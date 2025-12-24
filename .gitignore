@@ -19,6 +19,7 @@ dist/
 sdist/
 wheels/
 *.egg-info/
+*.dist-info/
 .eggs/
 .installed.cfg
 *.egg
@@ -28,9 +29,6 @@ downloads/
 parts/
 var/
 share/python-wheels/
-
-# Editable / local build artifacts
-eb_integration.egg-info/
 
 # =========================================
 # Virtual environments
@@ -107,10 +105,10 @@ dmypy.json
 .ropeproject
 
 # PyCharm / JetBrains
-#.idea/
+.idea/
 
 # VS Code
-#.vscode/
+.vscode/
 
 # Cursor (AI editor)
 .cursorignore
