@@ -1,0 +1,59 @@
+name: Reusable: Release to PyPI (trusted publishing)
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version used to build distributions"
+        required: false
+        type: string
+        default: "3.12"
+      packages-dir:
+        description: "Directory containing built distributions"
+        required: false
+        type: string
+        default: "dist"
+      build-command:
+        description: "Command used to build dists"
+        required: false
+        type: string
+        default: "python -m build"
+      install-command:
+        description: "Command used to install build tooling"
+        required: false
+        type: string
+        default: "python -m pip install -U pip build"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  # Use the *caller* repo/ref so concurrent releases don’t collide across repos.
+  group: pypi-release-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install build tools
+        run: ${{ inputs.install-command }}
+
+      - name: Build dist
+        run: ${{ inputs.build-command }}
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ${{ inputs.packages-dir }}
