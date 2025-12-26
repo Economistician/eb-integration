@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: windows-latest
@@ -16,6 +19,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+          cache: pip
 
       - name: Upgrade packaging tools
         run: python -m pip install -U pip setuptools wheel
@@ -26,16 +30,23 @@ jobs:
           repository: Economistician/eb-metrics
           path: eb-metrics
 
+      - name: Checkout eb-optimization
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/eb-optimization
+          path: eb-optimization
+
       - name: Checkout eb-evaluation
         uses: actions/checkout@v4
         with:
           repository: Economistician/eb-evaluation
           path: eb-evaluation
 
-      - name: Install integration deps + ecosystem
+      - name: Install integration deps + ecosystem (editable)
         run: |
           python -m pip install -e .
           python -m pip install -e .\eb-metrics
+          python -m pip install -e .\eb-optimization
           python -m pip install -e .\eb-evaluation
 
       - name: Run integration smoke tests
