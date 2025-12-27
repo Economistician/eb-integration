@@ -33,7 +33,7 @@ jobs:
         run: python -m pip install --upgrade pip ruff
 
       - name: Ruff format (check)
-        run: ruff format --check --config .eb-integration/tooling/ruff.toml .
+        run: ruff format --check --config .eb-integration/tooling/ruff.toml --exclude .eb-integration .
 
       - name: Ruff lint
-        run: ruff check --config .eb-integration/tooling/ruff.toml .
+        run: ruff check --config .eb-integration/tooling/ruff.toml --exclude .eb-integration .
