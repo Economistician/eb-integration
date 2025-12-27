@@ -1,8 +1,8 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-import eb_metrics as m
 import eb_evaluation as ev
+import eb_metrics as m
 
 
 def test_cwsl_array_and_df_match():
@@ -42,7 +42,7 @@ def test_evaluate_panel_df_smoke():
     )
 
     # basic shape/contract checks
-    assert set(["level", "metric", "value"]).issubset(out.columns)
+    assert {"level", "metric", "value"}.issubset(out.columns)
     assert (out["level"] == "overall").any()
     assert (out["level"] == "by_store").any()
 
