@@ -1,0 +1,39 @@
+name: Ruff (shared)
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version to run Ruff with"
+        required: false
+        type: string
+        default: "3.13"
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout caller repo
+        uses: actions/checkout@v4
+
+      - name: Checkout eb-integration (tooling)
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/eb-integration
+          path: .eb-integration
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install Ruff
+        run: python -m pip install --upgrade pip ruff
+
+      - name: Ruff format (check)
+        run: ruff format --check --config .eb-integration/tooling/ruff.toml .
+
+      - name: Ruff lint
+        run: ruff check --config .eb-integration/tooling/ruff.toml .

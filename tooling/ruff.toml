@@ -1,0 +1,127 @@
+######################################
+# Ruff configuration
+# Shared linting and formatting policy
+# for the Electric Barometer ecosystem
+######################################
+
+######################################
+# Core settings
+######################################
+line-length = 100
+target-version = "py311"
+
+# Files to include in linting / formatting
+include = [
+  "src/**/*.py",
+  "tests/**/*.py",
+  "scripts/**/*.py",
+  "*.py",
+]
+
+# Paths to exclude from linting
+exclude = [
+  ".git",
+  ".hg",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".ruff_cache",
+  ".tox",
+  ".venv",
+  "venv",
+  "build",
+  "dist",
+  "site",
+  "__pycache__",
+  "*.egg-info",
+]
+
+######################################
+# Formatter configuration
+######################################
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+######################################
+# Lint rule selection
+######################################
+[lint]
+# Selected rule families:
+# E   : pycodestyle (errors)
+# F   : pyflakes
+# I   : import sorting
+# B   : flake8-bugbear (common footguns)
+# UP  : pyupgrade (modern Python syntax)
+# SIM : simplification suggestions
+# C4  : comprehension optimizations
+# PIE : misc small correctness improvements
+# RUF : Ruff-native rules
+select = [
+  "E",
+  "F",
+  "I",
+  "B",
+  "UP",
+  "SIM",
+  "C4",
+  "PIE",
+  "RUF",
+]
+
+# Explicitly ignored rules (by policy)
+ignore = [
+  "E501",  # line length handled by formatter
+  "B008",  # allow function calls in default arguments (common in numeric code)
+]
+
+# Allow Ruff to auto-fix all safe issues
+fixable = ["ALL"]
+
+######################################
+# Per-file rule overrides
+######################################
+[lint.per-file-ignores]
+# Tests often intentionally redefine fixtures or leave imports unused
+"tests/**/*.py" = ["F401", "F811"]
+
+# Package __init__.py files commonly re-export symbols
+"src/**/__init__.py" = ["F401"]
+
+######################################
+# Import sorting (isort)
+######################################
+[lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
+
+# All Electric Barometer Python packages treated as first-party
+known-first-party = [
+  "eb_metrics",
+  "eb_evaluation",
+  "eb_optimization",
+  "eb_features",
+  "eb_adapters",
+  "eb_contracts",
+  "electric_barometer",
+  "eb_integration",
+]
+
+######################################
+# flake8-bugbear extensions
+######################################
+[lint.flake8-bugbear]
+extend-immutable-calls = [
+  "numpy.array",
+  "numpy.asarray",
+]
+
+######################################
+# Docstring linting (optional, disabled)
+######################################
+# Enable later if/when you want enforced
+# NumPy-style docstrings across the ecosystem
+#
+# [lint.pydocstyle]
+# convention = "numpy"
