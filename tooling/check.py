@@ -8,7 +8,7 @@ Default behavior:
 - Check formatting; if needed, apply formatting.
 - Check lint; if needed, apply safe fixes.
 - Re-check formatting and lint after fixes.
-- Run Pyright type checking.
+- Run Pyright type checking (whole repo; auto-skip if no Python files).
 - Run pre-commit over all files (re-run once if hooks made changes).
 - Run pytest.
 
@@ -60,6 +60,34 @@ def _require_ok(proc: subprocess.CompletedProcess[str], *, step: str) -> None:
     _print_proc(proc)
     if proc.returncode != 0:
         raise RuntimeError(f"{step} failed with exit code {proc.returncode}.")
+
+
+def _has_python_files(repo_root: Path) -> bool:
+    """Return True if repo contains any Python files (excluding common vendor/build dirs)."""
+    skip_dirs = {
+        ".git",
+        ".hg",
+        ".svn",
+        ".venv",
+        "venv",
+        "env",
+        "__pycache__",
+        ".mypy_cache",
+        ".ruff_cache",
+        ".pytest_cache",
+        "build",
+        "dist",
+        "site",
+        ".tox",
+        "node_modules",
+    }
+
+    for p in repo_root.rglob("*.py"):
+        parts = set(p.parts)
+        if parts & skip_dirs:
+            continue
+        return True
+    return False
 
 
 def main() -> int:
@@ -149,14 +177,15 @@ def main() -> int:
         )
 
         # -------------------------
-        # Pyright (type check)
+        # Pyright (type check) - whole repo, skip if no Python exists
         # -------------------------
-        # Note: We pass "src" explicitly because most repos are src-layout. If your
-        # config includes other paths, Pyright will still pick those up via config.
-        _require_ok(
-            _run(["pyright", "-p", str(pyright_config), "src"], cwd=repo_root),
-            step="pyright",
-        )
+        if not _has_python_files(repo_root):
+            print("\n⏭️  Skipping pyright (no .py files found in repo).")
+        else:
+            _require_ok(
+                _run(["pyright", "-p", str(pyright_config), "."], cwd=repo_root),
+                step="pyright",
+            )
 
         # -------------------------
         # Pre-commit (CI parity)
