@@ -175,7 +175,9 @@ def test_main_no_fix_mode_fails_on_first_format_error(monkeypatch: pytest.Monkey
     assert rc == 1
 
 
-def test_precommit_reruns_once_when_first_pass_changes_or_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_precommit_reruns_once_when_first_pass_changes_or_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     mod = _load_check_module()
     repo_root = Path(__file__).resolve().parents[1]
     monkeypatch.setattr(mod, "_find_repo_root", lambda _start: repo_root)

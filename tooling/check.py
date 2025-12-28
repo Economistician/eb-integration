@@ -143,7 +143,9 @@ def main() -> int:
                 step="ruff format",
             )
             _require_ok(
-                _run(["ruff", "format", "--check", ".", "--config", str(ruff_config)], cwd=repo_root),
+                _run(
+                    ["ruff", "format", "--check", ".", "--config", str(ruff_config)], cwd=repo_root
+                ),
                 step="ruff format --check (post-fix)",
             )
         else:
