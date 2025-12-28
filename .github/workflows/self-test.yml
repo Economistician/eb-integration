@@ -1,0 +1,15 @@
+name: Self Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # This tells the Hub to run its own PR Gate logic on itself
+  call-pr-gate:
+    uses: ./.github/workflows/pr-gate.yml
+    with:
+      import_module: "eb_integration"  # The name of this hub's package
+      tooling_python_version: "3.13"
