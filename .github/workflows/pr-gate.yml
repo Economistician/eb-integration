@@ -13,18 +13,15 @@ on:
         required: false
         default: '["3.11","3.12","3.13"]'
         type: string
-
       extras:
         description: 'Extras to install (e.g., ".[test]" or ".[test,docs]")'
         required: false
         default: ".[test]"
         type: string
-
       import_module:
         description: 'Module to import for wheel smoke (e.g., "eb_metrics")'
         required: true
         type: string
-
       run_precommit:
         description: "Run pre-commit gate"
         required: false
@@ -35,7 +32,6 @@ on:
         required: false
         default: false
         type: boolean
-
       enable_docs:
         description: "Run docs build gate (mkdocs). Off by default; enable per-repo when docs are stable."
         required: false
@@ -51,29 +47,27 @@ on:
         required: false
         default: ""
         type: string
-
       typecheck_tool:
         description: 'Type checker: "pyright" or "mypy"'
         required: false
         default: "pyright"
         type: string
-
       wheel_pytest_command:
         description: 'Optional pytest command to run after wheel install (empty = skip)'
         required: false
         default: ""
         type: string
-
       tooling_python_version:
         description: "Python version for tooling (Ruff, pre-commit, typecheck)"
         required: false
-        default: "3.13"  # Default Python version for non-test jobs
+        default: "3.13" 
         type: string
 
 permissions:
   contents: read
 
 jobs:
+  # TIER 1: FAST LINTING
   ruff:
     name: ruff
     uses: ./.github/workflows/gate-ruff.yml
@@ -87,38 +81,56 @@ jobs:
     with:
       python-version: ${{ inputs.tooling_python_version }}
 
+  # TIER 2: TYPECHECK & PACKAGING
+  # These wait for Tier 1. We use conditionals to handle skipped jobs.
   typecheck:
-    if: ${{ inputs.enable_typecheck }}
     name: typecheck
+    needs: [ruff, pre-commit]
+    if: |
+      always() && 
+      inputs.enable_typecheck &&
+      (needs.ruff.result == 'success') &&
+      (needs.pre-commit.result == 'success' || needs.pre-commit.result == 'skipped')
     uses: ./.github/workflows/gate-typecheck.yml
     with:
       python-version: ${{ inputs.tooling_python_version }}
       tool: ${{ inputs.typecheck_tool }}
 
+  package:
+    name: package (build + twine check)
+    needs: [ruff, pre-commit]
+    if: |
+      always() &&
+      (needs.ruff.result == 'success') &&
+      (needs.pre-commit.result == 'success' || needs.pre-commit.result == 'skipped')
+    uses: ./.github/workflows/gate-package.yml
+    with:
+      python-version: ${{ inputs.tooling_python_version }}
+
+  # TIER 3: FULL TESTING MATRIX & SMOKE
+  # Only runs if the code is clean and the package builds successfully.
   tests:
     name: tests (py${{ matrix.python-version }} on ${{ matrix.os }})
-    needs: [ruff, pre-commit, typecheck]
-    uses: ./.github/workflows/gate-pytest.yml
+    needs: [typecheck, package]
+    if: |
+      always() &&
+      (needs.package.result == 'success') &&
+      (needs.typecheck.result == 'success' || needs.typecheck.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
         os: ${{ fromJSON(inputs.os) }}
         python-version: ${{ fromJSON(inputs.python_versions) }}
+    uses: ./.github/workflows/gate-pytest.yml
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
       extras: ${{ inputs.extras }}
 
-  package:
-    name: package (build + twine check)
-    needs: [ruff, pre-commit, typecheck]
-    uses: ./.github/workflows/gate-package.yml
-    with:
-      python-version: ${{ inputs.tooling_python_version }}
-
   wheel-install:
     name: wheel install smoke
     needs: [package]
+    if: always() && (needs.package.result == 'success')
     uses: ./.github/workflows/gate-wheel-install.yml
     with:
       python-version: ${{ inputs.tooling_python_version }}
@@ -126,9 +138,12 @@ jobs:
       wheel_pytest_command: ${{ inputs.wheel_pytest_command }}
 
   docs:
-    if: ${{ inputs.enable_docs }}
     name: docs (mkdocs build)
-    needs: [ruff, pre-commit, typecheck]
+    needs: [package]
+    if: |
+      always() &&
+      inputs.enable_docs &&
+      (needs.package.result == 'success')
     uses: ./.github/workflows/gate-docs.yml
     with:
       python-version: ${{ inputs.tooling_python_version }}
