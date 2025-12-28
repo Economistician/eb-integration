@@ -4,6 +4,23 @@ This document describes the **tooling policy** used across the **Electric Barome
 
 ---
 
+## Purpose and Scope
+
+This tooling policy exists to ensure that **all Electric Barometer repositories behave consistently** with respect to code quality, formatting, static analysis, testing, packaging, and documentation.
+
+By centralizing tooling configuration in **eb-integration**, the ecosystem gains:
+
+- A **single, authoritative source of truth** for tooling rules
+- **Consistent CI behavior** across all repositories
+- Reduced configuration drift and maintenance overhead
+- Clear ownership and auditability of policy changes
+
+Leaf repositories are intentionally kept lightweight. They do **not** define their own linting, formatting, or type-checking rules. Instead, they opt into this policy by invoking the shared `gate-*` workflows, which enforce the same standards everywhere.
+
+Any change to tooling policy must be made in **eb-integration**. Once updated, those changes automatically propagate to all participating repositories, ensuring the ecosystem evolves in a coordinated and predictable way.
+
+---
+
 ## Centralized Tooling in `tooling/`
 
 The `tooling/` directory in **eb-integration** holds configuration files for the following tools:
