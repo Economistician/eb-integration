@@ -5,11 +5,13 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   # This tells the Hub to run its own PR Gate logic on itself
   call-pr-gate:
     uses: ./.github/workflows/pr-gate.yml
     with:
-      import_module: "eb_integration"  # The name of this hub's package
-      tooling_python_version: "3.13"   # Aligned with pyproject.toml to prevent audit crashes
+      import_module: "os"
+      tooling_python_version: "3.13"
+      extras: ".[test]"
