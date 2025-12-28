@@ -1,0 +1,3 @@
+# Bandit security scanner configuration
+exclude_dirs = ["tests", "venv", ".github"]
+skips = ["B101"]  # B101 is 'assert used' - common in test suites

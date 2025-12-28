@@ -1,0 +1,7 @@
+[run]
+source = eb_integration
+omit = tests/*
+
+[report]
+show_missing = True
+fail_under = 80
