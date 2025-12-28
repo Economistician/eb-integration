@@ -16,6 +16,15 @@ dependencies = [
 ]
 
 ######################################
+# Development dependencies
+######################################
+[tool.poetry.dev-dependencies]
+ruff = "^0.0.1"  # for linting and formatting
+pyright = "^1.1"  # for type checking (optional)
+twine = "^4.0"  # for publishing (optional)
+pytest = "^7.0"  # for testing (if not already included)
+
+######################################
 # Pytest configuration
 ######################################
 [tool.pytest.ini_options]

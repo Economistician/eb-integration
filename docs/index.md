@@ -1,33 +1,129 @@
-# eb-integration
+# EB Integration Platform
 
-`eb-integration` provides **shared tooling, CI workflows, and ecosystem-level
-validation** for the Electric Barometer project.
+**eb-integration** is the centralized CI/CD policy and workflow platform for the
+**Electric Barometer (EB)** ecosystem.
 
-This repository is intentionally **not** a runtime library. Instead, it serves as
-the governance and glue layer that ensures:
+This repository defines *how code is validated, packaged, and verified* across all
+EB Python packages. Leaf repositories do **not** define their own CI logic; they
+delegate to this platform.
 
-- consistent code quality across repositories
-- shared linting and formatting standards
-- reusable GitHub Actions workflows
-- cross-repo smoke tests for compatibility
+The goal is simple:
 
-## What this repository provides
+> **One ecosystem. One standard. One place to change it.**
 
-- **Shared Ruff configuration** used across all EB Python packages
-- **Reusable GitHub Actions workflows** (via `workflow_call`)
-- **Ecosystem smoke tests** validating cross-package compatibility
+---
 
-## What this repository does not provide
+## What This Repository Is (and Is Not)
 
-- Forecasting models
-- Metrics implementations
-- Optimization logic
-- Feature engineering utilities
+**eb-integration is:**
+- The **source of truth** for CI/CD behavior across the EB ecosystem
+- A collection of **reusable GitHub Actions workflows**
+- The home of **shared tooling policy** (linting, type checking, etc.)
 
-Those live in their respective repositories.
+**eb-integration is not:**
+- A runtime dependency
+- A feature library
+- A place for application logic
 
-## Who should read this documentation
+---
 
-- Contributors working across multiple EB repositories
-- Maintainers onboarding new EB packages
-- Anyone modifying CI, linting, or release infrastructure
+## The Three-Layer CI/CD Model
+
+The EB ecosystem uses a deliberately layered CI/CD architecture.
+
+### Layer 1 — PR Quality Gate (required to merge)
+**Answers:** *“Is this change safe to merge?”*
+
+This layer is enforced via branch protection and must pass for all pull requests.
+
+It includes:
+- Code hygiene (Ruff lint + format)
+- Optional pre-commit checks
+- Optional static type checking
+- Unit tests (matrix across Python + OS)
+- Packaging integrity (build, install, import smoke)
+- Optional documentation build
+
+**Key workflow:** `pr-gate.yml`  
+**Component workflows:** `gate-*`
+
+---
+
+### Layer 2 — Release Pipeline (publishing)
+**Answers:** *“Can we safely ship this artifact?”*
+
+This layer is intentionally separate from PR gating and runs only on:
+- version tags (`v*`)
+- manual dispatch
+
+It handles:
+- building distributions
+- validating package metadata
+- publishing to PyPI via trusted publishing (OIDC)
+
+**Key workflow:** `pypi-release.yml`
+
+---
+
+### Layer 3 — Post-release / Operational Verification
+**Answers:** *“What users can pip install actually works.”*
+
+This layer is *production verification*, not CI gating.
+
+It runs:
+- on a schedule (nightly / weekly)
+- optionally after a successful release
+
+It verifies:
+- install from PyPI
+- dependency resolution
+- import smoke
+- optional lightweight runtime checks
+
+**Key workflow:** `pypi-smoke.yml`
+
+---
+
+## How Leaf Repositories Use This Platform
+
+Leaf repositories in the EB ecosystem are intentionally small and simple.
+
+Each leaf repo typically contains only:
+- `ci.yml` → calls `pr-gate.yml`
+- `release.yml` → calls `pypi-release.yml`
+- `pypi-smoke.yml` → calls `pypi-smoke.yml`
+
+All logic, policy, and enforcement live here.
+
+---
+
+## Shared Tooling Policy
+
+Tooling configuration is centralized under the `tooling/` directory:
+
+- `tooling/ruff.toml` — canonical linting & formatting policy
+- `tooling/pyrightconfig.json` — canonical static type-checking policy
+
+These files are **not duplicated** in leaf repositories.
+All gates reference them directly.
+
+---
+
+## Design Principles
+
+This platform is built on a few core principles:
+
+- **Centralized policy, decentralized execution**
+- **Explicit layers with clear responsibility**
+- **Composable workflows, not copy-paste CI**
+- **Low-noise, high-signal enforcement**
+- **Ecosystem-wide consistency**
+
+If you change behavior here, you change it everywhere — intentionally.
+
+---
+
+## Where to Go Next
+
+- See **Guides** for how leaf repositories integrate with this platform
+- See **Reference** for detailed workflow and tooling documentation

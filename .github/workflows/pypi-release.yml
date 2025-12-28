@@ -1,0 +1,60 @@
+name: PyPI Release
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version used to build release artifacts"
+        required: false
+        default: "3.12"
+        type: string
+
+      build-command:
+        description: "Command used to build distribution artifacts"
+        required: false
+        default: "python -m build --sdist --wheel"
+        type: string
+
+      dist-dir:
+        description: "Directory containing built artifacts"
+        required: false
+        default: "dist"
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: pypi-release-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    name: Build and publish to PyPI
+    runs-on: ubuntu-latest
+    environment: pypi
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: pip
+
+      - name: Upgrade packaging tools
+        run: python -m pip install -U pip build twine
+
+      - name: Build distribution artifacts
+        run: ${{ inputs.build-command }}
+
+      - name: Validate package metadata
+        run: python -m twine check ${{ inputs.dist-dir }}/*
+
+      - name: Publish to PyPI (trusted publishing)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ${{ inputs.dist-dir }}

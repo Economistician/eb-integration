@@ -1,0 +1,130 @@
+name: PR Gate
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: "JSON array of GitHub runner labels"
+        required: false
+        default: '["ubuntu-latest","windows-latest"]'
+        type: string
+      python_versions:
+        description: "JSON array of Python versions for the test matrix"
+        required: false
+        default: '["3.11","3.12","3.13"]'
+        type: string
+
+      extras:
+        description: 'Extras to install (e.g., ".[test]" or ".[test,docs]")'
+        required: false
+        default: ".[test]"
+        type: string
+
+      import_module:
+        description: 'Module to import for wheel smoke (e.g., "eb_metrics")'
+        required: true
+        type: string
+
+      run_precommit:
+        description: "Run pre-commit gate"
+        required: false
+        default: true
+        type: boolean
+      enable_typecheck:
+        description: "Run typechecking gate"
+        required: false
+        default: false
+        type: boolean
+
+      enable_docs:
+        description: "Run docs build gate (mkdocs). Off by default; enable per-repo when docs are stable."
+        required: false
+        default: false
+        type: boolean
+      docs_command:
+        description: 'Command to build docs (default mkdocs build -s)'
+        required: false
+        default: "mkdocs build -s"
+        type: string
+      docs_extras:
+        description: 'Extras to install specifically for docs builds (e.g., ".[docs]" or ".[test,docs]"). If empty, uses `extras`.'
+        required: false
+        default: ""
+        type: string
+
+      typecheck_tool:
+        description: 'Type checker: "pyright" or "mypy"'
+        required: false
+        default: "pyright"
+        type: string
+
+      wheel_pytest_command:
+        description: 'Optional pytest command to run after wheel install (empty = skip)'
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  ruff:
+    name: ruff
+    uses: ./.github/workflows/gate-ruff.yml
+    with:
+      python-version: "3.13"
+
+  pre-commit:
+    if: ${{ inputs.run_precommit }}
+    name: pre-commit
+    uses: ./.github/workflows/gate-pre-commit.yml
+    with:
+      python-version: "3.13"
+
+  typecheck:
+    if: ${{ inputs.enable_typecheck }}
+    name: typecheck
+    uses: ./.github/workflows/gate-typecheck.yml
+    with:
+      python-version: "3.13"
+      tool: ${{ inputs.typecheck_tool }}
+
+  tests:
+    name: tests (py${{ matrix.python-version }} on ${{ matrix.os }})
+    needs: [ruff, pre-commit, typecheck]
+    uses: ./.github/workflows/gate-pytest.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON(inputs.os) }}
+        python-version: ${{ fromJSON(inputs.python_versions) }}
+    with:
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+      extras: ${{ inputs.extras }}
+
+  package:
+    name: package (build + twine check)
+    needs: [ruff, pre-commit, typecheck]
+    uses: ./.github/workflows/gate-package.yml
+    with:
+      python-version: "3.13"
+
+  wheel-install:
+    name: wheel install smoke
+    needs: [package]
+    uses: ./.github/workflows/gate-wheel-install.yml
+    with:
+      python-version: "3.13"
+      import_module: ${{ inputs.import_module }}
+      wheel_pytest_command: ${{ inputs.wheel_pytest_command }}
+
+  docs:
+    if: ${{ inputs.enable_docs }}
+    name: docs (mkdocs build)
+    needs: [ruff, pre-commit, typecheck]
+    uses: ./.github/workflows/gate-docs.yml
+    with:
+      python-version: "3.13"
+      extras: ${{ inputs.docs_extras != '' && inputs.docs_extras || inputs.extras }}
+      docs_command: ${{ inputs.docs_command }}

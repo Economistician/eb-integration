@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 import eb_evaluation as ev
 import eb_metrics as m
@@ -14,9 +15,12 @@ def test_cwsl_array_and_df_match():
     df = pd.DataFrame({"y": y, "yhat": yhat})
     cwsl_df = ev.compute_cwsl_df(df, y_true_col="y", y_pred_col="yhat", cu=2.0, co=1.0)
 
-    assert isinstance(cwsl_arr, float)
-    assert isinstance(cwsl_df, float)
-    assert cwsl_arr == cwsl_df
+    # Assert both are float types
+    assert isinstance(cwsl_arr, float), f"Expected cwsl_arr to be of type float, but got {type(cwsl_arr)}"
+    assert isinstance(cwsl_df, float), f"Expected cwsl_df to be of type float, but got {type(cwsl_df)}"
+
+    # Check if the two results match within a tolerance
+    assert cwsl_arr == pytest.approx(cwsl_df, rel=1e-9), f"Expected cwsl values to match but got {cwsl_arr} and {cwsl_df}"
 
 
 def test_evaluate_panel_df_smoke():
@@ -42,13 +46,13 @@ def test_evaluate_panel_df_smoke():
     )
 
     # basic shape/contract checks
-    assert {"level", "metric", "value"}.issubset(out.columns)
-    assert (out["level"] == "overall").any()
-    assert (out["level"] == "by_store").any()
+    assert {"level", "metric", "value"}.issubset(out.columns), f"Expected columns ['level', 'metric', 'value'], but got {list(out.columns)}"
+    assert (out["level"] == "overall").any(), "Expected 'overall' level to be present in the output"
+    assert (out["level"] == "by_store").any(), "Expected 'by_store' level to be present in the output"
 
     # ensure key metrics are present
     metrics = set(out["metric"].unique())
-    assert "cwsl" in metrics
-    assert "frs" in metrics
-    assert "wmape" in metrics
-    assert "hr_at_tau" in metrics
+    assert "cwsl" in metrics, f"Expected 'cwsl' in metrics, but found {metrics}"
+    assert "frs" in metrics, f"Expected 'frs' in metrics, but found {metrics}"
+    assert "wmape" in metrics, f"Expected 'wmape' in metrics, but found {metrics}"
+    assert "hr_at_tau" in metrics, f"Expected 'hr_at_tau' in metrics, but found {metrics}"

@@ -1,0 +1,21 @@
+{
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.11",
+  "pythonPlatform": "All",
+
+  "exclude": [
+    "**/.venv",
+    "**/venv",
+    "**/build",
+    "**/dist",
+    "**/__pycache__",
+    "**/*.egg-info",
+    "**/.mypy_cache",
+    "**/.pytest_cache"
+  ],
+
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownVariableType": false
+}

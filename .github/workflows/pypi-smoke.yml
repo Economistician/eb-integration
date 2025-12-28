@@ -1,0 +1,57 @@
+name: PyPI Smoke
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version used for smoke test"
+        required: false
+        default: "3.12"
+        type: string
+      package:
+        description: "PyPI package name to install (e.g., eb-metrics)"
+        required: true
+        type: string
+      import_module:
+        description: "Module to import (e.g., eb_metrics)"
+        required: true
+        type: string
+      index-url:
+        description: "Index URL to install from"
+        required: false
+        default: "https://pypi.org/simple"
+        type: string
+      extra_smoke_command:
+        description: "Optional extra smoke command(s) to run after import"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: pip
+
+      - name: Upgrade pip
+        run: python -m pip install -U pip
+
+      - name: Install from index
+        run: |
+          python -m pip install -U -i "${{ inputs.index-url }}" "${{ inputs.package }}"
+          python -m pip check
+
+      - name: Import smoke
+        run: python -c "import ${{ inputs.import_module }}; print('${{ inputs.package }} PyPI import OK')"
+
+      - name: Optional extra smoke
+        if: ${{ inputs.extra_smoke_command != '' }}
+        run: ${{ inputs.extra_smoke_command }}

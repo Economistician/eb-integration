@@ -1,0 +1,49 @@
+name: Gate - Wheel install
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: true
+        type: string
+      import_module:
+        required: true
+        type: string
+      wheel_pytest_command:
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  wheel-install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: pip
+
+      - name: Install build tools
+        run: python -m pip install -U pip build
+
+      - name: Build wheel
+        run: python -m build --wheel
+
+      - name: Install wheel (non-editable) + dependency check
+        run: |
+          python -m pip install -U dist/*.whl
+          python -m pip check
+
+      - name: Import smoke
+        run: python -c "import ${{ inputs.import_module }}; print('wheel import OK')"
+
+      - name: Optional wheel pytest
+        if: ${{ inputs.wheel_pytest_command != '' }}
+        run: ${{ inputs.wheel_pytest_command }}
