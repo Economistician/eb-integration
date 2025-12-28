@@ -23,7 +23,7 @@ The **PR Quality Gate** is the **most important check** and is enforced by the `
 - **Optional Documentation Build**
   - Ensures documentation can be built correctly if applicable
 
-**How it works**:  
+**How it works**:
 The `pr-gate.yml` workflow runs automatically on every pull request to the main branch (or other protected branches). The status check for this workflow must pass before the PR can be merged.
 
 **Required Inputs**:

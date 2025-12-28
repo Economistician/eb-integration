@@ -44,7 +44,7 @@ It includes:
 - Packaging integrity (build, install, import smoke)
 - Optional documentation build
 
-**Key workflow:** `pr-gate.yml`  
+**Key workflow:** `pr-gate.yml`
 **Component workflows:** `gate-*`
 
 ---

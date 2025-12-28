@@ -188,6 +188,6 @@ The workflow exceeded the maximum execution time
 
 ## Summary
 
-If you encounter any issues, follow the troubleshooting steps above for common CI/CD problems. Most errors can be resolved by reviewing the configuration, fixing minor bugs in the code, or ensuring that your dependencies are correctly set up. 
+If you encounter any issues, follow the troubleshooting steps above for common CI/CD problems. Most errors can be resolved by reviewing the configuration, fixing minor bugs in the code, or ensuring that your dependencies are correctly set up.
 
 For more detailed assistance, refer to the GitHub Actions [documentation](https://docs.github.com/en/github/actions).

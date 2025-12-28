@@ -70,7 +70,7 @@ on:
       tooling_python_version:
         description: "Python version for tooling (Ruff, pre-commit, typecheck)"
         required: false
-        default: "3.13" 
+        default: "3.13"
         type: string
 
 permissions:
@@ -113,7 +113,7 @@ jobs:
     name: typecheck
     needs: [ruff, pre-commit, bandit, audit]
     if: |
-      always() && 
+      always() &&
       inputs.enable_typecheck &&
       (needs.ruff.result == 'success') &&
       (needs.bandit.result == 'success' || needs.bandit.result == 'skipped') &&

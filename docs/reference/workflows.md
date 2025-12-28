@@ -10,7 +10,7 @@ Each workflow in **eb-integration** is designed to enforce consistency across al
 
 **Workflow:** `pr-gate.yml`
 
-**Purpose:**  
+**Purpose:**
 Ensures that pull requests meet the following quality standards before merging:
 - **Code hygiene**: enforced with **Ruff** (linting + formatting)
 - **Static correctness**: enforced with **Type checking** (optional via pyright/mypy)
@@ -26,7 +26,7 @@ Ensures that pull requests meet the following quality standards before merging:
 - `enable_typecheck`: Whether to enable typechecking (default: `false`)
 - `extras`: Extra dependencies to install (e.g., `.[test]` for testing dependencies)
 
-**Output:**  
+**Output:**
 - The workflow will fail if any of the gates fail (e.g., linting, tests, typechecking).
 
 ---
@@ -35,7 +35,7 @@ Ensures that pull requests meet the following quality standards before merging:
 
 **Workflow:** `pypi-release.yml`
 
-**Purpose:**  
+**Purpose:**
 Handles the release of new versions to PyPI, ensuring:
 - **Builds**: builds the source distribution and wheels
 - **Validation**: checks that the metadata is correct (e.g., versioning, required fields)
@@ -50,7 +50,7 @@ Handles the release of new versions to PyPI, ensuring:
 - Artifacts are built and validated.
 - If all checks pass, the package is published to PyPI.
 
-**Trigger:**  
+**Trigger:**
 This workflow is triggered manually via version tags (`v*`) or by manual dispatch.
 
 ---
@@ -59,7 +59,7 @@ This workflow is triggered manually via version tags (`v*`) or by manual dispatc
 
 **Workflow:** `pypi-smoke.yml`
 
-**Purpose:**  
+**Purpose:**
 Verifies that the package can be installed from PyPI and works as expected. This ensures:
 - The package is successfully installed from PyPI.
 - The package can be imported without issues.
@@ -72,7 +72,7 @@ Verifies that the package can be installed from PyPI and works as expected. This
 - `index-url`: The index URL to install from (default: `https://pypi.org/simple`)
 - `extra_smoke_command`: Optional command(s) to run after import, such as running tests or checking the version.
 
-**Trigger:**  
+**Trigger:**
 - This workflow runs on a schedule (e.g., nightly or weekly).
 - Optionally, it can be triggered after a successful release (`workflow_run`).
 
@@ -83,7 +83,7 @@ Verifies that the package can be installed from PyPI and works as expected. This
 These workflows are designed to be used within **Layer 1** (PR Gate) and are **reusable** across multiple repositories.
 
 ### `gate-ruff.yml`
-**Purpose:**  
+**Purpose:**
 Runs **Ruff** for linting and formatting checks across the repo.
 
 **Key Inputs:**
@@ -94,7 +94,7 @@ Runs **Ruff** for linting and formatting checks across the repo.
 - Runs `ruff check` for linting
 
 ### `gate-pre-commit.yml`
-**Purpose:**  
+**Purpose:**
 Runs pre-commit hooks on all files in the repo. These hooks can handle additional checks, such as end-of-file fixes, YAML validation, etc.
 
 **Key Inputs:**
@@ -105,7 +105,7 @@ Runs pre-commit hooks on all files in the repo. These hooks can handle additiona
 - Runs the hooks defined in the `.pre-commit-config.yaml`
 
 ### `gate-pytest.yml`
-**Purpose:**  
+**Purpose:**
 Runs tests using **pytest** on the specified Python versions and OS platforms.
 
 **Key Inputs:**
@@ -118,7 +118,7 @@ Runs tests using **pytest** on the specified Python versions and OS platforms.
 - Runs `pytest` on the repo
 
 ### `gate-package.yml`
-**Purpose:**  
+**Purpose:**
 Handles packaging and publishing validation. Ensures the package builds correctly and passes validation checks.
 
 **Key Inputs:**
@@ -129,7 +129,7 @@ Handles packaging and publishing validation. Ensures the package builds correctl
 - Runs `twine check` to ensure the package metadata is valid
 
 ### `gate-wheel-install.yml`
-**Purpose:**  
+**Purpose:**
 Runs a smoke test to ensure the built wheel installs correctly and can be imported.
 
 **Key Inputs:**
@@ -142,7 +142,7 @@ Runs a smoke test to ensure the built wheel installs correctly and can be import
 - Runs an import test to verify the module is installed and works
 
 ### `gate-typecheck.yml`
-**Purpose:**  
+**Purpose:**
 Runs **pyright** (or **mypy**) for static type checking.
 
 **Key Inputs:**
@@ -154,7 +154,7 @@ Runs **pyright** (or **mypy**) for static type checking.
 - Runs `pyright` (with the `tooling/pyrightconfig.json` config) or `mypy`
 
 ### `gate-docs.yml`
-**Purpose:**  
+**Purpose:**
 Builds the documentation using **MkDocs**.
 
 **Key Inputs:**

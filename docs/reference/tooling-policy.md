@@ -53,7 +53,7 @@ Leaf repositories should reference this file for type checking, and **`gate-type
 
 ### 3) **`tooling/pre-commit/`** — Pre-commit Hooks (optional)
 
-The **Pre-commit hooks** are optional but recommended for additional hygiene checks. This is managed using **pre-commit** (the tool). 
+The **Pre-commit hooks** are optional but recommended for additional hygiene checks. This is managed using **pre-commit** (the tool).
 
 **Default Hooks:**
 - End-of-file fixer
@@ -82,13 +82,13 @@ If your repo has specific **pytest** configuration requirements (e.g., plugins, 
 
 ## Best Practices
 
-- **Do not duplicate tooling configurations in leaf repos**:  
+- **Do not duplicate tooling configurations in leaf repos**:
   All tooling configuration (Ruff, Pyright, Pre-commit, etc.) must be referenced from `eb-integration` and should never be copied or altered in leaf repositories.
 
-- **Use the `gate-*` workflows** to enforce the policy:  
+- **Use the `gate-*` workflows** to enforce the policy:
   Every leaf repo should call the respective `gate-*` workflows (e.g., `gate-ruff.yml`, `gate-typecheck.yml`) to enforce linting, type checking, testing, etc. These workflows will automatically reference the shared tooling configuration from `eb-integration`.
 
-- **Update the tooling policy in `eb-integration`**:  
+- **Update the tooling policy in `eb-integration`**:
   If a change needs to be made to the linting, type checking, or other tooling configuration, do it in the `tooling/` folder of **eb-integration**. These changes will automatically propagate across all leaf repositories that call the platform’s workflows.
 
 ---
