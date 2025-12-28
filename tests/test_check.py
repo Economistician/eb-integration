@@ -8,13 +8,12 @@ the internal _run() helper.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from pathlib import Path
-from types import ModuleType
-from typing import Callable
-
 import importlib.util
+from pathlib import Path
 import sys
+from types import ModuleType
 
 import pytest
 

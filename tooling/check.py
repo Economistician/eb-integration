@@ -22,11 +22,11 @@ Options:
 from __future__ import annotations
 
 import argparse
+from collections.abc import Sequence
 import os
+from pathlib import Path
 import subprocess
 import sys
-from pathlib import Path
-from typing import Sequence
 
 
 def _find_repo_root(start: Path) -> Path:
