@@ -2,18 +2,26 @@ name: Gate - Bandit
 
 on:
   workflow_call:
+    inputs:
+      python-version:
+        description: 'Python version to use for the security scan'
+        required: true
+        type: string
 
 jobs:
   bandit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ inputs.python-version }}
+
       - name: Install Bandit
         run: pip install bandit
+
       - name: Security Scan
         # -r: recursive, -ll: medium/high severity, -ii: high confidence only
-        run: bandit -r . -ll -ii
+        run: bandit -r . -ll -ii --configfile tooling/bandit.toml

@@ -88,12 +88,17 @@ jobs:
     if: ${{ inputs.enable_bandit }}
     name: security (bandit)
     uses: ./.github/workflows/gate-bandit.yml
+    with:
+      # Pass the version to ensure consistent environment
+      python-version: ${{ inputs.tooling_python_version }}
 
   audit:
     if: ${{ inputs.enable_audit }}
     name: audit (dependencies)
     uses: ./.github/workflows/gate-audit.yml
     with:
+      # Added to fix the 'required input' error and version mismatch
+      python-version: ${{ inputs.tooling_python_version }}
       extras: ${{ inputs.extras }}
 
   pre-commit:
@@ -104,7 +109,6 @@ jobs:
       python-version: ${{ inputs.tooling_python_version }}
 
   # TIER 2: TYPECHECK & PACKAGING
-  # These wait for Tier 1. We use conditionals to handle skipped jobs.
   typecheck:
     name: typecheck
     needs: [ruff, pre-commit, bandit, audit]
@@ -134,7 +138,6 @@ jobs:
       python-version: ${{ inputs.tooling_python_version }}
 
   # TIER 3: FULL TESTING MATRIX & SMOKE
-  # Only runs if the code is clean and the package builds successfully.
   tests:
     name: tests (py${{ matrix.python-version }} on ${{ matrix.os }})
     needs: [typecheck, package]
