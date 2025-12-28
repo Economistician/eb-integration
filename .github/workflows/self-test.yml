@@ -12,4 +12,4 @@ jobs:
     uses: ./.github/workflows/pr-gate.yml
     with:
       import_module: "eb_integration"  # The name of this hub's package
-      tooling_python_version: "3.13"
+      tooling_python_version: "3.13"   # Aligned with pyproject.toml to prevent audit crashes
