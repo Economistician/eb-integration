@@ -1,6 +1,7 @@
 # Electric Barometer · Integration (`eb-integration`)
 
-[![Integration CI](https://github.com/Economistician/eb-integration/actions/workflows/pr-gate.yml/badge.svg)](https://github.com/Economistician/eb-integration/actions/workflows/pr-gate.yml)
+[![Integration CI](https://github.com/Economistician/eb-integration/actions/workflows/pr-gate.yml/badge.svg?branch=main)](https://github.com/Economistician/eb-integration/actions/workflows/pr-gate.yml)
+[![PyPI Smoke](https://github.com/Economistician/eb-integration/actions/workflows/pypi-smoke.yml/badge.svg?branch=main)](https://github.com/Economistician/eb-integration/actions/workflows/pypi-smoke.yml)
 ![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)
 ![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)
 
