@@ -64,6 +64,12 @@ on:
         default: ""
         type: string
 
+      tooling_python_version:
+        description: "Python version for tooling (Ruff, pre-commit, typecheck)"
+        required: false
+        default: "3.13"  # Default Python version for non-test jobs
+        type: string
+
 permissions:
   contents: read
 
@@ -72,21 +78,21 @@ jobs:
     name: ruff
     uses: ./.github/workflows/gate-ruff.yml
     with:
-      python-version: "3.13"
+      python-version: ${{ inputs.tooling_python_version }}
 
   pre-commit:
     if: ${{ inputs.run_precommit }}
     name: pre-commit
     uses: ./.github/workflows/gate-pre-commit.yml
     with:
-      python-version: "3.13"
+      python-version: ${{ inputs.tooling_python_version }}
 
   typecheck:
     if: ${{ inputs.enable_typecheck }}
     name: typecheck
     uses: ./.github/workflows/gate-typecheck.yml
     with:
-      python-version: "3.13"
+      python-version: ${{ inputs.tooling_python_version }}
       tool: ${{ inputs.typecheck_tool }}
 
   tests:
@@ -108,14 +114,14 @@ jobs:
     needs: [ruff, pre-commit, typecheck]
     uses: ./.github/workflows/gate-package.yml
     with:
-      python-version: "3.13"
+      python-version: ${{ inputs.tooling_python_version }}
 
   wheel-install:
     name: wheel install smoke
     needs: [package]
     uses: ./.github/workflows/gate-wheel-install.yml
     with:
-      python-version: "3.13"
+      python-version: ${{ inputs.tooling_python_version }}
       import_module: ${{ inputs.import_module }}
       wheel_pytest_command: ${{ inputs.wheel_pytest_command }}
 
@@ -125,6 +131,6 @@ jobs:
     needs: [ruff, pre-commit, typecheck]
     uses: ./.github/workflows/gate-docs.yml
     with:
-      python-version: "3.13"
+      python-version: ${{ inputs.tooling_python_version }}
       extras: ${{ inputs.docs_extras != '' && inputs.docs_extras || inputs.extras }}
       docs_command: ${{ inputs.docs_command }}
