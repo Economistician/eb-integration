@@ -14,8 +14,27 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout caller repository
         uses: actions/checkout@v4
+
+      # 1. Fetch the Hub's tooling if we are running in a Leaf repo
+      - name: Checkout eb-integration (tooling)
+        if: ${{ github.repository != 'Economistician/eb-integration' }}
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/eb-integration
+          path: .eb-integration
+          sparse-checkout: |
+            tooling/
+          fetch-depth: 1
+
+      # 2. Sync the tooling folder to the root
+      - name: Sync Tooling
+        if: ${{ github.repository != 'Economistician/eb-integration' }}
+        shell: bash
+        run: |
+          rm -rf tooling
+          cp -r .eb-integration/tooling ./tooling
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,11 +51,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pre-commit
-          # Updated hashFiles to point to the file in the tooling folder
+          # Now reliably points to the synced tooling folder
           key: pre-commit-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('tooling/.pre-commit-config.yaml') }}
           restore-keys: |
             pre-commit-${{ runner.os }}-${{ inputs.python-version }}-
 
       - name: Run pre-commit
-        # Added the --config flag to tell pre-commit exactly where the file is
+        # Standardized path for all repositories
         run: pre-commit run --all-files --show-diff-on-failure --config tooling/.pre-commit-config.yaml

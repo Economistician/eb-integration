@@ -19,14 +19,25 @@ jobs:
       - name: Checkout caller repo
         uses: actions/checkout@v4
 
-      # Only needed when the caller is NOT eb-integration itself.
+      # 1. Fetch the Hub's tooling if we are running in a Leaf repo
       - name: Checkout eb-integration (tooling)
         if: ${{ github.repository != 'Economistician/eb-integration' }}
         uses: actions/checkout@v4
         with:
           repository: Economistician/eb-integration
           path: .eb-integration
+          sparse-checkout: |
+            tooling/
           fetch-depth: 1
+
+      # 2. Sync the tooling folder so the path "tooling/ruff.toml" works everywhere
+      - name: Sync Tooling
+        if: ${{ github.repository != 'Economistician/eb-integration' }}
+        shell: bash
+        run: |
+          # Remove any existing symlink/folder and replace with the Hub version
+          rm -rf tooling
+          cp -r .eb-integration/tooling ./tooling
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,14 +48,9 @@ jobs:
       - name: Install Ruff
         run: python -m pip install -U pip ruff
 
+      # 3. Standardized commands: path is always 'tooling/ruff.toml'
       - name: Ruff format (check)
-        run: >
-          ruff format --check
-          --config ${{ github.repository == 'Economistician/eb-integration' && 'tooling/ruff.toml' || '.eb-integration/tooling/ruff.toml' }}
-          --exclude .eb-integration .
+        run: ruff format --check --config tooling/ruff.toml .
 
       - name: Ruff lint
-        run: >
-          ruff check
-          --config ${{ github.repository == 'Economistician/eb-integration' && 'tooling/ruff.toml' || '.eb-integration/tooling/ruff.toml' }}
-          --exclude .eb-integration .
+        run: ruff check --config tooling/ruff.toml .

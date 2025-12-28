@@ -1,16 +1,17 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-    -   id: check-yaml
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
-    -   id: check-added-large-files
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
 
--   repo: https://github.com/astral-sh/ruff-pre-commit
+  - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.9.1
     hooks:
-    -   id: ruff
-        args: [ --fix, --config, tooling/ruff.toml ]
-    -   id: ruff-format
-        args: [ --config, tooling/ruff.toml ]
+      - id: ruff
+        # --fix allows the CI/CD to automatically correct issues where possible
+        args: [--fix, --config, tooling/ruff.toml]
+      - id: ruff-format
+        args: [--config, tooling/ruff.toml]
