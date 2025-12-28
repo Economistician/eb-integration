@@ -33,7 +33,17 @@ jobs:
         run: python -m pip install -U pip setuptools wheel
 
       - name: Install package (editable) with extras
-        run: python -m pip install -e ".[${{ inputs.extras }}]"
+        shell: bash
+        run: |
+          EXTRAS="${{ inputs.extras }}"
+          if [ -n "$EXTRAS" ]; then
+            EXTRAS="${EXTRAS#.[}"
+            EXTRAS="${EXTRAS#[}"
+            EXTRAS="${EXTRAS%]}"
+            python -m pip install -e ".[${EXTRAS}]"
+          else
+            python -m pip install -e .
+          fi
 
       - name: Run unit tests
         run: python -m pytest -q

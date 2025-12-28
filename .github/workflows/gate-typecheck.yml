@@ -9,6 +9,10 @@ on:
       tool:
         required: true
         type: string
+      extras:
+        required: false
+        default: "test"
+        type: string
 
 permissions:
   contents: read
@@ -47,13 +51,23 @@ jobs:
 
       # 3. Clean stale build artifacts and install dependencies
       - name: Install dependencies
+        shell: bash
         run: |
           python -m pip install -U pip
-          # Nuke any build artifacts created by previous local runs or pip
           rm -rf build/ dist/ *.egg-info
-          pip install .[test]
+
+          EXTRAS="${{ inputs.extras }}"
+          if [ -n "$EXTRAS" ]; then
+            EXTRAS="${EXTRAS#.[}"
+            EXTRAS="${EXTRAS#[}"
+            EXTRAS="${EXTRAS%]}"
+            python -m pip install ".[${EXTRAS}]"
+          else
+            python -m pip install .
+          fi
 
       - name: Install typechecker
+        shell: bash
         run: |
           if [ "${{ inputs.tool }}" = "pyright" ]; then
             python -m pip install -U pyright
@@ -65,9 +79,9 @@ jobs:
           fi
 
       - name: Run typecheck
+        shell: bash
         run: |
           if [ "${{ inputs.tool }}" = "pyright" ]; then
-            # We target 'src' explicitly to avoid checking build/ artifacts
             pyright --project tooling/pyrightconfig.json src/
           else
             mypy src/

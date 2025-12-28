@@ -4,11 +4,11 @@ on:
   workflow_call:
     inputs:
       python-version:
-        description: 'Python version to use for the audit'
+        description: "Python version to use for the audit"
         required: true
         type: string
       extras:
-        description: 'Extras to install for auditing'
+        description: "Extras to install for auditing"
         required: false
         default: "test"
         type: string
@@ -25,14 +25,19 @@ jobs:
           python-version: ${{ inputs.python-version }}
 
       - name: Install Dependencies
+        shell: bash
         run: |
           python -m pip install --upgrade pip
-          # Logic: If extras is provided, install as a local extra. Otherwise, just install pip-audit.
-          if [ -n "${{ inputs.extras }}" ]; then
-            pip install ".[${{ inputs.extras }}]" pip-audit
-          else
-            pip install pip-audit
+
+          EXTRAS="${{ inputs.extras }}"
+          if [ -n "$EXTRAS" ]; then
+            EXTRAS="${EXTRAS#.[}"
+            EXTRAS="${EXTRAS#[}"
+            EXTRAS="${EXTRAS%]}"
+            python -m pip install ".[${EXTRAS}]"
           fi
+
+          python -m pip install -U pip-audit
 
       - name: Run Audit
         run: pip-audit
