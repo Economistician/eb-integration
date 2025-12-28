@@ -12,7 +12,27 @@ jobs:
   bandit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout caller repo
+        uses: actions/checkout@v4
+
+      # 1. Fetch the Hub's tooling if we are running in a Leaf repo (like eb-metrics)
+      - name: Checkout eb-integration (tooling)
+        if: ${{ github.repository != 'Economistician/eb-integration' }}
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/eb-integration
+          path: .eb-integration
+          sparse-checkout: |
+            tooling/
+          fetch-depth: 1
+
+      # 2. Sync the tooling folder so 'tooling/bandit.toml' exists in the root
+      - name: Sync Tooling
+        if: ${{ github.repository != 'Economistician/eb-integration' }}
+        shell: bash
+        run: |
+          rm -rf tooling
+          cp -r .eb-integration/tooling ./tooling
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,5 +43,4 @@ jobs:
         run: pip install bandit
 
       - name: Security Scan
-        # -r: recursive, -ll: medium/high severity, -ii: high confidence only
         run: bandit -r . -ll -ii --configfile tooling/bandit.toml
