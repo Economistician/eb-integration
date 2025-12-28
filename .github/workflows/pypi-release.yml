@@ -8,38 +8,29 @@ on:
         required: false
         default: "3.12"
         type: string
-
       build-command:
         description: "Command used to build distribution artifacts"
         required: false
         default: "python -m build --sdist --wheel"
         type: string
-
       dist-dir:
         description: "Directory containing built artifacts"
         required: false
         default: "dist"
         type: string
-
     secrets:
       PYPI_TOKEN:
         description: "PyPI API token for publishing"
         required: true
-      PYPI_USERNAME:
-        description: "Optional; not used for token auth (kept for compatibility)"
-        required: false
 
 permissions:
   contents: read
-
-concurrency:
-  group: pypi-release-${{ github.repository }}-${{ github.ref }}
-  cancel-in-progress: false
 
 jobs:
   build-and-publish:
     name: Build and publish to PyPI
     runs-on: ubuntu-latest
+    # Using environment 'pypi' allows for protection rules (like manual approval)
     environment: pypi
 
     steps:
@@ -61,10 +52,9 @@ jobs:
       - name: Validate package metadata
         run: python -m twine check ${{ inputs.dist-dir }}/*
 
-      - name: Publish to PyPI (API token)
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          # When using API tokens, the user is always __token__
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
           packages-dir: ${{ inputs.dist-dir }}
