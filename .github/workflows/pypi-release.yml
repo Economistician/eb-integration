@@ -21,9 +21,16 @@ on:
         default: "dist"
         type: string
 
+    secrets:
+      PYPI_TOKEN:
+        description: "PyPI API token for publishing"
+        required: true
+      PYPI_USERNAME:
+        description: "Optional; not used for token auth (kept for compatibility)"
+        required: false
+
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: pypi-release-${{ github.repository }}-${{ github.ref }}
@@ -54,10 +61,10 @@ jobs:
       - name: Validate package metadata
         run: python -m twine check ${{ inputs.dist-dir }}/*
 
-      - name: Publish to PyPI (trusted publishing)
+      - name: Publish to PyPI (API token)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: ${{ inputs.dist-dir }}
         env:
-          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }} 
+          TWINE_USERNAME: "__token__"
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
