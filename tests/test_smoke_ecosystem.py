@@ -16,11 +16,17 @@ def test_cwsl_array_and_df_match():
     cwsl_df = ev.compute_cwsl_df(df, y_true_col="y", y_pred_col="yhat", cu=2.0, co=1.0)
 
     # Assert both are float types
-    assert isinstance(cwsl_arr, float), f"Expected cwsl_arr to be of type float, but got {type(cwsl_arr)}"
-    assert isinstance(cwsl_df, float), f"Expected cwsl_df to be of type float, but got {type(cwsl_df)}"
+    assert isinstance(cwsl_arr, float), (
+        f"Expected cwsl_arr to be of type float, but got {type(cwsl_arr)}"
+    )
+    assert isinstance(cwsl_df, float), (
+        f"Expected cwsl_df to be of type float, but got {type(cwsl_df)}"
+    )
 
     # Check if the two results match within a tolerance
-    assert cwsl_arr == pytest.approx(cwsl_df, rel=1e-9), f"Expected cwsl values to match but got {cwsl_arr} and {cwsl_df}"
+    assert cwsl_arr == pytest.approx(cwsl_df, rel=1e-9), (
+        f"Expected cwsl values to match but got {cwsl_arr} and {cwsl_df}"
+    )
 
 
 def test_evaluate_panel_df_smoke():
@@ -46,9 +52,13 @@ def test_evaluate_panel_df_smoke():
     )
 
     # basic shape/contract checks
-    assert {"level", "metric", "value"}.issubset(out.columns), f"Expected columns ['level', 'metric', 'value'], but got {list(out.columns)}"
+    assert {"level", "metric", "value"}.issubset(out.columns), (
+        f"Expected columns ['level', 'metric', 'value'], but got {list(out.columns)}"
+    )
     assert (out["level"] == "overall").any(), "Expected 'overall' level to be present in the output"
-    assert (out["level"] == "by_store").any(), "Expected 'by_store' level to be present in the output"
+    assert (out["level"] == "by_store").any(), (
+        "Expected 'by_store' level to be present in the output"
+    )
 
     # ensure key metrics are present
     metrics = set(out["metric"].unique())
