@@ -10,7 +10,7 @@ on:
       extras:
         description: 'Extras to install for auditing'
         required: false
-        default: ".[test]"
+        default: "test"
         type: string
 
 jobs:
@@ -27,7 +27,12 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ${{ inputs.extras }} pip-audit
+          # Logic: If extras is provided, install as a local extra. Otherwise, just install pip-audit.
+          if [ -n "${{ inputs.extras }}" ]; then
+            pip install ".[${{ inputs.extras }}]" pip-audit
+          else
+            pip install pip-audit
+          fi
 
       - name: Run Audit
         run: pip-audit
