@@ -1,0 +1,24 @@
+name: Gate - Dependency Audit
+
+on:
+  workflow_call:
+    inputs:
+      extras:
+        description: 'Extras to install for auditing'
+        required: false
+        default: ".[test]"
+        type: string
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Dependencies
+        run: pip install ${{ inputs.extras }} pip-audit
+      - name: Run Audit
+        run: pip-audit

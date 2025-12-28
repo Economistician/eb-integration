@@ -32,6 +32,11 @@ on:
         required: false
         default: true
         type: boolean
+      enable_audit:
+        description: "Run pip-audit dependency security scan"
+        required: false
+        default: true
+        type: boolean
       enable_typecheck:
         description: "Run typechecking gate"
         required: false
@@ -84,6 +89,13 @@ jobs:
     name: security (bandit)
     uses: ./.github/workflows/gate-bandit.yml
 
+  audit:
+    if: ${{ inputs.enable_audit }}
+    name: audit (dependencies)
+    uses: ./.github/workflows/gate-audit.yml
+    with:
+      extras: ${{ inputs.extras }}
+
   pre-commit:
     if: ${{ inputs.run_precommit }}
     name: pre-commit
@@ -95,12 +107,13 @@ jobs:
   # These wait for Tier 1. We use conditionals to handle skipped jobs.
   typecheck:
     name: typecheck
-    needs: [ruff, pre-commit, bandit]
+    needs: [ruff, pre-commit, bandit, audit]
     if: |
       always() && 
       inputs.enable_typecheck &&
       (needs.ruff.result == 'success') &&
       (needs.bandit.result == 'success' || needs.bandit.result == 'skipped') &&
+      (needs.audit.result == 'success' || needs.audit.result == 'skipped') &&
       (needs.pre-commit.result == 'success' || needs.pre-commit.result == 'skipped')
     uses: ./.github/workflows/gate-typecheck.yml
     with:
@@ -109,11 +122,12 @@ jobs:
 
   package:
     name: package (build + twine check)
-    needs: [ruff, pre-commit, bandit]
+    needs: [ruff, pre-commit, bandit, audit]
     if: |
       always() &&
       (needs.ruff.result == 'success') &&
       (needs.bandit.result == 'success' || needs.bandit.result == 'skipped') &&
+      (needs.audit.result == 'success' || needs.audit.result == 'skipped') &&
       (needs.pre-commit.result == 'success' || needs.pre-commit.result == 'skipped')
     uses: ./.github/workflows/gate-package.yml
     with:
