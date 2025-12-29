@@ -8,7 +8,7 @@ Default behavior:
 - Check formatting; if needed, apply formatting.
 - Check lint; if needed, apply safe fixes.
 - Re-check formatting and lint after fixes.
-- Run Pyright type checking (whole repo; auto-skip if no Python files).
+- Run Pyright type checking (restricted to src/ and tests/; auto-skip if none exist).
 - Run pre-commit over all files (re-run once if hooks made changes).
 - Run pytest.
 
@@ -88,6 +88,20 @@ def _has_python_files(repo_root: Path) -> bool:
             continue
         return True
     return False
+
+
+def _pyright_targets(repo_root: Path) -> list[str]:
+    """
+    Return the Pyright scan targets.
+
+    We intentionally restrict to the real code surface area for speed:
+    - src/
+    - tests/
+
+    Only include targets that actually exist in the repo.
+    """
+    candidates = [repo_root / "src", repo_root / "tests"]
+    return [str(p.relative_to(repo_root)) for p in candidates if p.exists()]
 
 
 def main() -> int:
@@ -179,15 +193,22 @@ def main() -> int:
         )
 
         # -------------------------
-        # Pyright (type check) - whole repo, skip if no Python exists
+        # Pyright (type check) - restricted to src/ and tests/
         # -------------------------
-        if not _has_python_files(repo_root):
-            print("\n⏭️  Skipping pyright (no .py files found in repo).")
+        targets = _pyright_targets(repo_root)
+        if not targets:
+            # If a repo doesn't have src/ or tests/ yet, don't waste time scanning the world.
+            print("\n⏭️  Skipping pyright (no src/ or tests/ directories found).")
         else:
-            _require_ok(
-                _run(["pyright", "-p", str(pyright_config), "."], cwd=repo_root),
-                step="pyright",
-            )
+            # Optional: if you still want the old "no python anywhere" skip, keep this guard.
+            # It avoids invoking pyright in docs-only repos that still have empty src/tests.
+            if not _has_python_files(repo_root):
+                print("\n⏭️  Skipping pyright (no .py files found in repo).")
+            else:
+                _require_ok(
+                    _run(["pyright", "-p", str(pyright_config), *targets], cwd=repo_root),
+                    step=f"pyright ({', '.join(targets)})",
+                )
 
         # -------------------------
         # Pre-commit (CI parity)
