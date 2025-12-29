@@ -84,6 +84,7 @@ def _submodule_paths(repo_root: Path) -> list[Path]:
             if raw:
                 # Normalize slashes; keep as Path relative to repo_root.
                 paths.append(Path(raw.replace("\\", "/")).resolve())
+
     # De-dupe (by string form) but keep stable ordering
     unique: dict[str, Path] = {}
     for p in paths:
@@ -93,7 +94,7 @@ def _submodule_paths(repo_root: Path) -> list[Path]:
 
 def _relative_submodule_paths(repo_root: Path) -> list[str]:
     """
-    Return submodule paths as repo-root-relative POSIX strings for tool CLI excludes.
+    Return submodule paths as repo-root-relative POSIX strings for tool CLI excludes/ignores.
     """
     rels: list[str] = []
     for p in _submodule_paths(repo_root):
@@ -117,6 +118,15 @@ def _ruff_exclude_args(repo_root: Path) -> list[str]:
     for p in excludes:
         args.extend(["--exclude", p])
     return args
+
+
+def _pytest_ignore_args(repo_root: Path) -> list[str]:
+    """
+    Build pytest ignore arguments for detected submodules.
+
+    Returns: ["--ignore=path1", "--ignore=path2", ...]
+    """
+    return [f"--ignore={p}" for p in _relative_submodule_paths(repo_root)]
 
 
 def _is_under_any(path: Path, roots: Sequence[Path]) -> bool:
@@ -217,6 +227,7 @@ def main() -> int:
     submodule_rel_paths = _relative_submodule_paths(repo_root)
     submodule_roots = [repo_root / p for p in submodule_rel_paths]
     ruff_excludes = _ruff_exclude_args(repo_root)
+    pytest_ignores = _pytest_ignore_args(repo_root)
 
     print(f"Repo root:   {repo_root}")
     print(f"Tooling dir: {tooling_dir}")
@@ -267,7 +278,8 @@ def main() -> int:
         # Ruff lint (check, then fix if needed)
         # -------------------------
         proc = _run(
-            ["ruff", "check", ".", "--config", str(ruff_config), *ruff_excludes], cwd=repo_root
+            ["ruff", "check", ".", "--config", str(ruff_config), *ruff_excludes],
+            cwd=repo_root,
         )
         if proc.returncode != 0:
             if not fix_enabled:
@@ -362,7 +374,7 @@ def main() -> int:
         # Pytest
         # -------------------------
         if not args.skip_tests:
-            _require_ok(_run(["pytest"], cwd=repo_root), step="pytest")
+            _require_ok(_run(["pytest", *pytest_ignores], cwd=repo_root), step="pytest")
 
     except RuntimeError as e:
         print(f"\nERROR: {e}", file=sys.stderr)
