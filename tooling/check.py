@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Sequence
+import configparser
 import os
 from pathlib import Path
 import subprocess
@@ -62,8 +63,80 @@ def _require_ok(proc: subprocess.CompletedProcess[str], *, step: str) -> None:
         raise RuntimeError(f"{step} failed with exit code {proc.returncode}.")
 
 
-def _has_python_files(repo_root: Path) -> bool:
-    """Return True if repo contains any Python files (excluding common vendor/build dirs)."""
+def _submodule_paths(repo_root: Path) -> list[Path]:
+    """
+    Return submodule paths listed in .gitmodules as repo-root-relative Paths.
+
+    We intentionally exclude submodules from all validation steps; the runner is meant to
+    validate the repo you're in, not the repos it happens to vendor via submodules.
+    """
+    gm = repo_root / ".gitmodules"
+    if not gm.is_file():
+        return []
+
+    cp = configparser.ConfigParser()
+    cp.read(gm)
+
+    paths: list[Path] = []
+    for section in cp.sections():
+        if cp.has_option(section, "path"):
+            raw = cp.get(section, "path").strip()
+            if raw:
+                # Normalize slashes; keep as Path relative to repo_root.
+                paths.append(Path(raw.replace("\\", "/")).resolve())
+    # De-dupe (by string form) but keep stable ordering
+    unique: dict[str, Path] = {}
+    for p in paths:
+        unique.setdefault(str(p), p)
+    return list(unique.values())
+
+
+def _relative_submodule_paths(repo_root: Path) -> list[str]:
+    """
+    Return submodule paths as repo-root-relative POSIX strings for tool CLI excludes.
+    """
+    rels: list[str] = []
+    for p in _submodule_paths(repo_root):
+        try:
+            rel = p.relative_to(repo_root.resolve())
+        except ValueError:
+            # If something odd happens (shouldn't), ignore that entry.
+            continue
+        rels.append(rel.as_posix().rstrip("/"))
+    return sorted(set(rels))
+
+
+def _ruff_exclude_args(repo_root: Path) -> list[str]:
+    """
+    Build Ruff CLI exclude arguments including any detected submodules.
+
+    Returns: ["--exclude", "submod/a", "--exclude", "vendor/b", ...]
+    """
+    excludes = _relative_submodule_paths(repo_root)
+    args: list[str] = []
+    for p in excludes:
+        args.extend(["--exclude", p])
+    return args
+
+
+def _is_under_any(path: Path, roots: Sequence[Path]) -> bool:
+    """Return True if path is inside any of the provided root directories."""
+    for r in roots:
+        try:
+            path.resolve().relative_to(r.resolve())
+        except ValueError:
+            continue
+        else:
+            return True
+    return False
+
+
+def _has_python_files(repo_root: Path, *, excluded_roots: Sequence[Path]) -> bool:
+    """
+    Return True if repo contains any Python files (excluding common vendor/build dirs and submodules).
+
+    This is used only as a guard for whether pyright is worth running.
+    """
     skip_dirs = {
         ".git",
         ".hg",
@@ -85,6 +158,8 @@ def _has_python_files(repo_root: Path) -> bool:
     for p in repo_root.rglob("*.py"):
         parts = set(p.parts)
         if parts & skip_dirs:
+            continue
+        if _is_under_any(p, excluded_roots):
             continue
         return True
     return False
@@ -139,26 +214,49 @@ def main() -> int:
 
     fix_enabled = not args.no_fix
 
+    submodule_rel_paths = _relative_submodule_paths(repo_root)
+    submodule_roots = [repo_root / p for p in submodule_rel_paths]
+    ruff_excludes = _ruff_exclude_args(repo_root)
+
     print(f"Repo root:   {repo_root}")
     print(f"Tooling dir: {tooling_dir}")
     print(f"Fix enabled: {fix_enabled}")
+    if submodule_rel_paths:
+        print(f"Submodules:  {', '.join(submodule_rel_paths)}")
+    else:
+        print("Submodules:  (none)")
 
     try:
         # -------------------------
         # Ruff format (check, then fix if needed)
         # -------------------------
-        proc = _run(["ruff", "format", "--check", ".", "--config", str(ruff_config)], cwd=repo_root)
+        proc = _run(
+            ["ruff", "format", "--check", ".", "--config", str(ruff_config), *ruff_excludes],
+            cwd=repo_root,
+        )
         if proc.returncode != 0:
             if not fix_enabled:
                 _require_ok(proc, step="ruff format --check")
             print("\nFormatting needed; applying ruff format ...")
             _require_ok(
-                _run(["ruff", "format", ".", "--config", str(ruff_config)], cwd=repo_root),
+                _run(
+                    ["ruff", "format", ".", "--config", str(ruff_config), *ruff_excludes],
+                    cwd=repo_root,
+                ),
                 step="ruff format",
             )
             _require_ok(
                 _run(
-                    ["ruff", "format", "--check", ".", "--config", str(ruff_config)], cwd=repo_root
+                    [
+                        "ruff",
+                        "format",
+                        "--check",
+                        ".",
+                        "--config",
+                        str(ruff_config),
+                        *ruff_excludes,
+                    ],
+                    cwd=repo_root,
                 ),
                 step="ruff format --check (post-fix)",
             )
@@ -168,17 +266,25 @@ def main() -> int:
         # -------------------------
         # Ruff lint (check, then fix if needed)
         # -------------------------
-        proc = _run(["ruff", "check", ".", "--config", str(ruff_config)], cwd=repo_root)
+        proc = _run(
+            ["ruff", "check", ".", "--config", str(ruff_config), *ruff_excludes], cwd=repo_root
+        )
         if proc.returncode != 0:
             if not fix_enabled:
                 _require_ok(proc, step="ruff check")
             print("\nLint issues found; applying ruff check --fix ...")
             _require_ok(
-                _run(["ruff", "check", ".", "--fix", "--config", str(ruff_config)], cwd=repo_root),
+                _run(
+                    ["ruff", "check", ".", "--fix", "--config", str(ruff_config), *ruff_excludes],
+                    cwd=repo_root,
+                ),
                 step="ruff check --fix",
             )
             _require_ok(
-                _run(["ruff", "check", ".", "--config", str(ruff_config)], cwd=repo_root),
+                _run(
+                    ["ruff", "check", ".", "--config", str(ruff_config), *ruff_excludes],
+                    cwd=repo_root,
+                ),
                 step="ruff check (post-fix)",
             )
         else:
@@ -188,7 +294,10 @@ def main() -> int:
         # Ruff format (final check)
         # -------------------------
         _require_ok(
-            _run(["ruff", "format", "--check", ".", "--config", str(ruff_config)], cwd=repo_root),
+            _run(
+                ["ruff", "format", "--check", ".", "--config", str(ruff_config), *ruff_excludes],
+                cwd=repo_root,
+            ),
             step="ruff format --check (final)",
         )
 
@@ -200,10 +309,10 @@ def main() -> int:
             # If a repo doesn't have src/ or tests/ yet, don't waste time scanning the world.
             print("\n⏭️  Skipping pyright (no src/ or tests/ directories found).")
         else:
-            # Optional: if you still want the old "no python anywhere" skip, keep this guard.
-            # It avoids invoking pyright in docs-only repos that still have empty src/tests.
-            if not _has_python_files(repo_root):
-                print("\n⏭️  Skipping pyright (no .py files found in repo).")
+            # Avoid invoking pyright in docs-only repos that still have empty src/tests,
+            # and avoid counting any Python files that only live in submodules.
+            if not _has_python_files(repo_root, excluded_roots=submodule_roots):
+                print("\n⏭️  Skipping pyright (no .py files found in repo outside submodules).")
             else:
                 _require_ok(
                     _run(["pyright", "-p", str(pyright_config), *targets], cwd=repo_root),
