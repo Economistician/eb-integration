@@ -132,6 +132,18 @@ def test_ecosystem_imports_evaluation() -> None:
 
 @pytest.mark.ecosystem
 @pytest.mark.skipif(
+    not _has_module("electric_barometer"),
+    reason="electric-barometer not installed",
+)
+def test_ecosystem_imports_electric_barometer() -> None:
+    import electric_barometer
+
+    assert isinstance(electric_barometer.__version__, str)
+    assert len(electric_barometer.__version__) > 0
+
+
+@pytest.mark.ecosystem
+@pytest.mark.skipif(
     not (_has_module("eb_contracts") and _has_module("eb_metrics")),
     reason="ecosystem deps not installed",
 )
