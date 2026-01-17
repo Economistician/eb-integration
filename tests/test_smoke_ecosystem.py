@@ -152,18 +152,61 @@ def test_ecosystem_metrics_runs_against_real_library() -> None:
 
 @pytest.mark.ecosystem
 @pytest.mark.skipif(not _has_module("eb_contracts"), reason="eb-contracts not installed")
-def test_ecosystem_contract_validation_entrypoint_exists() -> None:
+def test_ecosystem_panel_demand_v1_validates_minimal_timestamp_panel() -> None:
     """
-    Validate that the public contracts validation entrypoint is present.
-    We do NOT hardcode demand column conventions here yet because those
-    conventions are stricter and should be validated in a dedicated
-    integration test once we wire a canonical tiny demand artifact.
+    True ecosystem drift tripwire: build a tiny PanelDemandV1 and validate it.
 
-    This is still valuable: it catches API surface drift immediately.
+    This catches:
+    - contract construction API drift (PanelDemandV1.from_frame)
+    - validation entrypoint drift (validate.panel_demand_v1)
+    - core gating semantics drift (structural-zero behavior)
     """
     from eb_contracts.api import validate as v
+    from eb_contracts.contracts.demand_panel.v1.panel_demand import PanelDemandV1
 
-    assert hasattr(v, "panel_demand_v1")
+    df = pd.DataFrame(
+        [
+            {
+                "store_id": "0001",
+                "forecast_entity_id": 101,
+                "ts": pd.Timestamp("2026-01-01 00:00:00", tz="UTC"),
+                "y": 10.0,
+                "is_observable": True,
+                "is_possible": True,
+                "is_structural_zero": False,
+            },
+            {
+                "store_id": "0001",
+                "forecast_entity_id": 101,
+                "ts": pd.Timestamp("2026-01-01 00:30:00", tz="UTC"),
+                "y": 12.0,
+                "is_observable": True,
+                "is_possible": True,
+                "is_structural_zero": False,
+            },
+            # Structural-zero semantics: y must be null and the interval must not be observable.
+            {
+                "store_id": "0001",
+                "forecast_entity_id": 101,
+                "ts": pd.Timestamp("2026-01-01 01:00:00", tz="UTC"),
+                "y": np.nan,
+                "is_observable": False,
+                "is_possible": True,
+                "is_structural_zero": True,
+            },
+        ]
+    )
+
+    panel = PanelDemandV1.from_frame(
+        df,
+        keys=["store_id", "forecast_entity_id"],
+        y_col="y",
+        time_mode="timestamp",
+        ts_col="ts",
+    )
+
+    # Should not raise.
+    v.panel_demand_v1(panel)
 
 
 @pytest.mark.ecosystem
