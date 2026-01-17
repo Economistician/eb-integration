@@ -210,39 +210,53 @@ def test_ecosystem_panel_demand_v1_validates_minimal_timestamp_panel() -> None:
 
 
 @pytest.mark.ecosystem
-@pytest.mark.skipif(not _has_module("eb_contracts"), reason="eb-contracts not installed")
-def test_ecosystem_panel_point_forecast_v1_validates_minimal_panel() -> None:
+@pytest.mark.skipif(not _has_module("eb_evaluation"), reason="eb-evaluation not installed")
+def test_ecosystem_governance_runs_from_minimal_signals() -> None:
     """
-    Forecast contract drift tripwire: validate a minimal PanelPointForecastV1 via the
-    stable public API entrypoint (validate.panel_point_v1).
+    Option A (diagnostics-first) integration tripwire: run a real diagnostic
+    pipeline entrypoint from eb-evaluation (governance = DQC x FPC).
 
-    This catches:
-    - required column drift (entity_id, interval_start, y_true, y_pred)
-    - uniqueness constraints drift ((entity_id, interval_start) unique)
-    - public entrypoint drift (panel_point_v1)
+    This intentionally does NOT depend on a "mega evaluate()" API.
+    It catches drift in:
+    - validate_governance entrypoint signature
+    - DQC + FPC composition contract
+    - GovernanceDecision structure
     """
-    from eb_contracts.api import validate as v
+    from eb_evaluation.diagnostics import FPCSignals, validate_governance
 
-    frame = pd.DataFrame(
-        [
-            {
-                "entity_id": "store:0001|fe:101",
-                "interval_start": pd.Timestamp("2026-01-01 00:00:00", tz="UTC"),
-                "y_true": 10.0,
-                "y_pred": 9.5,
-            },
-            {
-                "entity_id": "store:0001|fe:101",
-                "interval_start": pd.Timestamp("2026-01-01 00:30:00", tz="UTC"),
-                "y_true": 12.0,
-                "y_pred": 12.25,
-            },
-        ]
+    # Tiny, deterministic realized demand series (raw units).
+    y = [10.0, 12.0, 11.0, 9.0]
+
+    # Minimal FPCSignals: plausible, internally consistent numbers.
+    # (These are not "fit"; they are just stable deterministic inputs.)
+    fpc_raw = FPCSignals(
+        nsl_base=0.50,
+        nsl_ral=0.60,
+        delta_nsl=0.10,
+        hr_base_tau=0.70,
+        hr_ral_tau=0.75,
+        delta_hr_tau=0.05,
+        ud=1.0,
+        cwsl_base=None,
+        cwsl_ral=None,
+        delta_cwsl=None,
+        intervals=len(y),
+        shortfall_intervals=1,
     )
 
-    forecast = v.panel_point_v1(frame)
-    assert forecast.CONTRACT_NAME == "PanelPointForecastV1"
-    assert len(forecast.frame) == 2
+    decision = validate_governance(
+        y=y,
+        fpc_signals_raw=fpc_raw,
+        fpc_signals_snapped=None,
+        preset="balanced",
+    )
+
+    # Structural assertions: keep these light (drift tripwires, not logic tests).
+    assert hasattr(decision, "dqc")
+    assert hasattr(decision, "fpc_raw")
+    assert hasattr(decision, "snap_required")
+    assert hasattr(decision, "ral_policy")
+    assert hasattr(decision, "status")
 
 
 @pytest.mark.ecosystem
