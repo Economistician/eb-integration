@@ -36,3 +36,7 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+  "smoke: fast infrastructure smoke tests (numpy/pandas + minimal invariants)",
+  "ecosystem: cross-package integration smoke tests (run when EB packages are installed)",
+]
