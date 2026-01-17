@@ -210,6 +210,42 @@ def test_ecosystem_panel_demand_v1_validates_minimal_timestamp_panel() -> None:
 
 
 @pytest.mark.ecosystem
+@pytest.mark.skipif(not _has_module("eb_contracts"), reason="eb-contracts not installed")
+def test_ecosystem_panel_point_forecast_v1_validates_minimal_panel() -> None:
+    """
+    Forecast contract drift tripwire: validate a minimal PanelPointForecastV1 via the
+    stable public API entrypoint (validate.panel_point_v1).
+
+    This catches:
+    - required column drift (entity_id, interval_start, y_true, y_pred)
+    - uniqueness constraints drift ((entity_id, interval_start) unique)
+    - public entrypoint drift (panel_point_v1)
+    """
+    from eb_contracts.api import validate as v
+
+    frame = pd.DataFrame(
+        [
+            {
+                "entity_id": "store:0001|fe:101",
+                "interval_start": pd.Timestamp("2026-01-01 00:00:00", tz="UTC"),
+                "y_true": 10.0,
+                "y_pred": 9.5,
+            },
+            {
+                "entity_id": "store:0001|fe:101",
+                "interval_start": pd.Timestamp("2026-01-01 00:30:00", tz="UTC"),
+                "y_true": 12.0,
+                "y_pred": 12.25,
+            },
+        ]
+    )
+
+    forecast = v.panel_point_v1(frame)
+    assert forecast.CONTRACT_NAME == "PanelPointForecastV1"
+    assert len(forecast.frame) == 2
+
+
+@pytest.mark.ecosystem
 @pytest.mark.skipif(
     not (_has_module("eb_contracts") and _has_module("eb_evaluation")),
     reason="ecosystem deps not installed",
