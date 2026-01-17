@@ -1,0 +1,70 @@
+# Electric Barometer — LLM Style Contract (Python)
+# Authoritative, ecosystem-wide styling and linting rules.
+# Source of truth: tooling/ruff.toml, tooling/pyrightconfig.json, tooling/.pre-commit-config.yaml
+
+LANGUAGE:
+- Python 3.11 target
+
+FORMATTER:
+- Use ruff-format exclusively
+- Line length: 100
+- Quote style: double
+- Indent: spaces
+- Magic trailing commas enabled
+- Formatter is authoritative (ignore E501)
+
+LINT (ruff):
+- Enabled rule families:
+  E, F, I, B, UP, SIM, C4, PIE, RUF
+- Ignored by policy:
+  - E501 (line length handled by formatter)
+  - B008 (function calls allowed in default arguments)
+- Auto-fix allowed for all safe rules
+
+IMPORTS:
+- Sorted by ruff (isort)
+- Combine as-imports
+- Force sort within sections
+- First-party packages:
+  eb_metrics
+  eb_evaluation
+  eb_optimization
+  eb_features
+  eb_adapters
+  eb_contracts
+  electric_barometer
+  eb_integration
+
+PER-FILE OVERRIDES:
+- tests/**/*.py:
+  - Allow unused imports (F401)
+  - Allow fixture redefinition (F811)
+- src/**/__init__.py:
+  - Allow re-exports (F401)
+
+TYPING:
+- Pyright is enforced on src/ and tests/
+- Add type hints for public functions and methods
+- Prefer precise types over Any
+- Use modern Python typing (PEP 604 unions, built-in generics)
+
+CODING RULES:
+- from __future__ import annotations must appear immediately after module docstring
+- Avoid unused variables and unreachable code
+- Avoid mutable default arguments unless intentionally immutable (bugbear-safe)
+- Prefer pathlib.Path over os.path
+- Prefer explicit, readable control flow over clever one-liners
+- Prefer comprehensions only when they improve clarity
+
+TESTS:
+- Pytest is required
+- Tests may trade strict lint cleanliness for readability where allowed
+
+DO NOT:
+- Add noqa comments unless explicitly requested
+- Add new lint ignores without policy change
+- Introduce formatting tools other than ruff
+
+ASSUMPTION:
+- Code produced under this contract is expected to pass:
+  python tooling/check.py
