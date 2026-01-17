@@ -21,6 +21,6 @@ jobs:
           pip install -e .
           pip install eb-contracts eb-metrics eb-evaluation
 
-      - name: Run tests
+      - name: Run ecosystem tests
         run: |
-          pytest -q
+          pytest -q -m ecosystem
