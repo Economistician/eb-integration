@@ -1,0 +1,68 @@
+REPOSITORY: eb-integration
+
+ROLE
+This repository is the system-level integration, validation, and CI/CD hub
+for the Electric Barometer ecosystem.
+
+Its purpose is to ensure that independently developed and versioned Electric
+Barometer components work together correctly within representative workflows.
+It validates interfaces, contracts, and cross-package compatibility.
+
+This repository does not define business logic.
+
+---
+
+PRIMARY RESPONSIBILITIES
+
+- Run system-level smoke and integration tests across EB packages
+- Detect interface drift, dependency incompatibilities, and breaking changes
+- Enforce CI/CD quality gates (linting, type checks, security, packaging)
+- Validate that canonical workflows execute end-to-end at a minimal scale
+- Serve as the authoritative integration reference for the EB ecosystem
+
+---
+
+NON-RESPONSIBILITIES (STRICT)
+
+This repository MUST NOT:
+
+- Implement or redefine metrics, losses, or calibration logic
+- Implement evaluation, optimization, or adjustment algorithms
+- Contain domain-specific forecasting logic
+- Encode governance or policy decisions
+- Serve as a fallback execution layer
+- Substitute for unit tests in leaf repositories
+
+---
+
+SYSTEM RELATIONSHIP
+
+- This repository defers to `llm.system.txt` for all system-wide rules,
+  pipeline ordering, and invariants.
+- If any local instruction conflicts with `llm.system.txt`,
+  `llm.system.txt` takes precedence.
+
+---
+
+ALLOWED CHANGES
+
+- Adding or extending integration and smoke tests
+- Updating CI/CD workflows and quality gates
+- Adjusting dependency installation strategies for testing
+- Improving tooling for local and CI validation
+
+---
+
+DISALLOWED CHANGES
+
+- Adding production logic
+- Introducing implicit policy or gating behavior
+- Hard-coding assumptions about metric thresholds
+- Bypassing governance through integration logic
+
+---
+
+INTERPRETATION RULE
+
+If a proposed change would be inappropriate in a leaf repository,
+it is almost certainly inappropriate here.

@@ -1,0 +1,174 @@
+SYSTEM: Electric Barometer (EB)
+
+PURPOSE
+Electric Barometer is a forecasting readiness and governance framework for
+panel-based time-series forecasting in real-world operational environments.
+Its goal is not accuracy optimization alone, but controlled, auditable,
+cost-aware forecast usage under explicit governance.
+
+This file defines the canonical system worldview, pipeline ordering, and
+non-negotiable invariants for the Electric Barometer ecosystem.
+
+---
+
+SYSTEM PRINCIPLES (NON-NEGOTIABLE)
+
+1. Metrics are descriptive, not binding.
+   Metrics (including FRS, NSL, UD, HR@τ, CWSL, and related variants) describe
+   readiness, risk, and operational alignment. Metrics alone do not authorize,
+   block, or permit forecast adjustment, fallback, or execution behavior.
+
+2. Calibration defines evaluation context, not decisions.
+   Calibration artifacts (e.g., cost ratios, tolerance grids, selected τ)
+   define the evaluation envelope in which metrics are computed. Calibration
+   does not alter forecasts, does not gate execution, and does not replace
+   governance.
+
+3. Governance is the single binding decision layer.
+   No other component may authorize forecast adjustment, fallback, or execution
+   behavior. Governance decisions may be computed as artifacts in downstream
+   repositories, but their authority is system-level.
+
+4. Structural admissibility precedes adjustment.
+   Demand representation compatibility (DQC) and forecast primitive
+   compatibility (FPC) must be evaluated before any adjustment or fallback
+   logic is considered.
+
+5. Adjustment is optional, bounded, and deterministic.
+   The Readiness Adjustment Layer (RAL) applies only when explicitly permitted
+   by Governance. Adjustments must be bounded, reproducible, and auditable.
+   Identity (no-op) is always a valid outcome.
+
+6. Optional strictness is allowed upstream, never downstream.
+   Informative diagnostics (e.g., FAS) may influence modeling strategy or
+   resource allocation but may not act as binding gates.
+
+7. Contracts are canonical.
+   Data, forecast, diagnostic, and policy artifacts must conform to versioned
+   Electric Barometer contracts. Contracts are backward-compatible once
+   published.
+
+---
+
+CANONICAL PIPELINE (AUTHORITATIVE ORDER)
+
+0. Contractify Demand
+   Raw demand is transformed into contract-valid panel artifacts defining
+   identity, time, value, and observability.
+
+1. Baseline Forecast
+   A cheap, universal baseline forecast is produced for all slices.
+   The baseline exists to expose error anatomy, not to maximize performance.
+
+2. Forecast Admissibility Surface (FAS) — OPTIONAL
+   FAS is applied to baseline forecasts to diagnose admissibility regimes,
+   structural fragility, and modeling risk.
+   - FAS is informative, not binding.
+   - FAS may be enabled or disabled based on strictness.
+   - Pipelines may be compared with and without FAS.
+
+3. Model Zoo / Model Selection
+   One or more forecasting models are trained and/or selected.
+   Metrics may be used here for comparative model selection only.
+   FAS outputs may inform modeling strategy or resource allocation, but do not
+   authorize or block outcomes.
+
+4. Evaluation Metrics (Readiness Diagnostics)
+   Forecast artifacts are evaluated using the Electric Barometer metric suite.
+   Metrics are diagnostic inputs only and include paired metric–calibration
+   constructs:
+
+   Cost / magnitude primitives:
+   - CWSL (Cost-Weighted Shortfall Loss)
+   - CWSLR (Cost-ratio sensitivity and calibration)
+
+   Tolerance / acceptability primitives:
+   - HR@τ (Hit Rate within Tolerance)
+   - HR@τ sensitivity and calibration (tolerance grids, selection rules,
+     safeguards)
+
+   Additional readiness diagnostics:
+   - NSL (No-Shortfall Level)
+   - UD (Underbuild Depth)
+   - FRS (Forecast Readiness Score)
+
+   Calibration artifacts (e.g., cost ratios, tolerance grids, selected τ) define
+   the evaluation context but do not gate or authorize decisions.
+
+5. Demand Quantization Compatibility (DQC)
+   DQC determines the admissible demand representation (e.g., raw vs quantized).
+   DQC is structural and representation-only.
+
+6. Forecast Primitive Compatibility (FPC)
+   FPC evaluates whether the forecast primitive is compatible with adjustment
+   within the DQC-declared representation.
+   DQC MUST precede FPC.
+
+7. Governance
+   Governance composes:
+   - evaluation diagnostics,
+   - calibration context (cost ratios, tolerances),
+   - DQC results,
+   - FPC results,
+   - explicit policy thresholds
+   into a single binding decision artifact governing adjustment and fallback.
+
+8. Readiness Adjustment Layer (RAL) — IF PERMITTED
+   RAL applies bounded, deterministic adjustments only when permitted by
+   Governance.
+
+9. Serving / Execution
+   The final forecast artifact (adjusted, baseline, or fallback) is served with
+   full governance and adjustment traceability.
+
+---
+
+REPOSITORY ROLES (SYSTEM VIEW)
+
+- eb-contracts:
+  Defines canonical schemas, invariants, and validation rules.
+
+- eb-metrics:
+  Implements metric primitives and calibration utilities.
+  No policy, gating, or execution logic.
+
+- eb-evaluation:
+  Computes diagnostics, metrics, and governance artifacts.
+  No optimization or execution authority.
+
+- eb-optimization:
+  Tunes parameters and decision policies using historical data.
+  Produces reproducible artifacts; does not execute decisions.
+
+- eb-adapters:
+  Bridges external models and tools into EB contracts.
+
+- electric-barometer:
+  Orchestrates forecasting workflows and model selection.
+
+- eb-integration:
+  System-level CI/CD and cross-package integration validation.
+  Ensures ecosystem compatibility; contains no business logic.
+
+- eb-docs / eb-papers:
+  Human-facing documentation and formal references.
+  These must not contradict this file.
+
+---
+
+DISALLOWED SYSTEM BEHAVIOR
+
+- Using metrics (including FRS or HR@τ) as hard gates
+- Performing adjustment or fallback without Governance permission
+- Evaluating FPC before DQC
+- Treating FAS as a binding authorization
+- Mutating forecasts during evaluation
+- Using calibration to favor specific models ex post
+- Hiding fallback or adjustment behavior outside governance
+
+---
+
+INTERPRETATION RULE
+
+If any repository-level instruction conflicts with this file,
+this file takes precedence.
