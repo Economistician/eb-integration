@@ -3,14 +3,13 @@
 ######################################
 [project]
 name = "eb-integration"
-version = "0.1.1"
+version = "0.1.2"
 requires-python = ">=3.11"
 
 ######################################
 # Runtime dependencies
 ######################################
 dependencies = [
-  "pytest",
   "numpy>=1.24",
   "pandas>=2.0",
 ]
@@ -20,14 +19,25 @@ dependencies = [
 ######################################
 [project.optional-dependencies]
 test = [
-    "pytest>=7.0",
-    "pytest-cov",
+  "pytest>=7.0",
+  "pytest-cov",
 ]
+
 dev = [
-    "ruff>=0.1.0",
-    "pyright>=1.1",
-    "twine>=4.0",
-    "build",
+  "ruff>=0.1.0",
+  "pyright>=1.1",
+  "twine>=4.0",
+  "build",
+  "pytest>=7.0",
+  "pytest-cov",
+]
+
+# Opt-in: install EB packages to run @pytest.mark.ecosystem tests.
+ecosystem = [
+  "eb-contracts>=0.2,<0.3",
+  "eb-evaluation>=0.2,<0.3",
+  "eb-metrics>=0.2,<0.3",
+  "electric-barometer>=0.2,<0.3",
 ]
 
 ######################################
