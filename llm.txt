@@ -10,6 +10,12 @@ It validates interfaces, contracts, and cross-package compatibility.
 
 This repository does not define business logic.
 
+STYLE
+- This repository is the source of truth for shared ecosystem tooling.
+- Ecosystem-wide style and linting rules are defined in:
+  tooling/llm.style.txt
+- All leaf repositories inherit style via shared tooling.
+
 ---
 
 PRIMARY RESPONSIBILITIES
