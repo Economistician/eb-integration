@@ -47,7 +47,8 @@ jobs:
           pip install \
             "eb-contracts @ git+https://github.com/Economistician/eb-contracts@main" \
             "eb-metrics @ git+https://github.com/Economistician/eb-metrics@main" \
-            "eb-evaluation @ git+https://github.com/Economistician/eb-evaluation@main"
+            "eb-evaluation @ git+https://github.com/Economistician/eb-evaluation@main" \
+            "electric-barometer @ git+https://github.com/Economistician/electric-barometer@main"
 
       - name: Run ecosystem tests
         run: |
