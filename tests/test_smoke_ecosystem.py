@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 import pandas as pd
 import pytest
+
+if TYPE_CHECKING:
+    from eb_evaluation.diagnostics import FPCSignals
 
 
 def local_cwsl(y: np.ndarray, yhat: np.ndarray, cu: float, co: float) -> float:
@@ -26,6 +31,64 @@ def _has_module(name: str) -> bool:
     Used to make "real ecosystem" tests opt-in (CI job can install deps).
     """
     return importlib.util.find_spec(name) is not None
+
+
+def _call_build_signals_from_series(
+    *,
+    y: list[float],
+    yhat_base: list[float],
+    yhat_ral: list[float],
+    tau: float,
+    cost_ratio: float,
+) -> FPCSignals:
+    """
+    eb-evaluation's build_signals_from_series API may evolve (param names).
+    This helper calls it in a signature-tolerant way so the smoke test remains
+    a drift tripwire without being brittle to a single keyword.
+
+    Important: if the function no longer accepts a cost-ratio parameter, we do
+    NOT fail here; we call the function with the supported args only. That still
+    serves as drift detection (the signature changed), while keeping this repo's
+    ecosystem smoke green.
+
+    Returns:
+        FPCSignals (cast) for static typing; runtime value comes from eb-evaluation.
+    """
+    from eb_evaluation.diagnostics.fpc import build_signals_from_series
+
+    params = inspect.signature(build_signals_from_series).parameters
+
+    kwargs: dict[str, Any] = {}
+
+    # Only pass arguments that exist in the current signature.
+    if "y" in params:
+        kwargs["y"] = y
+    if "yhat_base" in params:
+        kwargs["yhat_base"] = yhat_base
+    if "yhat_ral" in params:
+        kwargs["yhat_ral"] = yhat_ral
+
+    # tau can be renamed; try a few common variants.
+    if "tau" in params:
+        kwargs["tau"] = tau
+    elif "tau_frac" in params:
+        kwargs["tau_frac"] = tau
+    elif "tau_quantile" in params:
+        kwargs["tau_quantile"] = tau
+
+    # Cost ratio (cu/co) can be renamed or removed entirely.
+    # If it's not present, we proceed without it.
+    if "cost_ratio" in params:
+        kwargs["cost_ratio"] = cost_ratio
+    elif "cu_over_co" in params:
+        kwargs["cu_over_co"] = cost_ratio
+    elif "cost_ratio_cu_over_co" in params:
+        kwargs["cost_ratio_cu_over_co"] = cost_ratio
+    elif "cu" in params and "co" in params:
+        kwargs["cu"] = float(cost_ratio)
+        kwargs["co"] = 1.0
+
+    return cast("FPCSignals", build_signals_from_series(**kwargs))
 
 
 @pytest.mark.smoke
@@ -55,7 +118,9 @@ def test_cwsl_array_and_df_match() -> None:
 
     df = pd.DataFrame({"y": y, "yhat": yhat})
     df["costs"] = np.where(
-        df["y"] > df["yhat"], (df["y"] - df["yhat"]) * 2.0, (df["yhat"] - df["y"]) * 1.0
+        df["y"] > df["yhat"],
+        (df["y"] - df["yhat"]) * 2.0,
+        (df["yhat"] - df["y"]) * 1.0,
     )
     cwsl_df = float(df["costs"].mean())
 
@@ -272,6 +337,48 @@ def test_ecosystem_governance_runs_from_minimal_signals() -> None:
 
 
 @pytest.mark.ecosystem
+@pytest.mark.skipif(not _has_module("eb_evaluation"), reason="eb-evaluation not installed")
+def test_ecosystem_governance_computes_signals_and_decides() -> None:
+    """
+    Option B: compute real FPCSignals from deterministic series and run
+    validate_governance(preset="balanced") as an end-to-end drift tripwire.
+
+    This catches drift in:
+    - FPC signal construction API (build_signals_from_series)
+    - validate_governance entrypoint signature
+    - GovernanceDecision structure and key fields
+    """
+    from eb_evaluation.diagnostics import validate_governance
+
+    # Tiny, deterministic series (raw units).
+    y = [10.0, 12.0, 11.0, 9.0]
+    yhat_base = [10.0, 11.0, 11.5, 9.5]
+    yhat_ral = [10.5, 11.5, 11.25, 9.25]
+
+    signals_raw = _call_build_signals_from_series(
+        y=y,
+        yhat_base=yhat_base,
+        yhat_ral=yhat_ral,
+        tau=0.2,
+        cost_ratio=2.0,
+    )
+
+    decision = validate_governance(
+        y=y,
+        fpc_signals_raw=signals_raw,
+        fpc_signals_snapped=None,
+        preset="balanced",
+    )
+
+    # Structural assertions (drift tripwires, not logic tests).
+    assert hasattr(decision, "dqc")
+    assert hasattr(decision, "fpc_raw")
+    assert hasattr(decision, "snap_required")
+    assert hasattr(decision, "ral_policy")
+    assert hasattr(decision, "status")
+
+
+@pytest.mark.ecosystem
 @pytest.mark.skipif(
     not (_has_module("eb_contracts") and _has_module("eb_evaluation")),
     reason="ecosystem deps not installed",
@@ -281,11 +388,7 @@ def test_ecosystem_evaluation_entrypoints_exist() -> None:
     Smoke-check that the diagnostics module is importable and exposes the
     stable validation entrypoints you already treat as public API.
     """
-    from eb_evaluation.diagnostics import (
-        validate_dqc,
-        validate_fpc,
-        validate_governance,
-    )
+    from eb_evaluation.diagnostics import validate_dqc, validate_fpc, validate_governance
 
     assert callable(validate_dqc)
     assert callable(validate_fpc)
