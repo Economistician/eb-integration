@@ -23,7 +23,7 @@ import sys
 from typing import Any
 
 _RE_WORKFLOW_ID = re.compile(r"^\s*-\s+id:\s*([A-Za-z0-9_]+)\s*$")
-_RE_IMPORT_LINE = re.compile(r'^\s*import:\s*"(from\s+[^"]+)"\s*$')
+_RE_IMPORT_LINE = re.compile(r"^\s*import:\s*(?P<q>['\"])?(?P<stmt>from\s+.+?)(?P=q)?\s*$")
 _RE_FROM_IMPORT = re.compile(r"^from\s+([A-Za-z0-9_.]+)\s+import\s+([A-Za-z0-9_]+)\s*$")
 
 
@@ -91,7 +91,7 @@ def _extract_import_refs(block: str) -> list[ImportRef]:
         if not m:
             continue
 
-        stmt = m.group(1).strip()
+        stmt = m.group("stmt").strip()
         m2 = _RE_FROM_IMPORT.match(stmt)
         if not m2:
             # Ignore any import lines that do not follow the expected format.
