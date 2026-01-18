@@ -4,6 +4,7 @@ Build a single deterministic LLM bundle for live sessions.
 The bundle concatenates:
 - llm/system.txt        (rules / behavior constraints)
 - llm/workflows.yml     (canonical workflows)
+- llm/llm-bundle.yml    (bundle metadata / intent)
 - llm/api_index.json    (public API surface)
 
 Output is a single text file suitable for copy/paste into a new chat.
@@ -30,7 +31,7 @@ def _read(path: Path) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Build a single LLM bundle from system.txt, workflows.yml, and api_index.json"
+        description="Build a single LLM bundle from system.txt, workflows.yml, llm-bundle.yml, and api_index.json"
     )
     parser.add_argument(
         "--out",
@@ -44,16 +45,19 @@ def main(argv: list[str] | None = None) -> int:
 
     system_path = llm_dir / "system.txt"
     workflows_path = llm_dir / "workflows.yml"
+    bundle_meta_path = llm_dir / "llm-bundle.yml"
     api_index_path = llm_dir / "api_index.json"
 
     system_txt = _read(system_path)
     workflows_txt = _read(workflows_path)
+    bundle_meta_txt = _read(bundle_meta_path)
     api_index = json.loads(_read(api_index_path))
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    bundle = []
+    bundle: list[str] = []
+
     bundle.append("# ===============================")
     bundle.append("# Electric Barometer — LLM SYSTEM")
     bundle.append("# ===============================")
@@ -67,6 +71,12 @@ def main(argv: list[str] | None = None) -> int:
     bundle.append("")
 
     bundle.append("# ===============================")
+    bundle.append("# Electric Barometer — LLM BUNDLE METADATA")
+    bundle.append("# ===============================")
+    bundle.append(bundle_meta_txt)
+    bundle.append("")
+
+    bundle.append("# ===============================")
     bundle.append("# Electric Barometer — API INDEX")
     bundle.append("# ===============================")
     bundle.append(json.dumps(api_index, indent=2, sort_keys=True))
@@ -75,8 +85,8 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"Wrote LLM bundle: {out_path}")
     print(
-        f"Contents: "
-        f"system.txt + workflows.yml + api_index.json "
+        "Contents: "
+        "system.txt + workflows.yml + llm-bundle.yml + api_index.json "
         f"(entries={len(api_index.get('entries', []))})"
     )
 
