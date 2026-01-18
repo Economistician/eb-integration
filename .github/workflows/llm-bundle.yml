@@ -1,0 +1,31 @@
+name: llm-bundle
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify-bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install eb-integration (and ecosystem)
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e ".[ecosystem]"
+
+      - name: Rebuild api index + bundle
+        run: |
+          python tooling/build_api_index.py
+          python tooling/llm_bundle.py --out llm/bundle.txt
+
+      - name: Verify repo is clean
+        run: |
+          git diff --exit-code

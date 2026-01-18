@@ -12,8 +12,8 @@ Output is a single text file suitable for copy/paste into a new chat.
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import json
+from pathlib import Path
 import sys
 
 
