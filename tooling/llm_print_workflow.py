@@ -22,7 +22,11 @@ import re
 import sys
 from typing import Any
 
-_RE_WORKFLOW_ID = re.compile(r"^\s*-\s+id:\s*([A-Za-z0-9_]+)\s*$")
+# Capture indentation so we can distinguish top-level workflow list items
+# from nested "- id:" occurrences inside steps.
+_RE_LIST_ID_LINE = re.compile(r"^(?P<indent>\s*)-\s+id:\s*(?P<id>[A-Za-z0-9_]+)\s*$")
+
+# Allow import lines that are quoted or unquoted.
 _RE_IMPORT_LINE = re.compile(r"^\s*import:\s*(?P<q>['\"])?(?P<stmt>from\s+.+?)(?P=q)?\s*$")
 _RE_FROM_IMPORT = re.compile(r"^from\s+([A-Za-z0-9_.]+)\s+import\s+([A-Za-z0-9_]+)\s*$")
 
@@ -58,26 +62,33 @@ def _extract_workflow_block(text: str, workflow_id: str) -> str:
     Extract the YAML-ish text block for the workflow with id == workflow_id.
 
     This is intentionally line-based to avoid adding a YAML dependency.
-    It assumes workflows are declared as list items with lines like:
-      - id: some_workflow_v1
+    Key behavior:
+      - Find the workflow list item "- id: <workflow_id>"
+      - Record its indentation level
+      - Capture until the NEXT "- id:" at the SAME indentation level
+        (so nested "- id:" inside steps does not terminate the block)
     """
     lines = text.splitlines()
     start_idx: int | None = None
+    start_indent: str | None = None
 
     for i, line in enumerate(lines):
-        m = _RE_WORKFLOW_ID.match(line)
-        if m and m.group(1) == workflow_id:
+        m = _RE_LIST_ID_LINE.match(line)
+        if m and m.group("id") == workflow_id:
             start_idx = i
+            start_indent = m.group("indent")
             break
 
-    if start_idx is None:
+    if start_idx is None or start_indent is None:
         raise ValueError(f"Workflow id not found in workflows file: {workflow_id!r}")
 
-    # Capture until the next "- id:" at the same or less indentation level.
-    # We treat any subsequent workflow item as a terminator.
     end_idx = len(lines)
     for j in range(start_idx + 1, len(lines)):
-        if _RE_WORKFLOW_ID.match(lines[j]):
+        m = _RE_LIST_ID_LINE.match(lines[j])
+        if not m:
+            continue
+        if m.group("indent") == start_indent:
+            # This is the next workflow list item (same indentation).
             end_idx = j
             break
 
@@ -94,15 +105,12 @@ def _extract_import_refs(block: str) -> list[ImportRef]:
         stmt = m.group("stmt").strip()
         m2 = _RE_FROM_IMPORT.match(stmt)
         if not m2:
-            # Ignore any import lines that do not follow the expected format.
             continue
 
         refs.append(ImportRef(module=m2.group(1), name=m2.group(2)))
 
-    # Deterministic unique ordering
     uniq = {(r.module, r.name): r for r in refs}
-    out = sorted(uniq.values(), key=lambda r: (r.module, r.name))
-    return out
+    return sorted(uniq.values(), key=lambda r: (r.module, r.name))
 
 
 def _load_api_index(path: Path) -> dict[str, Any]:
