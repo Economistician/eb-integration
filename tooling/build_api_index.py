@@ -12,18 +12,18 @@ Design goals:
 from __future__ import annotations
 
 import argparse
+from collections.abc import Iterable
+from dataclasses import dataclass
 import datetime as dt
 import importlib
 import inspect
 import json
+from pathlib import Path
 import platform
 import re
 import sys
-from dataclasses import dataclass
-from pathlib import Path
 from types import ModuleType
-from typing import Any, Iterable
-
+from typing import Any
 
 RE_WS = re.compile(r"\s+")
 
@@ -105,7 +105,23 @@ def _make_tags(package: str, module: str, name: str, doc_summary: str | None) ->
     blob = " ".join([package, module, name, doc_summary or ""]).lower()
     tags: set[str] = set()
 
-    for t in ["workflow", "governance", "evaluation", "validate", "validation", "contract", "panel", "hierarchy", "ral", "metric", "optimiz", "forecast", "adapter", "dataframe", "df"]:
+    for t in [
+        "workflow",
+        "governance",
+        "evaluation",
+        "validate",
+        "validation",
+        "contract",
+        "panel",
+        "hierarchy",
+        "ral",
+        "metric",
+        "optimiz",
+        "forecast",
+        "adapter",
+        "dataframe",
+        "df",
+    ]:
         if t in blob:
             # normalize common variants
             if t == "optimiz":
@@ -126,7 +142,7 @@ def _public_symbols(mod: ModuleType) -> list[str]:
     exports = getattr(mod, "__all__", None)
     if exports is None:
         return []
-    if not isinstance(exports, (list, tuple)):
+    if not isinstance(exports, list | tuple):
         return []
     out: list[str] = []
     for x in exports:
@@ -141,7 +157,7 @@ def _index_package(package: str) -> tuple[list[ApiEntry], str | None]:
     """
     try:
         pkg = importlib.import_module(package)
-    except Exception as e:  # noqa: BLE001 - we want the error string for reporting
+    except Exception as e:
         return ([], f"{type(e).__name__}: {e}")
 
     names = _public_symbols(pkg)
@@ -191,7 +207,7 @@ def _index_package(package: str) -> tuple[list[ApiEntry], str | None]:
 
 
 def build_api_index(packages: Iterable[str]) -> dict[str, Any]:
-    now = dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
+    now = dt.datetime.now(dt.UTC).replace(microsecond=0)
 
     all_entries: list[ApiEntry] = []
     packages_indexed: list[str] = []
@@ -235,7 +251,9 @@ def build_api_index(packages: Iterable[str]) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Generate llm/api_index.json from EB package __all__ exports.")
+    parser = argparse.ArgumentParser(
+        description="Generate llm/api_index.json from EB package __all__ exports."
+    )
     parser.add_argument(
         "--packages",
         nargs="*",
@@ -249,7 +267,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    packages = args.packages if args.packages is not None and len(args.packages) > 0 else DEFAULT_PACKAGES
+    packages = (
+        args.packages if args.packages is not None and len(args.packages) > 0 else DEFAULT_PACKAGES
+    )
 
     out_path = Path(args.out) if args.out else (_repo_root() / "llm" / "api_index.json")
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -258,7 +278,9 @@ def main(argv: list[str] | None = None) -> int:
 
     # Deterministic JSON formatting
     out_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(f"Wrote api index: {out_path}  (entries={len(payload['entries'])}, packages={len(payload['ecosystem']['packages_indexed'])})")
+    print(
+        f"Wrote api index: {out_path}  (entries={len(payload['entries'])}, packages={len(payload['ecosystem']['packages_indexed'])})"
+    )
     if "diagnostics" in payload:
         print("Diagnostics present (import errors).")
     return 0
