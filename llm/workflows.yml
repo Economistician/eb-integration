@@ -18,6 +18,7 @@ workflows:
 
     applicability:
       artifacts:
+        - panel_point_forecast_v1
         - panel_point_v1
 
     inputs:
@@ -26,6 +27,7 @@ workflows:
       - name: artifact_kind
         description: >
           The intended contract validator to apply. Must be one of:
+          - panel_point_forecast_v1
           - panel_point_v1
 
     outputs:
@@ -41,12 +43,18 @@ workflows:
         selection:
           by: artifact_kind
           cases:
+            panel_point_forecast_v1:
+              import: "from eb_contracts.api.validate import panel_point_forecast_v1"
+              call: "panel_point_forecast_v1(artifact)"
             panel_point_v1:
               import: "from eb_contracts.api.validate import panel_point_v1"
               call: "panel_point_v1(artifact)"
 
     notes:
       - "Validation must not be skipped for convenience."
+      - >
+        Prefer `panel_point_forecast_v1` as the canonical validator.
+        `panel_point_v1` is a backwards-compatible alias and may be removed in a future major version.
       - >
         Do not infer aliases or semantic equivalences between validators or contracts.
         If a relationship (e.g., aliasing, replacement, or shared contract semantics)

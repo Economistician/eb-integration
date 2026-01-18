@@ -5,20 +5,21 @@ This script generates: llm/api_index.json
 
 Design goals:
 - Deterministic output (stable ordering, stable IDs)
-- Only indexes public surfaces declared via package __all__
+- Only indexes public surfaces declared via package/module __all__
 - Captures minimal, useful metadata for LLM-driven discovery
 """
 
 from __future__ import annotations
 
 import argparse
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 import datetime as dt
 import importlib
 import inspect
 import json
 from pathlib import Path
+import pkgutil
 import platform
 import re
 import sys
@@ -151,32 +152,43 @@ def _public_symbols(mod: ModuleType) -> list[str]:
     return out
 
 
-def _index_package(package: str) -> tuple[list[ApiEntry], str | None]:
+def _iter_submodules(pkg: ModuleType) -> Iterator[str]:
     """
-    Returns (entries, import_error_message).
-    """
-    try:
-        pkg = importlib.import_module(package)
-    except Exception as e:
-        return ([], f"{type(e).__name__}: {e}")
+    Yield fully-qualified module names beneath a package.
 
-    names = _public_symbols(pkg)
+    We intentionally do NOT recurse into non-package modules except via pkgutil.
+    Deterministic ordering is enforced by sorting discovered names.
+    """
+    pkg_path = getattr(pkg, "__path__", None)
+    pkg_name = getattr(pkg, "__name__", None)
+    if pkg_path is None or not isinstance(pkg_name, str) or not pkg_name:
+        return iter(())
+
+    names: list[str] = []
+    for m in pkgutil.walk_packages(pkg_path, prefix=pkg_name + "."):
+        names.append(m.name)
+    names.sort()
+    return iter(names)
+
+
+def _index_module_exports(package: str, mod: ModuleType, entries: list[ApiEntry]) -> None:
+    """
+    Index all public symbols exported by `mod.__all__` into `entries`.
+    """
+    names = _public_symbols(mod)
     if not names:
-        # No __all__ => nothing public is indexed for this package.
-        return ([], None)
-
-    entries: list[ApiEntry] = []
+        return
 
     for name in names:
-        if not hasattr(pkg, name):
+        if not hasattr(mod, name):
             continue
 
-        obj = getattr(pkg, name)
+        obj = getattr(mod, name)
         kind = _kind(obj)
         if kind is None:
             continue
 
-        module = getattr(obj, "__module__", None) or package
+        module = getattr(obj, "__module__", None) or mod.__name__ or package
         import_path = f"{module}:{name}"
         public_import = f"from {module} import {name}"
         sig = _safe_signature(obj)
@@ -201,9 +213,46 @@ def _index_package(package: str) -> tuple[list[ApiEntry], str | None]:
             )
         )
 
-    # Deterministic ordering
-    entries.sort(key=lambda e: (e.package, e.module, e.name))
-    return (entries, None)
+
+def _index_package(package: str) -> tuple[list[ApiEntry], dict[str, str] | None]:
+    """
+    Returns (entries, import_errors_by_module).
+
+    We index:
+    - package root exports (package.__all__)
+    - all submodule exports (submodule.__all__), for every importable submodule under the package
+    """
+    try:
+        pkg = importlib.import_module(package)
+    except Exception as e:
+        return ([], {package: f"{type(e).__name__}: {e}"})
+
+    entries: list[ApiEntry] = []
+    import_errors: dict[str, str] = {}
+
+    # Index root exports
+    _index_module_exports(package=package, mod=pkg, entries=entries)
+
+    # Index submodule exports
+    for mod_name in _iter_submodules(pkg):
+        try:
+            mod = importlib.import_module(mod_name)
+        except Exception as e:
+            import_errors[mod_name] = f"{type(e).__name__}: {e}"
+            continue
+        _index_module_exports(package=package, mod=mod, entries=entries)
+
+    # Deterministic unique ordering (avoid duplicates across re-exports)
+    uniq: dict[tuple[str, str, str], ApiEntry] = {}
+    for e in entries:
+        key = (e.package, e.module, e.name)
+        if key not in uniq:
+            uniq[key] = e
+
+    out = list(uniq.values())
+    out.sort(key=lambda e: (e.package, e.module, e.name))
+
+    return (out, import_errors or None)
 
 
 def build_api_index(packages: Iterable[str]) -> dict[str, Any]:
@@ -217,11 +266,17 @@ def build_api_index(packages: Iterable[str]) -> dict[str, Any]:
         pkg = pkg.strip()
         if not pkg:
             continue
-        entries, err = _index_package(pkg)
-        if err:
-            import_errors[pkg] = err
-            continue
-        packages_indexed.append(pkg)
+
+        entries, errs = _index_package(pkg)
+        if errs:
+            # If the package itself failed to import, we may have no entries;
+            # still capture the error so CI/users see it.
+            import_errors.update(errs)
+
+        # Only count a package as "indexed" if its root imported successfully.
+        if pkg not in import_errors:
+            packages_indexed.append(pkg)
+
         all_entries.extend(entries)
 
     # Deterministic final ordering
@@ -252,7 +307,7 @@ def build_api_index(packages: Iterable[str]) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Generate llm/api_index.json from EB package __all__ exports."
+        description="Generate llm/api_index.json from EB package/module __all__ exports."
     )
     parser.add_argument(
         "--packages",
