@@ -125,6 +125,21 @@ workflows:
             may_echo_from_signature_only: true
             must_not_restate_as_guarantee: true
 
+      - id: require_schema_before_examples
+        description: >
+          Do not propose concrete values for required column-name arguments
+          (e.g., `keys`, `actual_col`, `base_forecast_col`, `ral_forecast_col`)
+          or numeric policy parameters (e.g., `tau`) unless the user supplies them.
+          If the user has not provided the DataFrame schema and mappings, request
+          `df.columns.tolist()` (or an equivalent schema snippet) first.
+          If providing a call template prior to schema, use placeholders like
+          `<ACTUAL_COL>` and `<KEY_COLS>` rather than invented example column names.
+        requirement:
+          must_request_df_schema_for_column_args: true
+          must_not_invent_column_names: true
+          must_not_invent_tau: true
+          templates_must_use_placeholders: true
+
     notes:
       - >
         This workflow is DataFrame-oriented. If your artifact is a contract object,
