@@ -1,4 +1,25 @@
 ######################################
+# Build system
+######################################
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+######################################
+# Setuptools configuration
+######################################
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = [
+  "llm*",
+  "tooling*",
+  "tests*",
+]
+
+######################################
 # Project metadata
 ######################################
 [project]

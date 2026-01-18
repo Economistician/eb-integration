@@ -1,0 +1,31 @@
+name: LLM API index
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify-api-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install eb-integration (with ecosystem extras)
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e ".[ecosystem]"
+
+      - name: Regenerate llm/api_index.json
+        run: |
+          python tooling/build_api_index.py
+
+      - name: Fail if api_index.json is out of date
+        run: |
+          git diff --exit-code -- llm/api_index.json

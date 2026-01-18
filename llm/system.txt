@@ -1,0 +1,103 @@
+Electric Barometer — LLM System Rules & Collaboration Contract
+
+This file defines the authoritative rules governing how an LLM
+(ChatGPT or similar) must reason about, select, and compose functionality
+across the Electric Barometer (EB) ecosystem.
+
+These rules apply to all interactive sessions, design discussions,
+and implementation exercises involving EB code.
+
+────────────────────────────────────────────────────────────
+CORE PRINCIPLES
+────────────────────────────────────────────────────────────
+
+1. Canonical Over Custom
+   Always prefer existing, public Electric Barometer APIs and workflows
+   over ad-hoc or custom implementations.
+
+   Do NOT re-implement logic inline if an EB function or workflow exists
+   that serves the same purpose.
+
+2. Explicit Over Implicit
+   Assumptions, inputs, outputs, and ordering must be explicit.
+   If required inputs are missing, identify the gap rather than guessing
+   or silently bypassing a step.
+
+3. Governance Before Optimization
+   Validation, evaluation, governance, and admissibility checks must not
+   be skipped for convenience.
+   Ordering matters.
+
+4. Discovery Over Guessing
+   Function names, module paths, and behaviors must be derived from
+   authoritative sources (see below), not inferred from naming patterns.
+
+────────────────────────────────────────────────────────────
+AUTHORITATIVE SOURCES (ORDERED)
+────────────────────────────────────────────────────────────
+
+When resolving what functionality exists or how it should be used,
+the following sources are authoritative, in descending order:
+
+1. llm/api_index.json
+   - Canonical, generated inventory of public EB APIs
+   - Only functions/classes listed here are considered available
+   - If it is not indexed, it must not be used
+
+2. llm/workflows.yml
+   - Curated, stable “golden paths” for composing EB functionality
+   - Defines intended ordering, required inputs, and expected outputs
+   - Prefer workflows over individual function selection
+
+3. Public package APIs (via __all__)
+   - Only symbols explicitly exported by EB packages are public
+   - Internal helpers must not be referenced directly
+
+4. EB documentation and contracts
+   - Used for clarification, not invention
+
+If information is missing from these sources, the correct response is to
+identify what is missing — not to invent behavior.
+
+────────────────────────────────────────────────────────────
+EXPECTED LLM BEHAVIOR
+────────────────────────────────────────────────────────────
+
+When given a task (e.g., “forecast demand”, “evaluate governance”),
+the LLM should:
+
+1. Identify the appropriate EB workflow (if one exists)
+2. Validate that required inputs / columns / contracts are present
+3. Recommend the canonical sequence of public API calls
+4. Surface any missing prerequisites explicitly
+5. Produce minimal, idiomatic code that uses EB APIs directly
+
+If no existing workflow matches the stated intent, the LLM must:
+- identify the closest available public primitives
+- explain why the intent cannot be satisfied by an existing workflow
+- describe the nature of the workflow gap (orchestration, validation,
+  governance, adapter coverage, etc.)
+
+The LLM must not silently construct ad-hoc pipelines to compensate
+for a missing workflow.
+
+The LLM must NOT:
+- Guess function names or module paths
+- Bypass EB layers “for speed”
+- Write custom glue code that duplicates existing functionality
+- Skip validation, evaluation, or governance steps silently
+
+────────────────────────────────────────────────────────────
+SCOPE & INTENT
+────────────────────────────────────────────────────────────
+
+Electric Barometer is a governed forecasting and decision framework.
+Correctness, reproducibility, and explicit structure are more important
+than brevity or convenience.
+
+If tradeoffs exist, favor:
+- correctness over speed
+- explicitness over cleverness
+- reuse over reinvention
+
+This system file is the non-negotiable collaboration contract.
