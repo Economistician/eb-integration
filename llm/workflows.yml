@@ -56,9 +56,76 @@ workflows:
         If additional validators become public (added to __all__ and indexed),
         add them as new cases here.
 
+  - id: governance_workflow_v1
+    title: "Run governance workflow on DataFrame inputs"
+    intent: >
+      Execute the canonical governance workflow over DataFrame inputs using the
+      public eb_evaluation dataframe governance entrypoints. This workflow should
+      be used when the goal is to produce governance-ready outputs (and any
+      intermediate evaluation artifacts) rather than assembling ad-hoc pipelines.
+
+    applicability:
+      interfaces:
+        - dataframe
+      variants:
+        - name: workflow_df
+          description: "Single-call governance workflow (DataFrame in, DataFrame out)."
+        - name: workflow_df_dict
+          description: "Single-call governance workflow returning structured outputs as a dict."
+        - name: governance_panel_df
+          description: "Evaluate governance panel over a DataFrame input."
+
+    inputs:
+      - name: df
+        description: "Input DataFrame for governance evaluation/workflow."
+      - name: config
+        description: >
+          Workflow configuration object(s) required by the selected entrypoint
+          (policy/threshold/cost parameters, etc.). The exact schema must be taken
+          from the function signature and docstring in llm/api_index.json.
+
+    outputs:
+      - name: result
+        description: >
+          Governance outputs produced by the selected entrypoint. Concrete output
+          shapes vary by variant; do not assume return types beyond what is
+          documented by the indexed function(s).
+
+    steps:
+      - id: select_entrypoint
+        description: >
+          Select the correct governance entrypoint based on the desired variant.
+        selection:
+          by: variant
+          cases:
+            workflow_df:
+              import: "from eb_evaluation.dataframe.governance_workflow import run_governance_workflow_df"
+              call: "run_governance_workflow_df(df=df, **config)"
+              output: "result_df"
+            workflow_df_dict:
+              import: "from eb_evaluation.dataframe.governance_workflow import run_governance_workflow_df_dict"
+              call: "run_governance_workflow_df_dict(df=df, **config)"
+              output: "result_dict"
+            governance_panel_df:
+              import: "from eb_evaluation.dataframe.governance_panel import evaluate_governance_panel_df"
+              call: "evaluate_governance_panel_df(df=df, **config)"
+              output: "result_df"
+
+    notes:
+      - >
+        This workflow is DataFrame-oriented. If your artifact is a contract object,
+        validate it first (validation_v1) and then convert/prepare the required
+        DataFrame inputs expected by the selected governance entrypoint.
+      - >
+        Do not invent column requirements or configuration schemas. Use the indexed
+        function signature and doc_summary from llm/api_index.json to determine
+        required arguments and expected inputs/outputs.
+      - >
+        Do not infer aliases or semantic equivalences between entrypoints. Treat
+        each indexed function as distinct unless EB sources explicitly state otherwise.
+
   # ---------------------------------------------------------------------------
   # Future workflows (add when the corresponding public APIs exist and are indexed)
   # ---------------------------------------------------------------------------
-  # - id: governance_workflow_v1
   # - id: panel_evaluation_v1
   # - id: apply_ral_v1
