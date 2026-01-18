@@ -1,0 +1,60 @@
+# Electric Barometer — Canonical Workflows
+#
+# This file defines hand-authored “golden paths” for composing EB functionality.
+# Workflows must reference public APIs only (i.e., symbols that are exported and
+# should appear in llm/api_index.json).
+#
+# Keep workflows stable and versioned (e.g., *_v1, *_v2). Prefer additive changes.
+
+schema_version: "1.0"
+
+workflows:
+  - id: validation_v1
+    title: "Validate EB contract artifacts"
+    intent: >
+      Validate EB contract-conformant artifacts using canonical eb_contracts
+      validation entrypoints. This workflow is the required first step before
+      downstream evaluation, governance, or optimization.
+
+    applicability:
+      artifacts:
+        - panel_point_v1
+
+    inputs:
+      - name: artifact
+        description: "A Python object intended to conform to an EB contract."
+      - name: artifact_kind
+        description: >
+          The intended contract validator to apply. Must be one of:
+          - panel_point_v1
+
+    outputs:
+      - name: validated_artifact
+        description: >
+          The validated artifact (may be returned unchanged). If invalid, the
+          validator raises an exception.
+
+    steps:
+      - id: choose_validator
+        description: >
+          Select the correct validation function based on artifact_kind.
+        selection:
+          by: artifact_kind
+          cases:
+            panel_point_v1:
+              import: "from eb_contracts.api.validate import panel_point_v1"
+              call: "panel_point_v1(artifact)"
+
+    notes:
+      - "Validation must not be skipped for convenience."
+      - >
+        This workflow references only APIs present in llm/api_index.json.
+        If additional validators become public (added to __all__ and indexed),
+        add them as new cases here.
+
+  # ---------------------------------------------------------------------------
+  # Future workflows (add when the corresponding public APIs exist and are indexed)
+  # ---------------------------------------------------------------------------
+  # - id: governance_workflow_v1
+  # - id: panel_evaluation_v1
+  # - id: apply_ral_v1
