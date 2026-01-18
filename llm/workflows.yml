@@ -124,6 +124,12 @@ workflows:
           return_types:
             may_echo_from_signature_only: true
             must_not_restate_as_guarantee: true
+            if_mentioned_must_caveat: "Return annotations are not guaranteed at runtime."
+            forbid_phrases:
+              - "it returns"
+              - "returns a tuple"
+              - "returns a dict"
+              - "default return shape"
 
       - id: require_schema_before_examples
         description: >
