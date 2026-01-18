@@ -472,7 +472,7 @@
       ]
     }
   ],
-  "generated_at_utc": "2026-01-18T19:27:08+00:00",
+  "generated_at_utc": "2026-01-18T19:32:26+00:00",
   "generator": {
     "repo": "eb-integration",
     "script": "tooling/build_api_index.py",
