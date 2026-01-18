@@ -1,0 +1,2072 @@
+# ===============================
+# Electric Barometer — LLM SYSTEM
+# ===============================
+Electric Barometer — LLM System Rules & Collaboration Contract
+
+This file defines the authoritative rules governing how an LLM
+(ChatGPT or similar) must reason about, select, and compose functionality
+across the Electric Barometer (EB) ecosystem.
+
+These rules apply to all interactive sessions, design discussions,
+and implementation exercises involving EB code.
+
+────────────────────────────────────────────────────────────
+CORE PRINCIPLES
+────────────────────────────────────────────────────────────
+
+1. Canonical Over Custom
+   Always prefer existing, public Electric Barometer APIs and workflows
+   over ad-hoc or custom implementations.
+
+   Do NOT re-implement logic inline if an EB function or workflow exists
+   that serves the same purpose.
+
+2. Explicit Over Implicit
+   Assumptions, inputs, outputs, and ordering must be explicit.
+   If required inputs are missing, identify the gap rather than guessing
+   or silently bypassing a step.
+
+3. Governance Before Optimization
+   Validation, evaluation, governance, and admissibility checks must not
+   be skipped for convenience.
+   Ordering matters.
+
+4. Discovery Over Guessing
+   Function names, module paths, and behaviors must be derived from
+   authoritative sources (see below), not inferred from naming patterns.
+
+────────────────────────────────────────────────────────────
+AUTHORITATIVE SOURCES (ORDERED)
+────────────────────────────────────────────────────────────
+
+When resolving what functionality exists or how it should be used,
+the following sources are authoritative, in descending order:
+
+1. llm/api_index.json
+   - Canonical, generated inventory of public EB APIs
+   - Only functions/classes listed here are considered available
+   - If it is not indexed, it must not be used
+
+2. llm/workflows.yml
+   - Curated, stable “golden paths” for composing EB functionality
+   - Defines intended ordering, required inputs, and expected outputs
+   - Prefer workflows over individual function selection
+
+3. Public package APIs (via __all__)
+   - Only symbols explicitly exported by EB packages are public
+   - Internal helpers must not be referenced directly
+
+4. EB documentation and contracts
+   - Used for clarification, not invention
+
+If information is missing from these sources, the correct response is to
+identify what is missing — not to invent behavior.
+
+────────────────────────────────────────────────────────────
+EXPECTED LLM BEHAVIOR
+────────────────────────────────────────────────────────────
+
+When given a task (e.g., “forecast demand”, “evaluate governance”),
+the LLM should:
+
+1. Identify the appropriate EB workflow (if one exists)
+2. Validate that required inputs / columns / contracts are present
+3. Recommend the canonical sequence of public API calls
+4. Surface any missing prerequisites explicitly
+5. Produce minimal, idiomatic code that uses EB APIs directly
+
+If no existing workflow matches the stated intent, the LLM must:
+- identify the closest available public primitives
+- explain why the intent cannot be satisfied by an existing workflow
+- describe the nature of the workflow gap (orchestration, validation,
+  governance, adapter coverage, etc.)
+
+The LLM must not silently construct ad-hoc pipelines to compensate
+for a missing workflow.
+
+The LLM must NOT:
+- Guess function names or module paths
+- Bypass EB layers “for speed”
+- Write custom glue code that duplicates existing functionality
+- Skip validation, evaluation, or governance steps silently
+
+────────────────────────────────────────────────────────────
+SCOPE & INTENT
+────────────────────────────────────────────────────────────
+
+Electric Barometer is a governed forecasting and decision framework.
+Correctness, reproducibility, and explicit structure are more important
+than brevity or convenience.
+
+If tradeoffs exist, favor:
+- correctness over speed
+- explicitness over cleverness
+- reuse over reinvention
+
+This system file is the non-negotiable collaboration contract.
+
+# ===============================
+# Electric Barometer — WORKFLOWS
+# ===============================
+# Electric Barometer — Canonical Workflows
+#
+# This file defines hand-authored “golden paths” for composing EB functionality.
+# Workflows must reference public APIs only (i.e., symbols that are exported and
+# should appear in llm/api_index.json).
+#
+# Keep workflows stable and versioned (e.g., *_v1, *_v2). Prefer additive changes.
+
+schema_version: "1.0"
+
+workflows:
+  - id: validation_v1
+    title: "Validate EB contract artifacts"
+    intent: >
+      Validate EB contract-conformant artifacts using canonical eb_contracts
+      validation entrypoints. This workflow is the required first step before
+      downstream evaluation, governance, or optimization.
+
+    applicability:
+      artifacts:
+        - panel_point_forecast_v1
+        - panel_point_v1
+
+    inputs:
+      - name: artifact
+        description: "A Python object intended to conform to an EB contract."
+      - name: artifact_kind
+        description: >
+          The intended contract validator to apply. Must be one of:
+          - panel_point_forecast_v1
+          - panel_point_v1
+
+    outputs:
+      - name: validated_artifact
+        description: >
+          The validated artifact (may be returned unchanged). If invalid, the
+          validator raises an exception.
+
+    steps:
+      - id: choose_validator
+        description: >
+          Select the correct validation function based on artifact_kind.
+        selection:
+          by: artifact_kind
+          cases:
+            panel_point_forecast_v1:
+              import: "from eb_contracts.api.validate import panel_point_forecast_v1"
+              call: "panel_point_forecast_v1(artifact)"
+            panel_point_v1:
+              import: "from eb_contracts.api.validate import panel_point_v1"
+              call: "panel_point_v1(artifact)"
+
+    notes:
+      - "Validation must not be skipped for convenience."
+      - >
+        Prefer `panel_point_forecast_v1` as the canonical validator.
+        `panel_point_v1` is a backwards-compatible alias and may be removed in a future major version.
+      - >
+        Do not infer aliases or semantic equivalences between validators or contracts.
+        If a relationship (e.g., aliasing, replacement, or shared contract semantics)
+        is not explicitly documented in EB sources, treat it as unknown.
+      - >
+        This workflow references only APIs present in llm/api_index.json.
+        If additional validators become public (added to __all__ and indexed),
+        add them as new cases here.
+
+  - id: governance_workflow_v1
+    title: "Run governance workflow on DataFrame inputs"
+    intent: >
+      Execute the canonical governance workflow over DataFrame inputs using the
+      public eb_evaluation dataframe governance entrypoints. This workflow should
+      be used when the goal is to produce governance-ready outputs (and any
+      intermediate evaluation artifacts) rather than assembling ad-hoc pipelines.
+
+    applicability:
+      interfaces:
+        - dataframe
+      variants:
+        - name: workflow_df
+          description: "Single-call governance workflow (DataFrame in, DataFrame out)."
+        - name: workflow_df_dict
+          description: "Single-call governance workflow returning structured outputs as a dict."
+        - name: governance_panel_df
+          description: "Evaluate governance panel over a DataFrame input."
+
+    inputs:
+      - name: df
+        description: "Input DataFrame for governance evaluation/workflow."
+      - name: config
+        description: >
+          Workflow configuration object(s) required by the selected entrypoint
+          (policy/threshold/cost parameters, etc.). The exact schema must be taken
+          from the function signature and docstring in llm/api_index.json.
+
+    outputs:
+      - name: result
+        description: >
+          Governance outputs produced by the selected entrypoint. Concrete output
+          shapes vary by variant; do not assume return types beyond what is
+          documented by the indexed function(s).
+
+    steps:
+      - id: select_entrypoint
+        description: >
+          Select the correct governance entrypoint based on the desired variant.
+        selection:
+          by: variant
+          cases:
+            workflow_df:
+              import: "from eb_evaluation.dataframe.governance_workflow import run_governance_workflow_df"
+              call: "run_governance_workflow_df(df=df, **config)"
+              output: "result"
+            workflow_df_dict:
+              import: "from eb_evaluation.dataframe.governance_workflow import run_governance_workflow_df_dict"
+              call: "run_governance_workflow_df_dict(df=df, **config)"
+              output: "result"
+            governance_panel_df:
+              import: "from eb_evaluation.dataframe.governance_panel import evaluate_governance_panel_df"
+              call: "evaluate_governance_panel_df(df=df, **config)"
+              output: "result"
+
+      - id: confirm_signature_from_index
+        description: >
+          Before proposing concrete argument names, defaults, return types, or
+          column requirements, the LLM must quote the exact `signature` field
+          from the corresponding llm/api_index.json entry for the selected
+          entrypoint. If the signature is missing or ambiguous, the LLM must
+          request clarification rather than inventing arguments or return shapes.
+        requirement:
+          must_echo_index_signature: true
+          must_not_invent_defaults: true
+          return_types:
+            may_echo_from_signature_only: true
+            must_not_restate_as_guarantee: true
+            if_mentioned_must_caveat: "Return annotations are not guaranteed at runtime."
+            forbid_phrases:
+              - "it returns"
+              - "returns a tuple"
+              - "returns a dict"
+              - "default return shape"
+
+      - id: require_schema_before_examples
+        description: >
+          Do not propose concrete values for required column-name arguments
+          (e.g., `keys`, `actual_col`, `base_forecast_col`, `ral_forecast_col`)
+          or numeric policy parameters (e.g., `tau`) unless the user supplies them.
+          If the user has not provided the DataFrame schema and mappings, request
+          `df.columns.tolist()` (or an equivalent schema snippet) first.
+          If providing a call template prior to schema, use placeholders like
+          `<ACTUAL_COL>` and `<KEY_COLS>` rather than invented example column names.
+        requirement:
+          must_request_df_schema_for_column_args: true
+          must_not_invent_column_names: true
+          must_not_invent_tau: true
+          templates_must_use_placeholders: true
+
+    notes:
+      - >
+        This workflow is DataFrame-oriented. If your artifact is a contract object,
+        validate it first (validation_v1) and then convert/prepare the required
+        DataFrame inputs expected by the selected governance entrypoint.
+      - >
+        Do not invent column requirements or configuration schemas. Use the indexed
+        function signature and doc_summary from llm/api_index.json to determine
+        required arguments and expected inputs/outputs.
+      - >
+        Do not infer aliases or semantic equivalences between entrypoints. Treat
+        each indexed function as distinct unless EB sources explicitly state otherwise.
+
+  # ---------------------------------------------------------------------------
+  # Future workflows (add when the corresponding public APIs exist and are indexed)
+  # ---------------------------------------------------------------------------
+  # - id: panel_evaluation_v1
+  # - id: apply_ral_v1
+
+# ===============================
+# Electric Barometer — API INDEX
+# ===============================
+{
+  "ecosystem": {
+    "install_mode": "editable",
+    "packages_indexed": [
+      "eb_contracts",
+      "eb_metrics",
+      "eb_evaluation",
+      "electric_barometer"
+    ],
+    "python_version": "3.13.3"
+  },
+  "entries": [
+    {
+      "doc_summary": "Convert a string or number to a floating-point number, if possible.",
+      "id": "eb_contracts:builtins:Scale",
+      "import_path": "builtins:Scale",
+      "io": null,
+      "kind": "class",
+      "module": "builtins",
+      "name": "Scale",
+      "package": "eb_contracts",
+      "public_import": "from builtins import Scale",
+      "signature": "(x=0, /)",
+      "tags": [
+        "contract",
+        "eb_contracts"
+      ]
+    },
+    {
+      "doc_summary": "str(object='') -> str str(bytes_or_buffer[, encoding[, errors]]) -> str",
+      "id": "eb_contracts:builtins:UnitString",
+      "import_path": "builtins:UnitString",
+      "io": null,
+      "kind": "class",
+      "module": "builtins",
+      "name": "UnitString",
+      "package": "eb_contracts",
+      "public_import": "from builtins import UnitString",
+      "signature": null,
+      "tags": [
+        "contract",
+        "eb_contracts"
+      ]
+    },
+    {
+      "doc_summary": "Column mapping for point forecasts.",
+      "id": "eb_contracts:eb_contracts.api.migrate_forecast:PanelPointColumns",
+      "import_path": "eb_contracts.api.migrate_forecast:PanelPointColumns",
+      "io": null,
+      "kind": "class",
+      "module": "eb_contracts.api.migrate_forecast",
+      "name": "PanelPointColumns",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.migrate_forecast import PanelPointColumns",
+      "signature": "(entity_id: 'str', interval_start: 'str', y_true: 'str', y_pred: 'str') -> None",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Column mapping for quantile forecasts.",
+      "id": "eb_contracts:eb_contracts.api.migrate_forecast:PanelQuantileColumns",
+      "import_path": "eb_contracts.api.migrate_forecast:PanelQuantileColumns",
+      "io": null,
+      "kind": "class",
+      "module": "eb_contracts.api.migrate_forecast",
+      "name": "PanelQuantileColumns",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.migrate_forecast import PanelQuantileColumns",
+      "signature": "(entity_id: 'str', interval_start: 'str', y_true: 'str', q: 'str', y_pred_q: 'str') -> None",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Adapt a frame into the PanelPointResultV1 contract.",
+      "id": "eb_contracts:eb_contracts.api.migrate_forecast:to_panel_point_result_v1",
+      "import_path": "eb_contracts.api.migrate_forecast:to_panel_point_result_v1",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.api.migrate_forecast",
+      "name": "to_panel_point_result_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.migrate_forecast import to_panel_point_result_v1",
+      "signature": "(frame: 'pd.DataFrame', *, columns: 'PanelPointColumns') -> 'PanelPointResultV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Adapt a frame into the PanelPointForecastV1 contract.",
+      "id": "eb_contracts:eb_contracts.api.migrate_forecast:to_panel_point_v1",
+      "import_path": "eb_contracts.api.migrate_forecast:to_panel_point_v1",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.api.migrate_forecast",
+      "name": "to_panel_point_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.migrate_forecast import to_panel_point_v1",
+      "signature": "(frame: 'pd.DataFrame', *, columns: 'PanelPointColumns') -> 'PanelPointForecastV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Adapt a frame into the PanelQuantileForecastV1 contract.",
+      "id": "eb_contracts:eb_contracts.api.migrate_forecast:to_panel_quantile_v1",
+      "import_path": "eb_contracts.api.migrate_forecast:to_panel_quantile_v1",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.api.migrate_forecast",
+      "name": "to_panel_quantile_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.migrate_forecast import to_panel_quantile_v1",
+      "signature": "(frame: 'pd.DataFrame', *, columns: 'PanelQuantileColumns') -> 'PanelQuantileForecastV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Validate and construct a V1 cost-asymmetry specification artifact.",
+      "id": "eb_contracts:eb_contracts.api.validate:cost_asymmetry_v1",
+      "import_path": "eb_contracts.api.validate:cost_asymmetry_v1",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.api.validate",
+      "name": "cost_asymmetry_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.validate import cost_asymmetry_v1",
+      "signature": "(frame: 'pd.DataFrame') -> 'CostAsymmetrySpecV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validate a V1 demand panel artifact.",
+      "id": "eb_contracts:eb_contracts.api.validate:panel_demand_v1",
+      "import_path": "eb_contracts.api.validate:panel_demand_v1",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.api.validate",
+      "name": "panel_demand_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.validate import panel_demand_v1",
+      "signature": "(panel: 'PanelDemandV1') -> 'None'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validate and construct a V1 panel point forecast artifact.",
+      "id": "eb_contracts:eb_contracts.api.validate:panel_point_forecast_v1",
+      "import_path": "eb_contracts.api.validate:panel_point_forecast_v1",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.api.validate",
+      "name": "panel_point_forecast_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.validate import panel_point_forecast_v1",
+      "signature": "(frame: 'pd.DataFrame') -> 'PanelPointForecastV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validate and construct a V1 panel point result artifact.",
+      "id": "eb_contracts:eb_contracts.api.validate:panel_point_result_v1",
+      "import_path": "eb_contracts.api.validate:panel_point_result_v1",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.api.validate",
+      "name": "panel_point_result_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.validate import panel_point_result_v1",
+      "signature": "(frame: 'pd.DataFrame') -> 'PanelPointResultV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Alias for `panel_point_forecast_v1` (kept for backwards compatibility).",
+      "id": "eb_contracts:eb_contracts.api.validate:panel_point_v1",
+      "import_path": "eb_contracts.api.validate:panel_point_v1",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.api.validate",
+      "name": "panel_point_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.validate import panel_point_v1",
+      "signature": "(frame: 'pd.DataFrame') -> 'PanelPointForecastV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validate and construct a V1 panel quantile forecast artifact.",
+      "id": "eb_contracts:eb_contracts.api.validate:panel_quantile_forecast_v1",
+      "import_path": "eb_contracts.api.validate:panel_quantile_forecast_v1",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.api.validate",
+      "name": "panel_quantile_forecast_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.validate import panel_quantile_forecast_v1",
+      "signature": "(frame: 'pd.DataFrame') -> 'PanelQuantileForecastV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Alias for `panel_quantile_forecast_v1` (kept for backwards compatibility).",
+      "id": "eb_contracts:eb_contracts.api.validate:panel_quantile_v1",
+      "import_path": "eb_contracts.api.validate:panel_quantile_v1",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.api.validate",
+      "name": "panel_quantile_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.api.validate import panel_quantile_v1",
+      "signature": "(frame: 'pd.DataFrame') -> 'PanelQuantileForecastV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Temporarily set validation behavior within a context.",
+      "id": "eb_contracts:eb_contracts.contracts._internal.runtime:set_validation_mode",
+      "import_path": "eb_contracts.contracts._internal.runtime:set_validation_mode",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.contracts._internal.runtime",
+      "name": "set_validation_mode",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.contracts._internal.runtime import set_validation_mode",
+      "signature": "(mode: 'ValidationMode') -> 'Iterator[None]'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validated run-level context metadata.",
+      "id": "eb_contracts:eb_contracts.contracts.context.v1.run_context:RunContextV1",
+      "import_path": "eb_contracts.contracts.context.v1.run_context:RunContextV1",
+      "io": null,
+      "kind": "class",
+      "module": "eb_contracts.contracts.context.v1.run_context",
+      "name": "RunContextV1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.contracts.context.v1.run_context import RunContextV1",
+      "signature": "(run_id: 'str', issued_at: 'datetime', model_id: 'str | None' = None, dataset_id: 'str | None' = None, horizon: 'int | None' = None, interval_minutes: 'int | None' = None, tz: 'str | None' = None, tags: 'dict[str, str] | None' = None) -> None",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validated cost-asymmetry specifications.",
+      "id": "eb_contracts:eb_contracts.contracts.costs.v1.cost_asymmetry_spec:CostAsymmetrySpecV1",
+      "import_path": "eb_contracts.contracts.costs.v1.cost_asymmetry_spec:CostAsymmetrySpecV1",
+      "io": null,
+      "kind": "class",
+      "module": "eb_contracts.contracts.costs.v1.cost_asymmetry_spec",
+      "name": "CostAsymmetrySpecV1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.contracts.costs.v1.cost_asymmetry_spec import CostAsymmetrySpecV1",
+      "signature": "(frame: 'pd.DataFrame') -> None",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "A normalized, validated demand panel.",
+      "id": "eb_contracts:eb_contracts.contracts.demand_panel.v1.panel_demand:PanelDemandV1",
+      "import_path": "eb_contracts.contracts.demand_panel.v1.panel_demand:PanelDemandV1",
+      "io": null,
+      "kind": "class",
+      "module": "eb_contracts.contracts.demand_panel.v1.panel_demand",
+      "name": "PanelDemandV1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.contracts.demand_panel.v1.panel_demand import PanelDemandV1",
+      "signature": "(frame: 'pd.DataFrame', keys: 'tuple[str, ...]', y_col: 'str', time_mode: 'TimeMode', ts_col: 'str | None' = None, day_col: 'str | None' = None, interval_index_col: 'str | None' = None, interval_minutes: 'int | None' = None, periods_per_day: 'int | None' = None, business_day_start_local_minutes: 'int | None' = None, is_observable_col: 'str' = 'is_observable', is_possible_col: 'str' = 'is_possible', is_structural_zero_col: 'str' = 'is_structural_zero') -> None",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validated panel point-forecast data (entity x interval).",
+      "id": "eb_contracts:eb_contracts.contracts.forecast_panel.v1.forecast_panel:PanelPointForecastV1",
+      "import_path": "eb_contracts.contracts.forecast_panel.v1.forecast_panel:PanelPointForecastV1",
+      "io": null,
+      "kind": "class",
+      "module": "eb_contracts.contracts.forecast_panel.v1.forecast_panel",
+      "name": "PanelPointForecastV1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.contracts.forecast_panel.v1.forecast_panel import PanelPointForecastV1",
+      "signature": "(frame: 'pd.DataFrame') -> None",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validated panel quantile-forecast data (entity x interval x q).",
+      "id": "eb_contracts:eb_contracts.contracts.forecast_panel.v1.forecast_panel:PanelQuantileForecastV1",
+      "import_path": "eb_contracts.contracts.forecast_panel.v1.forecast_panel:PanelQuantileForecastV1",
+      "io": null,
+      "kind": "class",
+      "module": "eb_contracts.contracts.forecast_panel.v1.forecast_panel",
+      "name": "PanelQuantileForecastV1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.contracts.forecast_panel.v1.forecast_panel import PanelQuantileForecastV1",
+      "signature": "(frame: 'pd.DataFrame') -> None",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validated point-forecast results (entity x interval).",
+      "id": "eb_contracts:eb_contracts.contracts.results.v1.panel_point_result:PanelPointResultV1",
+      "import_path": "eb_contracts.contracts.results.v1.panel_point_result:PanelPointResultV1",
+      "io": null,
+      "kind": "class",
+      "module": "eb_contracts.contracts.results.v1.panel_point_result",
+      "name": "PanelPointResultV1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.contracts.results.v1.panel_point_result import PanelPointResultV1",
+      "signature": "(frame: 'pd.DataFrame') -> None",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Required columns for the canonical panel point forecast representation.",
+      "id": "eb_contracts:eb_contracts.definitions.conventions:required_columns_point",
+      "import_path": "eb_contracts.definitions.conventions:required_columns_point",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.definitions.conventions",
+      "name": "required_columns_point",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.definitions.conventions import required_columns_point",
+      "signature": "() -> 'set[str]'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Required columns for the canonical panel quantile forecast representation.",
+      "id": "eb_contracts:eb_contracts.definitions.conventions:required_columns_quantile",
+      "import_path": "eb_contracts.definitions.conventions:required_columns_quantile",
+      "io": null,
+      "kind": "function",
+      "module": "eb_contracts.definitions.conventions",
+      "name": "required_columns_quantile",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.definitions.conventions import required_columns_quantile",
+      "signature": "() -> 'set[str]'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "A named set of semantic expectations.",
+      "id": "eb_contracts:eb_contracts.definitions.semantics:SemanticProfile",
+      "import_path": "eb_contracts.definitions.semantics:SemanticProfile",
+      "io": null,
+      "kind": "class",
+      "module": "eb_contracts.definitions.semantics",
+      "name": "SemanticProfile",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.definitions.semantics import SemanticProfile",
+      "signature": "(name: 'str', strictness: 'ValidationStrictness' = 'baseline') -> None",
+      "tags": [
+        "contract",
+        "eb_contracts"
+      ]
+    },
+    {
+      "doc_summary": "Declarative unit specification for a set of values.",
+      "id": "eb_contracts:eb_contracts.definitions.units:UnitSpec",
+      "import_path": "eb_contracts.definitions.units:UnitSpec",
+      "io": null,
+      "kind": "class",
+      "module": "eb_contracts.definitions.units",
+      "name": "UnitSpec",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.definitions.units import UnitSpec",
+      "signature": "(units: 'UnitString | None' = None, scale: 'Scale' = 1.0, policy: 'UnitPolicy' = 'declared') -> None",
+      "tags": [
+        "contract",
+        "eb_contracts"
+      ]
+    },
+    {
+      "doc_summary": "Readiness Adjustment Layer (RAL) for operational forecast uplift.",
+      "id": "eb_evaluation:eb_evaluation.adjustment.ral:ReadinessAdjustmentLayer",
+      "import_path": "eb_evaluation.adjustment.ral:ReadinessAdjustmentLayer",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.adjustment.ral",
+      "name": "ReadinessAdjustmentLayer",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.adjustment.ral import ReadinessAdjustmentLayer",
+      "signature": "(*, cu: 'float | None' = None, co: 'float | None' = None, uplift_min: 'float' = 1.0, uplift_max: 'float' = 1.2, grid_step: 'float' = 0.01) -> 'None'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Canonical RAL application utility: - optionally joins governance decisions onto a panel, - produces a raw RAL prediction column (from yhat_ral_col or uplift_col), - applies governed nonnegativity + snap-to-grid policies, - emits governed prediction columns + audit columns.",
+      "id": "eb_evaluation:eb_evaluation.adjustment.ral:apply_ral",
+      "import_path": "eb_evaluation.adjustment.ral:apply_ral",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.adjustment.ral",
+      "name": "apply_ral",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.adjustment.ral import apply_ral",
+      "signature": "(df: 'pd.DataFrame', *, join_keys: 'Sequence[str] | None' = None, pred_col: 'str | None' = None, output_col: 'str | None' = None, nonneg_mode: 'str | None' = None, decisions: 'pd.DataFrame | None' = None, key_cols: 'Sequence[str]' = ('forecast_entity_id',), yhat_base_col: 'str' = 'yhat_base', yhat_ral_col: 'str | None' = 'yhat_ral', uplift_col: 'str | None' = None, snap_required_col: 'str' = 'snap_required', snap_unit_col: 'str' = 'snap_unit', recommendations_col: 'str' = 'recommendations', snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = True, out_base_col: 'str' = 'yhat_base_governed', out_ral_col: 'str' = 'yhat_ral_governed', out_audit_prefix: 'str' = 'ral_apply_') -> 'pd.DataFrame'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "panel",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Evaluate an entity-interval panel using entity-level cost ratios.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.entity:evaluate_panel_with_entity_R",
+      "import_path": "eb_evaluation.dataframe.entity:evaluate_panel_with_entity_R",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.entity",
+      "name": "evaluate_panel_with_entity_R",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.entity import evaluate_panel_with_entity_R",
+      "signature": "(df: 'pd.DataFrame', entity_R: 'pd.DataFrame', *, entity_col: 'str' = 'entity', y_true_col: 'str' = 'actual_qty', y_pred_col: 'str' = 'forecast_qty', R_col: 'str' = 'R', co_col: 'str' = 'co', tau: 'float' = 2.0, sample_weight_col: 'str | None' = None) -> 'pd.DataFrame'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Evaluate governance across a panel of streams and return a per-stream summary table.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.governance_panel:evaluate_governance_panel_df",
+      "import_path": "eb_evaluation.dataframe.governance_panel:evaluate_governance_panel_df",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.governance_panel",
+      "name": "evaluate_governance_panel_df",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.governance_panel import evaluate_governance_panel_df",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True) -> 'pd.DataFrame'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "End-to-end governance workflow for a panel DataFrame.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.governance_workflow:run_governance_workflow_df",
+      "import_path": "eb_evaluation.dataframe.governance_workflow:run_governance_workflow_df",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.governance_workflow",
+      "name": "run_governance_workflow_df",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.governance_workflow import run_governance_workflow_df",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = True, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'tuple[pd.DataFrame, pd.DataFrame]'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "panel",
+        "workflow"
+      ]
+    },
+    {
+      "doc_summary": "Same as run_governance_workflow_df, but returns a named dict payload.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.governance_workflow:run_governance_workflow_df_dict",
+      "import_path": "eb_evaluation.dataframe.governance_workflow:run_governance_workflow_df_dict",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.governance_workflow",
+      "name": "run_governance_workflow_df_dict",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.governance_workflow import run_governance_workflow_df_dict",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = True, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'dict[str, Any]'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "workflow"
+      ]
+    },
+    {
+      "doc_summary": "Evaluate core EB metrics per group from a DataFrame.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.group:evaluate_groups_df",
+      "import_path": "eb_evaluation.dataframe.group:evaluate_groups_df",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.group",
+      "name": "evaluate_groups_df",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.group import evaluate_groups_df",
+      "signature": "(df: 'pd.DataFrame', group_cols: 'list[str]', *, actual_col: 'str' = 'actual_qty', forecast_col: 'str' = 'forecast_qty', cu: 'float | str' = 2.0, co: 'float | str' = 1.0, tau: 'float' = 2.0, sample_weight_col: 'str | None' = None) -> 'pd.DataFrame'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Evaluate EB metrics at multiple hierarchy levels.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.hierarchy:evaluate_hierarchy_df",
+      "import_path": "eb_evaluation.dataframe.hierarchy:evaluate_hierarchy_df",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.hierarchy",
+      "name": "evaluate_hierarchy_df",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.hierarchy import evaluate_hierarchy_df",
+      "signature": "(df: 'pd.DataFrame', levels: 'dict[str, Sequence[str]]', actual_col: 'str', forecast_col: 'str', cu, co, tau: 'float | None' = None) -> 'dict[str, pd.DataFrame]'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "hierarchy",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Aggregate by forecast entity only.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.levels:levels_by_entity",
+      "import_path": "eb_evaluation.dataframe.levels:levels_by_entity",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.levels",
+      "name": "levels_by_entity",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.levels import levels_by_entity",
+      "signature": "(entity_col: 'str' = 'forecast_entity_id') -> 'dict[str, Sequence[str]]'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Aggregate by site only.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.levels:levels_by_site",
+      "import_path": "eb_evaluation.dataframe.levels:levels_by_site",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.levels",
+      "name": "levels_by_site",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.levels import levels_by_site",
+      "signature": "(site_col: 'str' = 'site_id') -> 'dict[str, Sequence[str]]'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Aggregate by site x forecast entity.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.levels:levels_by_site_entity",
+      "import_path": "eb_evaluation.dataframe.levels:levels_by_site_entity",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.levels",
+      "name": "levels_by_site_entity",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.levels import levels_by_site_entity",
+      "signature": "(*, site_col: 'str' = 'site_id', entity_col: 'str' = 'forecast_entity_id') -> 'dict[str, Sequence[str]]'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Single overall aggregation level.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.levels:levels_overall",
+      "import_path": "eb_evaluation.dataframe.levels:levels_overall",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.levels",
+      "name": "levels_overall",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.levels import levels_overall",
+      "signature": "() -> 'dict[str, Sequence[str]]'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Canonical multi-level hierarchy for panel evaluation.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.levels:levels_standard_panel",
+      "import_path": "eb_evaluation.dataframe.levels:levels_standard_panel",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.levels",
+      "name": "levels_standard_panel",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.levels import levels_standard_panel",
+      "signature": "(*, site_col: 'str' = 'site_id', entity_col: 'str' = 'forecast_entity_id') -> 'dict[str, Sequence[str]]'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "hierarchy",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Evaluate metrics at multiple levels and return a long-form panel DataFrame.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.panel:evaluate_panel_df",
+      "import_path": "eb_evaluation.dataframe.panel:evaluate_panel_df",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.panel",
+      "name": "evaluate_panel_df",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.panel import evaluate_panel_df",
+      "signature": "(df: 'pd.DataFrame', levels: 'dict[str, Sequence[str]]', actual_col: 'str', forecast_col: 'str', cu, co, tau: 'float | None' = None) -> 'pd.DataFrame'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "metric",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Compute CWSL from a DataFrame.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.single:compute_cwsl_df",
+      "import_path": "eb_evaluation.dataframe.single:compute_cwsl_df",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.single",
+      "name": "compute_cwsl_df",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.single import compute_cwsl_df",
+      "signature": "(df: 'pd.DataFrame', y_true_col: 'str', y_pred_col: 'str', cu: 'float | str', co: 'float | str', sample_weight_col: 'str | None' = None) -> 'float'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Compatibility taxonomy for demand resolution / quantization.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.dqc:DQCClass",
+      "import_path": "eb_evaluation.diagnostics.dqc:DQCClass",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.dqc",
+      "name": "DQCClass",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.dqc import DQCClass",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Result container for DQC classification + rationale.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.dqc:DQCResult",
+      "import_path": "eb_evaluation.diagnostics.dqc:DQCResult",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.dqc",
+      "name": "DQCResult",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.dqc import DQCResult",
+      "signature": "(dqc_class: 'DQCClass', signals: 'DQCSignals', reasons: 'tuple[str, ...]') -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Observable signals describing demand quantization.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.dqc:DQCSignals",
+      "import_path": "eb_evaluation.diagnostics.dqc:DQCSignals",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.dqc",
+      "name": "DQCSignals",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.dqc import DQCSignals",
+      "signature": "(n_obs: 'int', nonzero_obs: 'int', granularity: 'float | None', multiple_rate: 'float', support_size: 'int', zero_mass: 'float', small_value_mass: 'float', offgrid_mad: 'float', candidate_units: 'tuple[float, ...]', unit_scores: 'tuple[tuple[float, float], ...]', pack_signature: 'tuple[float, ...]' = ()) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Thresholds for DQC classification.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.dqc:DQCThresholds",
+      "import_path": "eb_evaluation.diagnostics.dqc:DQCThresholds",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.dqc",
+      "name": "DQCThresholds",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.dqc import DQCThresholds",
+      "signature": "(multiple_rate_quantized: 'float' = 0.9, multiple_rate_packed: 'float' = 0.95, offgrid_mad_ratio_max: 'float' = 0.1, min_nonzero_obs: 'int' = 50, round_decimals: 'int' = 6, small_value_max: 'float' = 20.0, candidate_units: 'tuple[float, ...]' = (1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 16.0), pack_units_min_count: 'int' = 2, pack_unit_mass_min: 'float' = 0.1) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Classify demand quantization compatibility from realized demand values.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.dqc:classify_dqc",
+      "import_path": "eb_evaluation.diagnostics.dqc:classify_dqc",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.dqc",
+      "name": "classify_dqc",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.dqc import classify_dqc",
+      "signature": "(y: 'Sequence[float]', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Serialize a DQCResult to a JSON-friendly dictionary.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.dqc:dqc_to_dict",
+      "import_path": "eb_evaluation.diagnostics.dqc:dqc_to_dict",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.dqc",
+      "name": "dqc_to_dict",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.dqc import dqc_to_dict",
+      "signature": "(result: 'DQCResult') -> 'dict[str, object]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Thresholds that define ALLOWED / CONDITIONAL / BLOCKED.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.fas:FASThresholds",
+      "import_path": "eb_evaluation.diagnostics.fas:FASThresholds",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.fas",
+      "name": "FASThresholds",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.fas import FASThresholds",
+      "signature": "(blocked_spike_rate_ge: 'float' = 0.3, blocked_p95_ae_ge: 'float' = 25.0, conditional_spike_rate_ge: 'float' = 0.05, conditional_p95_ae_ge: 'float' = 10.0, blocked_shortfall_spike_rate_ge: 'float | None' = None, blocked_p95_shortfall_ge: 'float | None' = None, conditional_shortfall_spike_rate_ge: 'float | None' = None, conditional_p95_shortfall_ge: 'float | None' = None, min_valid_rows: 'int' = 200, min_nonzero_rows: 'int | None' = None) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Build the FAS surface from an error anatomy table.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.fas:build_fas_surface",
+      "import_path": "eb_evaluation.diagnostics.fas:build_fas_surface",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.fas",
+      "name": "build_fas_surface",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.fas import build_fas_surface",
+      "signature": "(*, anatomy: 'pd.DataFrame', keys: 'list[str]', thr: 'FASThresholds' = FASThresholds(blocked_spike_rate_ge=0.3, blocked_p95_ae_ge=25.0, conditional_spike_rate_ge=0.05, conditional_p95_ae_ge=10.0, blocked_shortfall_spike_rate_ge=None, blocked_p95_shortfall_ge=None, conditional_shortfall_spike_rate_ge=None, conditional_p95_shortfall_ge=None, min_valid_rows=200, min_nonzero_rows=None)) -> 'pd.DataFrame'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Compute baseline-derived error anatomy by slice keys.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.fas:compute_error_anatomy",
+      "import_path": "eb_evaluation.diagnostics.fas:compute_error_anatomy",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.fas",
+      "name": "compute_error_anatomy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.fas import compute_error_anatomy",
+      "signature": "(df: 'pd.DataFrame', *, y_col: 'str' = 'y', yhat_col: 'str', keys: 'list[str]', spike_ge: 'float' = 10.0) -> 'pd.DataFrame'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": null,
+      "id": "eb_evaluation:eb_evaluation.diagnostics.fas:slice_keys",
+      "import_path": "eb_evaluation.diagnostics.fas:slice_keys",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.fas",
+      "name": "slice_keys",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.fas import slice_keys",
+      "signature": "(mode: 'FASSliceMode', *, site_col: 'str' = 'site_id', entity_col: 'str' = 'forecast_entity_id', interval_col: 'str' = 'INTERVAL_30_INDEX') -> 'list[str]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Return the supported slice mode strings.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.fas:valid_slice_modes",
+      "import_path": "eb_evaluation.diagnostics.fas:valid_slice_modes",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.fas",
+      "name": "valid_slice_modes",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.fas import valid_slice_modes",
+      "signature": "() -> 'tuple[str, ...]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Compatibility taxonomy for forecast primitives.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.fpc:FPCClass",
+      "import_path": "eb_evaluation.diagnostics.fpc:FPCClass",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.fpc",
+      "name": "FPCClass",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.fpc import FPCClass",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Result container for classification + rationale.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.fpc:FPCResult",
+      "import_path": "eb_evaluation.diagnostics.fpc:FPCResult",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.fpc",
+      "name": "FPCResult",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.fpc import FPCResult",
+      "signature": "(fpc_class: 'FPCClass', signals: 'FPCSignals', reasons: 'tuple[str, ...]') -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Observable signals used to classify forecast primitive compatibility.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.fpc:FPCSignals",
+      "import_path": "eb_evaluation.diagnostics.fpc:FPCSignals",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.fpc",
+      "name": "FPCSignals",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.fpc import FPCSignals",
+      "signature": "(nsl_base: 'float', nsl_ral: 'float', delta_nsl: 'float', hr_base_tau: 'float', hr_ral_tau: 'float', delta_hr_tau: 'float', ud: 'float', cwsl_base: 'float | None' = None, cwsl_ral: 'float | None' = None, delta_cwsl: 'float | None' = None, intervals: 'int | None' = None, shortfall_intervals: 'int | None' = None) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Thresholds for FPC classification.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.fpc:FPCThresholds",
+      "import_path": "eb_evaluation.diagnostics.fpc:FPCThresholds",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.fpc",
+      "name": "FPCThresholds",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.fpc import FPCThresholds",
+      "signature": "(nsl_very_low: 'float' = 0.03, delta_nsl_tiny: 'float' = 0.02, hr_very_low: 'float' = 0.05, delta_hr_large_drop: 'float' = -0.1, ud_high: 'float' = 10.0, delta_cwsl_high: 'float' = 0.75) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Compute FPCSignals from deterministic series.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.fpc:build_signals_from_series",
+      "import_path": "eb_evaluation.diagnostics.fpc:build_signals_from_series",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.fpc",
+      "name": "build_signals_from_series",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.fpc import build_signals_from_series",
+      "signature": "(*, y: 'Sequence[float]', yhat_base: 'Sequence[float]', yhat_ral: 'Sequence[float]', tau: 'float', ud: 'float | None' = None, cwsl_r: 'float | None' = None, cost_ratio: 'float | None' = None) -> 'FPCSignals'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Classify forecast primitive compatibility from observable signals.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.fpc:classify_fpc",
+      "import_path": "eb_evaluation.diagnostics.fpc:classify_fpc",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.fpc",
+      "name": "classify_fpc",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.fpc import classify_fpc",
+      "signature": "(signals: 'FPCSignals', thresholds: 'FPCThresholds | None' = None) -> 'FPCResult'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Authoritative governance decision.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.governance:GovernanceDecision",
+      "import_path": "eb_evaluation.diagnostics.governance:GovernanceDecision",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.governance",
+      "name": "GovernanceDecision",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.governance import GovernanceDecision",
+      "signature": "(dqc: 'DQCResult', fpc_raw: 'FPCResult', fpc_snapped: 'FPCResult', snap_required: 'bool', snap_unit: 'float | None', tau_policy: 'TauPolicy', ral_policy: 'RALPolicy', status: 'GovernanceStatus', max_delta_nsl_raw: 'float | None' = None, max_delta_nsl_snap: 'float | None' = None, reasons: 'tuple[str, ...]' = ()) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Traffic-light status for downstream gating.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.governance:GovernanceStatus",
+      "import_path": "eb_evaluation.diagnostics.governance:GovernanceStatus",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.governance",
+      "name": "GovernanceStatus",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.governance import GovernanceStatus",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Whether readiness adjustment is allowed downstream.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.governance:RALPolicy",
+      "import_path": "eb_evaluation.diagnostics.governance:RALPolicy",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.governance",
+      "name": "RALPolicy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.governance import RALPolicy",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "How to interpret tolerance \u03c4 downstream.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.governance:TauPolicy",
+      "import_path": "eb_evaluation.diagnostics.governance:TauPolicy",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.governance",
+      "name": "TauPolicy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.governance import TauPolicy",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Produce an authoritative governance decision for a single realized series.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.governance:decide_governance",
+      "import_path": "eb_evaluation.diagnostics.governance:decide_governance",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.governance",
+      "name": "decide_governance",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.governance import decide_governance",
+      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset' = 'balanced') -> 'GovernanceDecision'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Snap values to the detected demand grid.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.governance:snap_to_grid",
+      "import_path": "eb_evaluation.diagnostics.governance:snap_to_grid",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.governance",
+      "name": "snap_to_grid",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.governance import snap_to_grid",
+      "signature": "(values: 'Sequence[float]', unit: 'float', *, mode: 'str' = 'ceil') -> 'list[float]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Named bundle of governance thresholds.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.presets:GovernancePreset",
+      "import_path": "eb_evaluation.diagnostics.presets:GovernancePreset",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.presets",
+      "name": "GovernancePreset",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.presets import GovernancePreset",
+      "signature": "(name: 'str', description: 'str', dqc: 'DQCThresholds', fpc: 'FPCThresholds', nonnegativity_mode: 'NonnegativityMode' = 'clip_zero') -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Retrieve a governance preset by name.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.presets:get_governance_preset",
+      "import_path": "eb_evaluation.diagnostics.presets:get_governance_preset",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.presets",
+      "name": "get_governance_preset",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.presets import get_governance_preset",
+      "signature": "(name: 'str') -> 'GovernancePreset'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Resolve a preset into its governance policy knobs (non-threshold behavior).",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.presets:preset_policy",
+      "import_path": "eb_evaluation.diagnostics.presets:preset_policy",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.presets",
+      "name": "preset_policy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.presets import preset_policy",
+      "signature": "(preset: 'str | GovernancePreset') -> 'NonnegativityMode'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Resolve a preset into (DQCThresholds, FPCThresholds).",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.presets:preset_thresholds",
+      "import_path": "eb_evaluation.diagnostics.presets:preset_thresholds",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.presets",
+      "name": "preset_thresholds",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.presets import preset_thresholds",
+      "signature": "(preset: 'str | GovernancePreset') -> 'tuple[DQCThresholds, FPCThresholds]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Portable governance result for a single demand stream.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.results:GovernanceResult",
+      "import_path": "eb_evaluation.diagnostics.results:GovernanceResult",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.results",
+      "name": "GovernanceResult",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.results import GovernanceResult",
+      "signature": "(recommended_mode: 'str', snap_required: 'bool', snap_unit: 'float | None', tau_policy: 'TauPolicy', ral_policy: 'RALPolicy', status: 'GovernanceStatus', dqc_class: 'DQCClass', fpc_raw_class: 'FPCClass', fpc_snapped_class: 'FPCClass', dqc_reasons: 'tuple[str, ...]' = (), fpc_raw_reasons: 'tuple[str, ...]' = (), fpc_snapped_reasons: 'tuple[str, ...]' = (), recommendations: 'tuple[str, ...]' = ()) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Result of running the governance gate from common raw inputs.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.validate:GateResult",
+      "import_path": "eb_evaluation.diagnostics.validate:GateResult",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics.validate",
+      "name": "GateResult",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.validate import GateResult",
+      "signature": "(dqc: 'DQCResult', fpc_raw: 'FPCResult', fpc_snapped: 'FPCResult', decision: 'GovernanceDecision', recommended_mode: 'RecommendedEvaluationMode', recommendations: 'tuple[str, ...]' = ()) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Orchestrate governance from common raw inputs.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.validate:run_governance_gate",
+      "import_path": "eb_evaluation.diagnostics.validate:run_governance_gate",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.validate",
+      "name": "run_governance_gate",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.validate import run_governance_gate",
+      "signature": "(*, y: 'Sequence[float]', yhat_base: 'Sequence[float]', yhat_ral: 'Sequence[float]', tau: 'float', cwsl_r: 'float | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset | None' = None) -> 'GateResult'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Run Demand Quantization Compatibility (DQC) classification.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.validate:validate_dqc",
+      "import_path": "eb_evaluation.diagnostics.validate:validate_dqc",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.validate",
+      "name": "validate_dqc",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.validate import validate_dqc",
+      "signature": "(*, y: 'Sequence[float]', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Run Forecast Primitive Compatibility (FPC) classification.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.validate:validate_fpc",
+      "import_path": "eb_evaluation.diagnostics.validate:validate_fpc",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.validate",
+      "name": "validate_fpc",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.validate import validate_fpc",
+      "signature": "(*, signals: 'FPCSignals', thresholds: 'FPCThresholds | None' = None) -> 'FPCResult'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Run the governance decision contract (DQC x FPC) for a single entity.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics.validate:validate_governance",
+      "import_path": "eb_evaluation.diagnostics.validate:validate_governance",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics.validate",
+      "name": "validate_governance",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics.validate import validate_governance",
+      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset | None' = None) -> 'GovernanceDecision'",
+      "tags": [
+        "contract",
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Convenience factory for :class:`~eb_evaluation.model_selection.electric_barometer.ElectricBarometer`.",
+      "id": "eb_evaluation:eb_evaluation.model_selection.auto_engine:AutoEngine",
+      "import_path": "eb_evaluation.model_selection.auto_engine:AutoEngine",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.model_selection.auto_engine",
+      "name": "AutoEngine",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.model_selection.auto_engine import AutoEngine",
+      "signature": "(*, cu: 'float' = 2.0, co: 'float' = 1.0, tau: 'float' = 2.0, selection_mode: 'str' = 'holdout', cv: 'int' = 3, random_state: 'int | None' = None, speed: 'SpeedType' = 'balanced') -> 'None'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Compare multiple forecast models on the same target series.",
+      "id": "eb_evaluation:eb_evaluation.model_selection.compare:compare_forecasts",
+      "import_path": "eb_evaluation.model_selection.compare:compare_forecasts",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.model_selection.compare",
+      "name": "compare_forecasts",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.model_selection.compare import compare_forecasts",
+      "signature": "(y_true: 'ArrayLike', forecasts: 'Mapping[str, ArrayLike]', cu: 'float | ArrayLike', co: 'float | ArrayLike', sample_weight: 'ArrayLike | None' = None, tau: 'float | ArrayLike' = 2.0) -> 'pd.DataFrame'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Fit multiple models, then select the best by validation CWSL.",
+      "id": "eb_evaluation:eb_evaluation.model_selection.compare:select_model_by_cwsl",
+      "import_path": "eb_evaluation.model_selection.compare:select_model_by_cwsl",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.model_selection.compare",
+      "name": "select_model_by_cwsl",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.model_selection.compare import select_model_by_cwsl",
+      "signature": "(models: 'dict[str, Any]', X_train, y_train, X_val, y_val, *, cu: 'float', co: 'float', sample_weight_val=None) -> 'tuple[str, Any, pd.DataFrame]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Select a model by cross-validated CWSL and refit on the full dataset.",
+      "id": "eb_evaluation:eb_evaluation.model_selection.compare:select_model_by_cwsl_cv",
+      "import_path": "eb_evaluation.model_selection.compare:select_model_by_cwsl_cv",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.model_selection.compare",
+      "name": "select_model_by_cwsl_cv",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.model_selection.compare import select_model_by_cwsl_cv",
+      "signature": "(models: 'dict[str, Any]', X, y, *, cu: 'float', co: 'float', cv: 'int' = 5, sample_weight: 'np.ndarray | None' = None) -> 'tuple[str, Any, pd.DataFrame]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "scikit-learn-style estimator that selects among candidate models using CWSL.",
+      "id": "eb_evaluation:eb_evaluation.model_selection.cwsl_regressor:CWSLRegressor",
+      "import_path": "eb_evaluation.model_selection.cwsl_regressor:CWSLRegressor",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.model_selection.cwsl_regressor",
+      "name": "CWSLRegressor",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.model_selection.cwsl_regressor import CWSLRegressor",
+      "signature": "(models: dict[str, typing.Any], cu: float = 2.0, co: float = 1.0, tau: float = 2.0, training_mode: str = 'selection_only', refit_on_full: bool = True, selection_mode: str = 'cv', cv: int = 3, validation_fraction: float = 0.2, random_state: int | None = None) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Cost-aware selector that chooses the best model by minimizing a selection objective.",
+      "id": "eb_evaluation:eb_evaluation.model_selection.electric_barometer:ElectricBarometer",
+      "import_path": "eb_evaluation.model_selection.electric_barometer:ElectricBarometer",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.model_selection.electric_barometer",
+      "name": "ElectricBarometer",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.model_selection.electric_barometer import ElectricBarometer",
+      "signature": "(models: 'dict[str, Any]', cu: 'float' = 2.0, co: 'float' = 1.0, tau: 'float' = 2.0, training_mode: 'str' = 'selection_only', refit_on_full: 'bool' = False, selection_mode: 'str' = 'holdout', cv: 'int' = 3, random_state: 'int | None' = None, *, include: 'set[str] | None' = None, exclude: 'set[str] | None' = None, metric: '_MetricName' = 'cwsl', tie_tol: 'float' = 0.0, tie_breaker: '_TieBreaker' = 'metric', validate_inputs: '_ValidateInputs' = 'strict', error_policy: '_ErrorPolicy' = 'warn_skip', time_budget_s: 'float | None' = None, per_model_time_budget_s: 'float | None' = None) -> 'None'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Raised when a pandas DataFrame fails a validation check.",
+      "id": "eb_evaluation:eb_evaluation.utils.validation:DataFrameValidationError",
+      "import_path": "eb_evaluation.utils.validation:DataFrameValidationError",
+      "io": null,
+      "kind": "class",
+      "module": "eb_evaluation.utils.validation",
+      "name": "DataFrameValidationError",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.utils.validation import DataFrameValidationError",
+      "signature": null,
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Ensure that all required columns are present in a DataFrame.",
+      "id": "eb_evaluation:eb_evaluation.utils.validation:ensure_columns_present",
+      "import_path": "eb_evaluation.utils.validation:ensure_columns_present",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.utils.validation",
+      "name": "ensure_columns_present",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.utils.validation import ensure_columns_present",
+      "signature": "(df: 'pd.DataFrame', required: 'Sequence[str]', *, context: 'str | None' = None) -> 'None'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Ensure that a DataFrame is not empty.",
+      "id": "eb_evaluation:eb_evaluation.utils.validation:ensure_non_empty",
+      "import_path": "eb_evaluation.utils.validation:ensure_non_empty",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.utils.validation",
+      "name": "ensure_non_empty",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.utils.validation import ensure_non_empty",
+      "signature": "(df: 'pd.DataFrame', *, context: 'str | None' = None) -> 'None'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Create a Keras-compatible loss implementing Cost-Weighted Service Loss (CWSL).",
+      "id": "eb_metrics:eb_metrics.frameworks.keras_loss:make_cwsl_keras_loss",
+      "import_path": "eb_metrics.frameworks.keras_loss:make_cwsl_keras_loss",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.frameworks.keras_loss",
+      "name": "make_cwsl_keras_loss",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.frameworks.keras_loss import make_cwsl_keras_loss",
+      "signature": "(cu: 'float', co: 'float') -> 'Callable'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Compute the (positive) Cost-Weighted Service Loss (CWSL) for scikit-learn usage.",
+      "id": "eb_metrics:eb_metrics.frameworks.sklearn_scorer:cwsl_loss",
+      "import_path": "eb_metrics.frameworks.sklearn_scorer:cwsl_loss",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.frameworks.sklearn_scorer",
+      "name": "cwsl_loss",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.frameworks.sklearn_scorer import cwsl_loss",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', *, cu: 'float', co: 'float', sample_weight: 'ArrayLike | None' = None) -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Build a scikit-learn scorer based on Cost-Weighted Service Loss (CWSL).",
+      "id": "eb_metrics:eb_metrics.frameworks.sklearn_scorer:cwsl_scorer",
+      "import_path": "eb_metrics.frameworks.sklearn_scorer:cwsl_scorer",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.frameworks.sklearn_scorer",
+      "name": "cwsl_scorer",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.frameworks.sklearn_scorer import cwsl_scorer",
+      "signature": "(cu: 'float', co: 'float') -> 'Callable'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "State-dependent asymmetric cost profile.",
+      "id": "eb_metrics:eb_metrics.metrics.loss:PiecewiseStateAsymmetry",
+      "import_path": "eb_metrics.metrics.loss:PiecewiseStateAsymmetry",
+      "io": null,
+      "kind": "class",
+      "module": "eb_metrics.metrics.loss",
+      "name": "PiecewiseStateAsymmetry",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.loss import PiecewiseStateAsymmetry",
+      "signature": "(state_upper_bounds: tuple[float, ...], state_weights: tuple[float, ...], under_mult: float = 3.0, over_mult: float = 1.0) -> None",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Compute Cost-Weighted Service Loss (CWSL).",
+      "id": "eb_metrics:eb_metrics.metrics.loss:cwsl",
+      "import_path": "eb_metrics.metrics.loss:cwsl",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.loss",
+      "name": "cwsl",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.loss import cwsl",
+      "signature": "(y_true: ArrayLike, y_pred: ArrayLike, cu: float | ArrayLike, co: float | ArrayLike, sample_weight: ArrayLike | None = None) -> float",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Compute a state-dependent asymmetric squared error.",
+      "id": "eb_metrics:eb_metrics.metrics.loss:piecewise_state_asymmetric_squared_error",
+      "import_path": "eb_metrics.metrics.loss:piecewise_state_asymmetric_squared_error",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.loss",
+      "name": "piecewise_state_asymmetric_squared_error",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.loss import piecewise_state_asymmetric_squared_error",
+      "signature": "(y_true: ArrayLike, y_pred: ArrayLike, profile: eb_metrics.metrics.loss.PiecewiseStateAsymmetry) -> numpy.ndarray",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Mean Absolute Error (MAE).",
+      "id": "eb_metrics:eb_metrics.metrics.regression:mae",
+      "import_path": "eb_metrics.metrics.regression:mae",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.regression",
+      "name": "mae",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.regression import mae",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike') -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Mean Absolute Percentage Error (MAPE).",
+      "id": "eb_metrics:eb_metrics.metrics.regression:mape",
+      "import_path": "eb_metrics.metrics.regression:mape",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.regression",
+      "name": "mape",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.regression import mape",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike') -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Mean Absolute Scaled Error (MASE).",
+      "id": "eb_metrics:eb_metrics.metrics.regression:mase",
+      "import_path": "eb_metrics.metrics.regression:mase",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.regression",
+      "name": "mase",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.regression import mase",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', y_naive: 'ArrayLike') -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Median Absolute Error (MedAE).",
+      "id": "eb_metrics:eb_metrics.metrics.regression:medae",
+      "import_path": "eb_metrics.metrics.regression:medae",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.regression",
+      "name": "medae",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.regression import medae",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike') -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Mean Squared Error (MSE).",
+      "id": "eb_metrics:eb_metrics.metrics.regression:mse",
+      "import_path": "eb_metrics.metrics.regression:mse",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.regression",
+      "name": "mse",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.regression import mse",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike') -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Mean Squared Log Error (MSLE).",
+      "id": "eb_metrics:eb_metrics.metrics.regression:msle",
+      "import_path": "eb_metrics.metrics.regression:msle",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.regression",
+      "name": "msle",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.regression import msle",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike') -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Root Mean Squared Error (RMSE).",
+      "id": "eb_metrics:eb_metrics.metrics.regression:rmse",
+      "import_path": "eb_metrics.metrics.regression:rmse",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.regression",
+      "name": "rmse",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.regression import rmse",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike') -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Root Mean Squared Log Error (RMSLE).",
+      "id": "eb_metrics:eb_metrics.metrics.regression:rmsle",
+      "import_path": "eb_metrics.metrics.regression:rmsle",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.regression",
+      "name": "rmsle",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.regression import rmsle",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike') -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Symmetric Mean Absolute Percentage Error (sMAPE).",
+      "id": "eb_metrics:eb_metrics.metrics.regression:smape",
+      "import_path": "eb_metrics.metrics.regression:smape",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.regression",
+      "name": "smape",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.regression import smape",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike') -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Weighted Mean Absolute Percentage Error (WMAPE).",
+      "id": "eb_metrics:eb_metrics.metrics.regression:wmape",
+      "import_path": "eb_metrics.metrics.regression:wmape",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.regression",
+      "name": "wmape",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.regression import wmape",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike') -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Evaluate CWSL across a grid of cost ratios (cost sensitivity analysis).",
+      "id": "eb_metrics:eb_metrics.metrics.service:cwsl_sensitivity",
+      "import_path": "eb_metrics.metrics.service:cwsl_sensitivity",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.service",
+      "name": "cwsl_sensitivity",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.service import cwsl_sensitivity",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', R_list: 'Sequence[float]' = (0.5, 1.0, 2.0, 3.0), co: 'float | ArrayLike' = 1.0, sample_weight: 'ArrayLike | None' = None) -> 'dict[float, float]'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Compute Forecast Readiness Score (FRS).",
+      "id": "eb_metrics:eb_metrics.metrics.service:frs",
+      "import_path": "eb_metrics.metrics.service:frs",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.service",
+      "name": "frs",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.service import frs",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', cu: 'float | ArrayLike', co: 'float | ArrayLike', sample_weight: 'ArrayLike | None' = None) -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "forecast",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Compute Hit Rate within Tolerance (HR@\u03c4).",
+      "id": "eb_metrics:eb_metrics.metrics.service:hr_at_tau",
+      "import_path": "eb_metrics.metrics.service:hr_at_tau",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.service",
+      "name": "hr_at_tau",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.service import hr_at_tau",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', tau: 'float | ArrayLike', sample_weight: 'ArrayLike | None' = None) -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Compute No-Shortfall Level (NSL).",
+      "id": "eb_metrics:eb_metrics.metrics.service:nsl",
+      "import_path": "eb_metrics.metrics.service:nsl",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.service",
+      "name": "nsl",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.service import nsl",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', sample_weight: 'ArrayLike | None' = None) -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    },
+    {
+      "doc_summary": "Compute Underbuild Depth (UD).",
+      "id": "eb_metrics:eb_metrics.metrics.service:ud",
+      "import_path": "eb_metrics.metrics.service:ud",
+      "io": null,
+      "kind": "function",
+      "module": "eb_metrics.metrics.service",
+      "name": "ud",
+      "package": "eb_metrics",
+      "public_import": "from eb_metrics.metrics.service import ud",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', sample_weight: 'ArrayLike | None' = None) -> 'float'",
+      "tags": [
+        "eb_metrics",
+        "metric"
+      ]
+    }
+  ],
+  "generated_at_utc": "2026-01-18T23:14:28+00:00",
+  "generator": {
+    "repo": "eb-integration",
+    "script": "tooling/build_api_index.py",
+    "script_version": null
+  },
+  "schema_version": "1.0"
+}
