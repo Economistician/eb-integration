@@ -101,15 +101,27 @@ workflows:
             workflow_df:
               import: "from eb_evaluation.dataframe.governance_workflow import run_governance_workflow_df"
               call: "run_governance_workflow_df(df=df, **config)"
-              output: "result_df"
+              output: "result"
             workflow_df_dict:
               import: "from eb_evaluation.dataframe.governance_workflow import run_governance_workflow_df_dict"
               call: "run_governance_workflow_df_dict(df=df, **config)"
-              output: "result_dict"
+              output: "result"
             governance_panel_df:
               import: "from eb_evaluation.dataframe.governance_panel import evaluate_governance_panel_df"
               call: "evaluate_governance_panel_df(df=df, **config)"
-              output: "result_df"
+              output: "result"
+
+      - id: confirm_signature_from_index
+        description: >
+          Before proposing concrete argument names, defaults, return types, or
+          column requirements, the LLM must quote the exact `signature` field
+          from the corresponding llm/api_index.json entry for the selected
+          entrypoint. If the signature is missing or ambiguous, the LLM must
+          request clarification rather than inventing arguments or return shapes.
+        requirement:
+          must_echo_index_signature: true
+          must_not_invent_defaults: true
+          must_not_assert_return_types: true
 
     notes:
       - >
