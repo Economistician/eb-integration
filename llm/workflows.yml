@@ -121,7 +121,9 @@ workflows:
         requirement:
           must_echo_index_signature: true
           must_not_invent_defaults: true
-          must_not_assert_return_types: true
+          return_types:
+            may_echo_from_signature_only: true
+            must_not_restate_as_guarantee: true
 
     notes:
       - >
