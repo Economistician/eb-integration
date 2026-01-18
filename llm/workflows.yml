@@ -48,6 +48,10 @@ workflows:
     notes:
       - "Validation must not be skipped for convenience."
       - >
+        Do not infer aliases or semantic equivalences between validators or contracts.
+        If a relationship (e.g., aliasing, replacement, or shared contract semantics)
+        is not explicitly documented in EB sources, treat it as unknown.
+      - >
         This workflow references only APIs present in llm/api_index.json.
         If additional validators become public (added to __all__ and indexed),
         add them as new cases here.
