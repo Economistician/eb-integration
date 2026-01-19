@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": null,
+  "generated_at": "2026-01-18T00:00:00Z",
   "source_of_truth": "human",
   "repos": [
     {
@@ -103,7 +103,7 @@
       ],
       "docs": {
         "primary": null,
-        "paths": ["README.md", "src/", "docs/"]
+        "paths": ["README.md", "src/eb_adapters/", "docs/"]
       },
       "releases": {
         "published_to_pypi": false,
@@ -283,7 +283,15 @@
         "compatibility_band": null
       },
       "relationships": {
-        "depends_on_repos": ["electric-barometer", "eb-metrics", "eb-evaluation", "eb-contracts", "eb-adapters", "eb-features", "eb-optimization"],
+        "depends_on_repos": [
+          "electric-barometer",
+          "eb-metrics",
+          "eb-evaluation",
+          "eb-contracts",
+          "eb-adapters",
+          "eb-features",
+          "eb-optimization"
+        ],
         "owned_by_repos": []
       }
     },
