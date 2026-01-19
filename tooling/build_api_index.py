@@ -28,9 +28,11 @@ from typing import Any
 
 RE_WS = re.compile(r"\s+")
 
+REPO_INDEX_REL = Path("llm") / "repo_index.json"
+
 
 DEFAULT_PACKAGES: list[str] = [
-    # Keep this aligned with what eb-integration can install in ".[ecosystem]"
+    # Fallback only. Prefer deriving packages from llm/repo_index.json.
     "eb_contracts",
     "eb_metrics",
     "eb_evaluation",
@@ -74,6 +76,51 @@ class ApiEntry:
 def _repo_root() -> Path:
     # tooling/build_api_index.py -> repo root
     return Path(__file__).resolve().parents[1]
+
+
+def _read_json(path: Path) -> Any:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _packages_from_repo_index(root: Path) -> tuple[list[str], dict[str, str] | None]:
+    """
+    Derive package import roots from llm/repo_index.json.
+
+    Returns (packages, diagnostics). Diagnostics are non-fatal and intended
+    for human troubleshooting.
+    """
+    path = root / REPO_INDEX_REL
+    if not path.exists():
+        return ([], {str(REPO_INDEX_REL): "FileNotFoundError: repo_index.json not found"})
+
+    try:
+        payload = _read_json(path)
+    except Exception as e:
+        return ([], {str(REPO_INDEX_REL): f"{type(e).__name__}: {e}"})
+
+    repos = payload.get("repos", [])
+    if not isinstance(repos, list):
+        return ([], {str(REPO_INDEX_REL): "ValueError: repos must be a list"})
+
+    pkgs: set[str] = set()
+    diag: dict[str, str] = {}
+
+    for repo in repos:
+        if not isinstance(repo, dict):
+            continue
+        packages = repo.get("packages", [])
+        if not isinstance(packages, list):
+            continue
+
+        for p in packages:
+            if not isinstance(p, dict):
+                continue
+            import_root = p.get("import_root")
+            if isinstance(import_root, str) and import_root.strip():
+                pkgs.add(import_root.strip())
+
+    out = sorted(pkgs)
+    return (out, diag or None)
 
 
 def _first_paragraph(doc: str | None) -> str | None:
@@ -275,7 +322,12 @@ def _index_package(package: str) -> tuple[list[ApiEntry], dict[str, str] | None]
     return (out, import_errors or None)
 
 
-def build_api_index(packages: Iterable[str]) -> dict[str, Any]:
+def build_api_index(
+    packages: Iterable[str],
+    *,
+    ecosystem_source: str | None = None,
+    extra_diagnostics: dict[str, str] | None = None,
+) -> dict[str, Any]:
     now = dt.datetime.now(dt.UTC).replace(microsecond=0)
 
     all_entries: list[ApiEntry] = []
@@ -318,9 +370,16 @@ def build_api_index(packages: Iterable[str]) -> dict[str, Any]:
         "entries": [e.to_dict() for e in all_entries],
     }
 
-    # Helpful diagnostics (non-breaking) for humans/CI logs
+    if ecosystem_source is not None:
+        payload["ecosystem"]["package_source"] = ecosystem_source
+
+    diagnostics: dict[str, Any] = {}
     if import_errors:
-        payload["diagnostics"] = {"import_errors": import_errors}
+        diagnostics["import_errors"] = import_errors
+    if extra_diagnostics:
+        diagnostics.update(extra_diagnostics)
+    if diagnostics:
+        payload["diagnostics"] = diagnostics
 
     return payload
 
@@ -342,14 +401,34 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    packages = (
-        args.packages if args.packages is not None and len(args.packages) > 0 else DEFAULT_PACKAGES
-    )
+    root = _repo_root()
 
-    out_path = Path(args.out) if args.out else (_repo_root() / "llm" / "api_index.json")
+    packages: list[str]
+    ecosystem_source: str | None = None
+    repo_index_diag: dict[str, str] | None = None
+
+    if args.packages is not None and len(args.packages) > 0:
+        packages = args.packages
+        ecosystem_source = "cli"
+    else:
+        repo_pkgs, repo_diag = _packages_from_repo_index(root)
+        if repo_pkgs:
+            packages = repo_pkgs
+            ecosystem_source = str(REPO_INDEX_REL).replace("\\", "/")
+            repo_index_diag = repo_diag
+        else:
+            packages = DEFAULT_PACKAGES
+            ecosystem_source = "DEFAULT_PACKAGES"
+            repo_index_diag = repo_diag
+
+    out_path = Path(args.out) if args.out else (root / "llm" / "api_index.json")
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    payload = build_api_index(packages)
+    payload = build_api_index(
+        packages,
+        ecosystem_source=ecosystem_source,
+        extra_diagnostics=repo_index_diag,
+    )
 
     # Deterministic JSON formatting
     out_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")

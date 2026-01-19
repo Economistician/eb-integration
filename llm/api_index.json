@@ -1,14 +1,16 @@
 {
   "ecosystem": {
     "install_mode": "editable",
+    "package_source": "llm/repo_index.json",
     "packages_indexed": [
+      "eb_adapters",
       "eb_contracts",
-      "eb_metrics",
       "eb_evaluation",
-      "electric_barometer",
-      "eb_optimization",
+      "eb_examples",
       "eb_features",
-      "eb_adapters"
+      "eb_metrics",
+      "eb_optimization",
+      "electric_barometer"
     ],
     "python_version": "3.13.3"
   },
@@ -2211,6 +2213,92 @@
       ]
     },
     {
+      "doc_summary": "Canonical file layout for the eb_golden_v1 demo dataset.",
+      "id": "eb_examples:eb_examples:GoldenV1Artifacts",
+      "import_path": "eb_examples:GoldenV1Artifacts",
+      "io": {
+        "defined_in": "eb_examples.paths"
+      },
+      "kind": "class",
+      "module": "eb_examples",
+      "name": "GoldenV1Artifacts",
+      "package": "eb_examples",
+      "public_import": "from eb_examples import GoldenV1Artifacts",
+      "signature": "(base: 'Path') -> None",
+      "tags": [
+        "eb_examples"
+      ]
+    },
+    {
+      "doc_summary": null,
+      "id": "eb_examples:eb_examples:default_base_dir",
+      "import_path": "eb_examples:default_base_dir",
+      "io": {
+        "defined_in": "eb_examples.paths"
+      },
+      "kind": "function",
+      "module": "eb_examples",
+      "name": "default_base_dir",
+      "package": "eb_examples",
+      "public_import": "from eb_examples import default_base_dir",
+      "signature": "() -> 'Path'",
+      "tags": [
+        "eb_examples"
+      ]
+    },
+    {
+      "doc_summary": null,
+      "id": "eb_examples:eb_examples:resolve_base_dir",
+      "import_path": "eb_examples:resolve_base_dir",
+      "io": {
+        "defined_in": "eb_examples.paths"
+      },
+      "kind": "function",
+      "module": "eb_examples",
+      "name": "resolve_base_dir",
+      "package": "eb_examples",
+      "public_import": "from eb_examples import resolve_base_dir",
+      "signature": "(base_dir: 'str | None') -> 'Path'",
+      "tags": [
+        "eb_examples"
+      ]
+    },
+    {
+      "doc_summary": "Load the EB golden demo dataset (v1) as a pandas DataFrame.",
+      "id": "eb_examples:eb_examples.datasets:load_demo_golden_v1",
+      "import_path": "eb_examples.datasets:load_demo_golden_v1",
+      "io": {
+        "defined_in": "eb_examples.datasets.demo_golden_v1"
+      },
+      "kind": "function",
+      "module": "eb_examples.datasets",
+      "name": "load_demo_golden_v1",
+      "package": "eb_examples",
+      "public_import": "from eb_examples.datasets import load_demo_golden_v1",
+      "signature": "(*, as_dataframe: 'bool' = True) -> 'pd.DataFrame'",
+      "tags": [
+        "dataframe",
+        "eb_examples"
+      ]
+    },
+    {
+      "doc_summary": "Load the dataset manifest.json for the EB golden demo dataset (v1).",
+      "id": "eb_examples:eb_examples.datasets:load_demo_golden_v1_manifest",
+      "import_path": "eb_examples.datasets:load_demo_golden_v1_manifest",
+      "io": {
+        "defined_in": "eb_examples.datasets.demo_golden_v1"
+      },
+      "kind": "function",
+      "module": "eb_examples.datasets",
+      "name": "load_demo_golden_v1_manifest",
+      "package": "eb_examples",
+      "public_import": "from eb_examples.datasets import load_demo_golden_v1_manifest",
+      "signature": "() -> 'dict[str, Any]'",
+      "tags": [
+        "eb_examples"
+      ]
+    },
+    {
       "doc_summary": "Configuration for panel time-series feature engineering.",
       "id": "eb_features:eb_features.panel:FeatureConfig",
       "import_path": "eb_features.panel:FeatureConfig",
@@ -3987,7 +4075,7 @@
       ]
     }
   ],
-  "generated_at_utc": "2026-01-19T00:37:08+00:00",
+  "generated_at_utc": "2026-01-19T00:51:54+00:00",
   "generator": {
     "repo": "eb-integration",
     "script": "tooling/build_api_index.py",

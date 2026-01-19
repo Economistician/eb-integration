@@ -10,15 +10,7 @@
       "default_branch": "main",
       "repo_url": "https://github.com/Economistician/eb-integration",
       "purpose": "Integration smoke tests for the Electric Barometer ecosystem. Validates cross-package compatibility and end-to-end evaluations across repos and related libraries.",
-      "packages": [
-        {
-          "package_name": "eb_integration",
-          "import_root": "eb_integration",
-          "src_layout": null,
-          "public_api_modules": [],
-          "notes": "Houses canonical LLM bundle (system/workflows/index)."
-        }
-      ],
+      "packages": [],
       "docs": {
         "primary": null,
         "paths": ["README.md", "llm/README.md", "llm/bootstrap.md"]
@@ -98,7 +90,7 @@
       "display_name": "eb-adapters",
       "status": "active",
       "default_branch": "main",
-      "repo_url": "https://github.com/Economistician/eb-adapter",
+      "repo_url": "https://github.com/Economistician/eb-adapters",
       "purpose": "Adapters and integration utilities for the Electric Barometer forecasting framework and EB Metrics library. Includes model wrappers, scoring hooks, and data helpers for popular Python ML and data tools.",
       "packages": [
         {
@@ -291,7 +283,7 @@
         "compatibility_band": null
       },
       "relationships": {
-        "depends_on_repos": ["electric-barometer", "eb-metrics", "eb-evaluation", "eb-contracts", "eb-adapter", "eb-features", "eb-optimization"],
+        "depends_on_repos": ["electric-barometer", "eb-metrics", "eb-evaluation", "eb-contracts", "eb-adapters", "eb-features", "eb-optimization"],
         "owned_by_repos": []
       }
     },
