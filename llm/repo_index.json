@@ -1,0 +1,321 @@
+{
+  "schema_version": "1.0",
+  "generated_at": null,
+  "source_of_truth": "human",
+  "repos": [
+    {
+      "repo_id": "eb-integration",
+      "display_name": "eb-integration",
+      "status": "active",
+      "default_branch": "main",
+      "repo_url": "https://github.com/Economistician/eb-integration",
+      "purpose": "Integration smoke tests for the Electric Barometer ecosystem. Validates cross-package compatibility and end-to-end evaluations across repos and related libraries.",
+      "packages": [
+        {
+          "package_name": "eb_integration",
+          "import_root": "eb_integration",
+          "src_layout": null,
+          "public_api_modules": [],
+          "notes": "Houses canonical LLM bundle (system/workflows/index)."
+        }
+      ],
+      "docs": {
+        "primary": null,
+        "paths": ["README.md", "llm/README.md", "llm/bootstrap.md"]
+      },
+      "releases": {
+        "published_to_pypi": false,
+        "version": null,
+        "compatibility_band": null
+      },
+      "relationships": {
+        "depends_on_repos": [],
+        "owned_by_repos": []
+      }
+    },
+    {
+      "repo_id": "eb-examples",
+      "display_name": "eb-examples",
+      "status": "active",
+      "default_branch": "main",
+      "repo_url": "https://github.com/Economistician/eb-examples",
+      "purpose": "Example notebooks, sample datasets, and demonstration workflows for the Electric Barometer and EB Metrics ecosystem. Includes forecasting demos, model comparisons, and cost-sensitive metric tutorials.",
+      "packages": [
+        {
+          "package_name": "eb_examples",
+          "import_root": "eb_examples",
+          "src_layout": null,
+          "public_api_modules": [],
+          "notes": "Examples-focused; package entry only if importable."
+        }
+      ],
+      "docs": {
+        "primary": "examples",
+        "paths": ["README.md", "examples/", "notebooks/", "data/"]
+      },
+      "releases": {
+        "published_to_pypi": false,
+        "version": null,
+        "compatibility_band": null
+      },
+      "relationships": {
+        "depends_on_repos": ["electric-barometer", "eb-metrics", "eb-evaluation", "eb-contracts"],
+        "owned_by_repos": []
+      }
+    },
+    {
+      "repo_id": "eb-contracts",
+      "display_name": "eb-contracts",
+      "status": "active",
+      "default_branch": "main",
+      "repo_url": "https://github.com/Economistician/eb-contracts",
+      "purpose": "Canonical data and policy contracts for the Electric Barometer ecosystem. Defines required schemas, invariants, and validation rules for evaluation, optimization, and deployment workflows.",
+      "packages": [
+        {
+          "package_name": "eb_contracts",
+          "import_root": "eb_contracts",
+          "src_layout": null,
+          "public_api_modules": [],
+          "notes": "Authoritative source of contract schemas and validators."
+        }
+      ],
+      "docs": {
+        "primary": null,
+        "paths": ["README.md", "src/eb_contracts/", "docs/"]
+      },
+      "releases": {
+        "published_to_pypi": true,
+        "version": null,
+        "compatibility_band": "0.2.x"
+      },
+      "relationships": {
+        "depends_on_repos": [],
+        "owned_by_repos": []
+      }
+    },
+    {
+      "repo_id": "eb-adapter",
+      "display_name": "eb-adapter",
+      "status": "active",
+      "default_branch": "main",
+      "repo_url": "https://github.com/Economistician/eb-adapter",
+      "purpose": "Adapters and integration utilities for the Electric Barometer forecasting framework and EB Metrics library. Includes model wrappers, scoring hooks, and data helpers for popular Python ML and data tools.",
+      "packages": [
+        {
+          "package_name": "eb_adapter",
+          "import_root": "eb_adapter",
+          "src_layout": null,
+          "public_api_modules": [],
+          "notes": "Confirm import root naming from repo."
+        }
+      ],
+      "docs": {
+        "primary": null,
+        "paths": ["README.md", "src/", "docs/"]
+      },
+      "releases": {
+        "published_to_pypi": false,
+        "version": null,
+        "compatibility_band": null
+      },
+      "relationships": {
+        "depends_on_repos": ["electric-barometer", "eb-metrics", "eb-evaluation"],
+        "owned_by_repos": []
+      }
+    },
+    {
+      "repo_id": "eb-features",
+      "display_name": "eb-features",
+      "status": "active",
+      "default_branch": "main",
+      "repo_url": "https://github.com/Economistician/eb-features",
+      "purpose": "Domain-agnostic feature engineering library for time-series and panel forecasting. Supports lag features, rolling windows, calendar encodings, external regressors, and entity-level transformations.",
+      "packages": [
+        {
+          "package_name": "eb_features",
+          "import_root": "eb_features",
+          "src_layout": null,
+          "public_api_modules": [],
+          "notes": null
+        }
+      ],
+      "docs": {
+        "primary": null,
+        "paths": ["README.md", "src/", "docs/"]
+      },
+      "releases": {
+        "published_to_pypi": false,
+        "version": null,
+        "compatibility_band": null
+      },
+      "relationships": {
+        "depends_on_repos": [],
+        "owned_by_repos": []
+      }
+    },
+    {
+      "repo_id": "eb-optimization",
+      "display_name": "eb-optimization",
+      "status": "active",
+      "default_branch": "main",
+      "repo_url": "https://github.com/Economistician/eb-optimization",
+      "purpose": "Tunes parameters and decision policies against EB objectives using historical data, producing reproducible parameter artifacts that can be applied deterministically without optimization dependencies.",
+      "packages": [
+        {
+          "package_name": "eb_optimization",
+          "import_root": "eb_optimization",
+          "src_layout": null,
+          "public_api_modules": [],
+          "notes": null
+        }
+      ],
+      "docs": {
+        "primary": null,
+        "paths": ["README.md", "src/", "docs/"]
+      },
+      "releases": {
+        "published_to_pypi": false,
+        "version": null,
+        "compatibility_band": null
+      },
+      "relationships": {
+        "depends_on_repos": ["eb-metrics", "eb-evaluation", "eb-contracts", "electric-barometer"],
+        "owned_by_repos": []
+      }
+    },
+    {
+      "repo_id": "eb-evaluation",
+      "display_name": "eb-evaluation",
+      "status": "active",
+      "default_branch": "main",
+      "repo_url": "https://github.com/Economistician/eb-evaluation",
+      "purpose": "Evaluation and diagnostics toolkit for forecasting workflows using Electric Barometer (EB). Provides pandas-native utilities for group-level metrics, hierarchical evaluation, and cost sensitivity analysis.",
+      "packages": [
+        {
+          "package_name": "eb_evaluation",
+          "import_root": "eb_evaluation",
+          "src_layout": null,
+          "public_api_modules": [],
+          "notes": null
+        }
+      ],
+      "docs": {
+        "primary": null,
+        "paths": ["README.md", "src/eb_evaluation/", "docs/"]
+      },
+      "releases": {
+        "published_to_pypi": true,
+        "version": null,
+        "compatibility_band": "0.2.x"
+      },
+      "relationships": {
+        "depends_on_repos": ["eb-metrics", "eb-contracts"],
+        "owned_by_repos": []
+      }
+    },
+    {
+      "repo_id": "eb-metrics",
+      "display_name": "eb-metrics",
+      "status": "active",
+      "default_branch": "main",
+      "repo_url": "https://github.com/Economistician/eb-metrics",
+      "purpose": "Lightweight Python library for cost-aware error metrics and DataFrame-based evaluation utilities used by Electric Barometer.",
+      "packages": [
+        {
+          "package_name": "eb_metrics",
+          "import_root": "eb_metrics",
+          "src_layout": null,
+          "public_api_modules": [],
+          "notes": null
+        }
+      ],
+      "docs": {
+        "primary": null,
+        "paths": ["README.md", "src/eb_metrics/", "docs/"]
+      },
+      "releases": {
+        "published_to_pypi": true,
+        "version": null,
+        "compatibility_band": "0.2.x"
+      },
+      "relationships": {
+        "depends_on_repos": [],
+        "owned_by_repos": []
+      }
+    },
+    {
+      "repo_id": "electric-barometer",
+      "display_name": "electric-barometer",
+      "status": "active",
+      "default_branch": "main",
+      "repo_url": "https://github.com/Economistician/electric-barometer",
+      "purpose": "Modular forecasting framework for panel-based time-series data and production workflows. Provides model selection, evaluation, and optimization hooks.",
+      "packages": [
+        {
+          "package_name": "electric_barometer",
+          "import_root": "electric_barometer",
+          "src_layout": null,
+          "public_api_modules": [],
+          "notes": null
+        }
+      ],
+      "docs": {
+        "primary": null,
+        "paths": ["README.md", "src/electric_barometer/", "docs/"]
+      },
+      "releases": {
+        "published_to_pypi": false,
+        "version": null,
+        "compatibility_band": "0.2.x"
+      },
+      "relationships": {
+        "depends_on_repos": ["eb-metrics", "eb-evaluation", "eb-contracts"],
+        "owned_by_repos": []
+      }
+    },
+    {
+      "repo_id": "eb-docs",
+      "display_name": "eb-docs",
+      "status": "active",
+      "default_branch": "main",
+      "repo_url": "https://github.com/Economistician/eb-docs",
+      "purpose": "Central documentation hub for the Electric Barometer ecosystem, including user guides, tutorials, and API references.",
+      "packages": [],
+      "docs": {
+        "primary": "mkdocs",
+        "paths": ["mkdocs.yml", "docs/", "README.md"]
+      },
+      "releases": {
+        "published_to_pypi": false,
+        "version": null,
+        "compatibility_band": null
+      },
+      "relationships": {
+        "depends_on_repos": ["electric-barometer", "eb-metrics", "eb-evaluation", "eb-contracts", "eb-adapter", "eb-features", "eb-optimization"],
+        "owned_by_repos": []
+      }
+    },
+    {
+      "repo_id": "eb-papers",
+      "display_name": "eb-papers",
+      "status": "active",
+      "default_branch": "main",
+      "repo_url": "https://github.com/Economistician/eb-papers",
+      "purpose": "Whitepapers, technical reports, and mathematical documentation for the Electric Barometer framework and EB Metrics system.",
+      "packages": [],
+      "docs": {
+        "primary": "latex",
+        "paths": ["README.md", "papers/", "tex/", "figures/"]
+      },
+      "releases": {
+        "published_to_pypi": false,
+        "version": null,
+        "compatibility_band": null
+      },
+      "relationships": {
+        "depends_on_repos": [],
+        "owned_by_repos": []
+      }
+    }
+  ]
+}
