@@ -8,6 +8,7 @@ on:
 jobs:
   verify-bundle:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -21,9 +22,12 @@ jobs:
           python -m pip install -U pip
           python -m pip install -e ".[ecosystem]"
 
-      - name: Rebuild api index + bundle
+      - name: Rebuild API index
         run: |
           python tooling/build_api_index.py
+
+      - name: Rebuild LLM bundle
+        run: |
           python tooling/llm_bundle.py --out llm/bundle.txt
 
       - name: Verify repo is clean

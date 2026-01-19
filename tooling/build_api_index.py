@@ -35,6 +35,9 @@ DEFAULT_PACKAGES: list[str] = [
     "eb_metrics",
     "eb_evaluation",
     "electric_barometer",
+    "eb_optimization",
+    "eb_features",
+    "eb_adapters",
 ]
 
 
@@ -174,10 +177,20 @@ def _iter_submodules(pkg: ModuleType) -> Iterator[str]:
 def _index_module_exports(package: str, mod: ModuleType, entries: list[ApiEntry]) -> None:
     """
     Index all public symbols exported by `mod.__all__` into `entries`.
+
+    IMPORTANT: The canonical import location for an export is the module that
+    exports it (i.e., `mod.__name__`), not necessarily `obj.__module__`.
+
+    Many ecosystems re-export symbols (or provide typing aliases) where
+    `obj.__module__` is misleading (e.g., "builtins"). We therefore build
+    actionable imports from the exporting module and preserve `obj.__module__`
+    as metadata.
     """
     names = _public_symbols(mod)
     if not names:
         return
+
+    exporting_module = getattr(mod, "__name__", None) or package
 
     for name in names:
         if not hasattr(mod, name):
@@ -188,7 +201,9 @@ def _index_module_exports(package: str, mod: ModuleType, entries: list[ApiEntry]
         if kind is None:
             continue
 
-        module = getattr(obj, "__module__", None) or mod.__name__ or package
+        defined_in = getattr(obj, "__module__", None)
+
+        module = exporting_module
         import_path = f"{module}:{name}"
         public_import = f"from {module} import {name}"
         sig = _safe_signature(obj)
@@ -196,6 +211,11 @@ def _index_module_exports(package: str, mod: ModuleType, entries: list[ApiEntry]
         tags = _make_tags(package=package, module=module, name=name, doc_summary=doc_summary)
 
         entry_id = f"{package}:{module}:{name}"
+
+        io: dict[str, Any] | None = None
+        if defined_in and defined_in != module:
+            # Preserve origin information without changing the top-level schema.
+            io = {"defined_in": defined_in}
 
         entries.append(
             ApiEntry(
@@ -209,7 +229,7 @@ def _index_module_exports(package: str, mod: ModuleType, entries: list[ApiEntry]
                 signature=sig,
                 doc_summary=doc_summary,
                 tags=tags,
-                io=None,  # reserved for future: required/provided columns, contracts, etc.
+                io=io,  # reserved for future: required/provided columns, contracts, etc.
             )
         )
 

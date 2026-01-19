@@ -1,0 +1,37 @@
+# Electric Barometer — LLM Bundle Metadata
+#
+# This file provides lightweight, human-readable metadata describing the
+# contents and intent of the generated LLM bundle.
+#
+# The authoritative bundle is produced by tooling/llm_bundle.py as llm/bundle.txt.
+# Keep this file stable and additive; do not encode logic here.
+
+schema_version: "1.0"
+
+bundle_id: "eb_llm_bundle_v1"
+
+intent: >
+  Provide a single deterministic text bundle for live LLM working sessions
+  across the Electric Barometer ecosystem, including system rules,
+  canonical workflows, repository topology, and the public API index.
+
+includes:
+  - path: "llm/system.txt"
+    role: "system_rules"
+
+  - path: "llm/workflows.yml"
+    role: "canonical_workflows"
+
+  - path: "llm/llm-bundle.yml"
+    role: "bundle_metadata"
+
+  - path: "llm/repo_index.json"
+    role: "repository_index"
+
+  - path: "llm/api_index.json"
+    role: "api_index"
+
+notes:
+  - "This file is metadata only; the generated bundle.txt is the source of truth."
+  - "api_index.json is generated from __all__ exports of installable ecosystem packages."
+  - "repo_index.json defines repository ownership and package topology."
