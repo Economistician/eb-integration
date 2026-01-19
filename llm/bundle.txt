@@ -440,7 +440,7 @@ notes:
     },
     {
       "default_branch": "main",
-      "display_name": "eb-adapter",
+      "display_name": "eb-adapters",
       "docs": {
         "paths": [
           "README.md",
@@ -451,9 +451,9 @@ notes:
       },
       "packages": [
         {
-          "import_root": "eb_adapter",
-          "notes": "Confirm import root naming from repo.",
-          "package_name": "eb_adapter",
+          "import_root": "eb_adapters",
+          "notes": "Confirmed plural import root (matches published package).",
+          "package_name": "eb_adapters",
           "public_api_modules": [],
           "src_layout": null
         }
@@ -472,7 +472,7 @@ notes:
         "published_to_pypi": false,
         "version": null
       },
-      "repo_id": "eb-adapter",
+      "repo_id": "eb-adapters",
       "repo_url": "https://github.com/Economistician/eb-adapter",
       "status": "active"
     },

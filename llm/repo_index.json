@@ -94,19 +94,19 @@
       }
     },
     {
-      "repo_id": "eb-adapter",
-      "display_name": "eb-adapter",
+      "repo_id": "eb-adapters",
+      "display_name": "eb-adapters",
       "status": "active",
       "default_branch": "main",
       "repo_url": "https://github.com/Economistician/eb-adapter",
       "purpose": "Adapters and integration utilities for the Electric Barometer forecasting framework and EB Metrics library. Includes model wrappers, scoring hooks, and data helpers for popular Python ML and data tools.",
       "packages": [
         {
-          "package_name": "eb_adapter",
-          "import_root": "eb_adapter",
+          "package_name": "eb_adapters",
+          "import_root": "eb_adapters",
           "src_layout": null,
           "public_api_modules": [],
-          "notes": "Confirm import root naming from repo."
+          "notes": "Confirmed plural import root (matches published package)."
         }
       ],
       "docs": {
