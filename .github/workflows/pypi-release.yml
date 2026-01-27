@@ -18,6 +18,11 @@ on:
         required: false
         default: "dist"
         type: string
+      skip-existing:
+        description: "Skip uploading files that already exist on PyPI"
+        required: false
+        default: false
+        type: boolean
     secrets:
       PYPI_TOKEN:
         description: "PyPI API token for publishing"
@@ -58,3 +63,4 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
           packages-dir: ${{ inputs.dist-dir }}
+          skip-existing: ${{ inputs.skip-existing }}
