@@ -20,7 +20,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .
-          pip install eb-contracts eb-metrics eb-evaluation
+          pip install eb-contracts eb-metrics eb-evaluation eb-optimization eb-features eb-adapters
+
+      - name: Install test runner
+        run: |
+          pip install pytest
 
       - name: Run ecosystem tests
         run: |
@@ -48,7 +52,14 @@ jobs:
             "eb-contracts @ git+https://github.com/Economistician/eb-contracts@main" \
             "eb-metrics @ git+https://github.com/Economistician/eb-metrics@main" \
             "eb-evaluation @ git+https://github.com/Economistician/eb-evaluation@main" \
+            "eb-optimization @ git+https://github.com/Economistician/eb-optimization@main" \
+            "eb-features @ git+https://github.com/Economistician/eb-features@main" \
+            "eb-adapters @ git+https://github.com/Economistician/eb-adapters@main" \
             "electric-barometer @ git+https://github.com/Economistician/electric-barometer@main"
+
+      - name: Install test runner
+        run: |
+          pip install pytest
 
       - name: Run ecosystem tests
         run: |
