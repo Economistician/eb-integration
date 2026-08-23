@@ -8,6 +8,72 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Zero-drift gate: leaf CHANGELOG.md files must match the synthesized
+  # electric-barometer macro changelog for the latest system release date.
+  changelog-sync:
+    name: changelog-sync (zero-drift)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout electric-barometer
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/electric-barometer
+          path: electric-barometer
+
+      - name: Checkout eb-metrics
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/eb-metrics
+          path: eb-metrics
+
+      - name: Checkout eb-evaluation
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/eb-evaluation
+          path: eb-evaluation
+
+      - name: Checkout eb-contracts
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/eb-contracts
+          path: eb-contracts
+
+      - name: Checkout eb-optimization
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/eb-optimization
+          path: eb-optimization
+
+      - name: Checkout eb-features
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/eb-features
+          path: eb-features
+
+      - name: Checkout eb-adapters
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/eb-adapters
+          path: eb-adapters
+
+      - name: Checkout eb-examples
+        uses: actions/checkout@v4
+        with:
+          repository: Economistician/eb-examples
+          path: eb-examples
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync + verify macro changelog (zero-drift)
+        env:
+          EB_ECOSYSTEM_ROOT: ${{ github.workspace }}
+        run: |
+          python electric-barometer/scripts/sync_changelogs.py --check
+
   ecosystem-smoke:
     name: ecosystem-smoke (released packages)
     runs-on: ubuntu-latest
