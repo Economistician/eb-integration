@@ -9,7 +9,7 @@ on:
         default: '["ubuntu-latest","windows-latest"]'
         type: string
       python_versions:
-        description: "JSON array of Python versions for the test matrix"
+        description: "JSON array of Python versions for the test matrix (floor is 3.11)"
         required: false
         default: '["3.11","3.12","3.13"]'
         type: string

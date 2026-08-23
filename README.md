@@ -3,7 +3,7 @@
 [![Self Test](https://github.com/Economistician/eb-integration/actions/workflows/self-test.yml/badge.svg?branch=main)](https://github.com/Economistician/eb-integration/actions/workflows/self-test.yml)
 [![Ecosystem Smoke](https://github.com/Economistician/eb-integration/actions/workflows/ecosystem-smoke.yml/badge.svg?branch=main)](https://github.com/Economistician/eb-integration/actions/workflows/ecosystem-smoke.yml)
 ![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)
-![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
 
 Centralized CI/CD platform for integration, testing, and publishing across the Electric Barometer ecosystem.
 
