@@ -19,7 +19,7 @@ def _import_attr(module_path: str, attr: str) -> Any:
 
 
 def _import_panel_demand_v1() -> type:
-    # Known-good path from your ecosystem smoke test.
+    # Canonical import path used by ecosystem smoke tests.
     return _import_attr(
         "eb_contracts.contracts.demand_panel.v1.panel_demand",
         "PanelDemandV1",
@@ -27,13 +27,7 @@ def _import_panel_demand_v1() -> type:
 
 
 def _import_panel_point_forecast_v1() -> type:
-    """
-    Import PanelPointForecastV1 from the canonical eb-contracts location.
-
-    NOTE: The earlier candidate list was guessing paths. In your current
-    eb-contracts repo, the class is defined here:
-      eb_contracts.contracts.forecast_panel.v1.forecast_panel.PanelPointForecastV1
-    """
+    """Import PanelPointForecastV1 from its canonical eb-contracts location."""
     return _import_attr(
         "eb_contracts.contracts.forecast_panel.v1.forecast_panel",
         "PanelPointForecastV1",
@@ -41,12 +35,7 @@ def _import_panel_point_forecast_v1() -> type:
 
 
 def _resolve_validator(validate_module: Any, names: list[str]) -> Callable[..., Any]:
-    """
-    Resolve a validator function from eb_contracts.api.validate.
-
-    We try a small set of plausible names to reduce brittle coupling, but we
-    prefer stable top-level API names (e.g., panel_point_v1).
-    """
+    """Resolve a validator from ``eb_contracts.api.validate`` by preferred name order."""
     for name in names:
         fn = getattr(validate_module, name, None)
         if callable(fn):
@@ -105,17 +94,15 @@ def make_canonical_panel_demand_v1() -> Any:
 
 
 def make_canonical_panel_point_forecast_v1() -> Any:
-    """
-    Canonical tiny timestamp point-forecast panel aligned to the demand panel.
+    """Canonical timestamp point-forecast panel aligned to the demand panel.
 
-    IMPORTANT:
-    Your eb-contracts PanelPointForecastV1 is a "forecast_panel" contract that
-    uses canonical column conventions (entity_id, interval_start, y_true, y_pred),
-    and from_frame(frame) does NOT accept custom column mappings.
+    ``PanelPointForecastV1`` uses fixed columns
+    (``entity_id``, ``interval_start``, ``y_true``, ``y_pred``);
+    ``from_frame()`` does not accept column remapping.
     """
     PanelPointForecastV1 = _import_panel_point_forecast_v1()
 
-    # Use the contract's canonical column names.
+    # Contract canonical column names.
     df = pd.DataFrame(
         [
             {
@@ -158,31 +145,22 @@ def test_canonical_panel_demand_v1_validates() -> None:
 @pytest.mark.ecosystem
 @pytest.mark.skipif(not _has_module("eb_contracts"), reason="eb-contracts not installed")
 def test_canonical_panel_point_forecast_v1_validates() -> None:
-    """
-    Validate that we can construct a canonical point forecast panel via the
-    stable eb_contracts.api.validate entrypoint.
-
-    NOTE:
-    eb_contracts.api.validate exposes panel_point_v1(frame) (not
-    panel_point_forecast_v1), and it returns PanelPointForecastV1.
-    """
+    """Construct and validate a canonical point-forecast panel via ``panel_point_v1``."""
     from eb_contracts.api import validate as v
 
     panel = make_canonical_panel_point_forecast_v1()
 
-    # Prefer the stable API name.
     validate_point_forecast = _resolve_validator(
         v,
         [
             "panel_point_v1",
-            # Back-compat / alternate names if you ever rename:
+            # Alternate names kept for resolver tolerance:
             "panel_point_forecast_v1",
             "validate_panel_point_forecast_v1",
         ],
     )
 
-    # panel_point_v1 expects a DataFrame, but we already have the panel object.
-    # So: if panel_point_v1 exists, validate by reconstructing from the frame.
+    # panel_point_v1 expects a DataFrame; reconstruct from the panel frame when needed.
     if validate_point_forecast.__name__ == "panel_point_v1":
         frame = panel.frame  # contract object should expose .frame
         _ = validate_point_forecast(frame)
