@@ -3396,7 +3396,8 @@
       ]
     },
     {
-      "doc_summary": "Convenience functional wrapper to apply a RALPolicy.",
+      "deprecated": true,
+      "doc_summary": "Hard-deprecated. Always raises ValueError. Requires a governance decisions table via electric_barometer.apply_ral (or eb_evaluation.apply_ral).",
       "id": "eb_optimization:eb_optimization:apply_ral_policy",
       "import_path": "eb_optimization:apply_ral_policy",
       "io": {
@@ -3686,7 +3687,8 @@
       ]
     },
     {
-      "doc_summary": "Convenience functional wrapper to apply a RALPolicy.",
+      "deprecated": true,
+      "doc_summary": "Hard-deprecated. Always raises ValueError. Requires a governance decisions table via electric_barometer.apply_ral (or eb_evaluation.apply_ral).",
       "id": "eb_optimization:eb_optimization.policies:apply_ral_policy",
       "import_path": "eb_optimization.policies:apply_ral_policy",
       "io": {

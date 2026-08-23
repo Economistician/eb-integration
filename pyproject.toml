@@ -59,7 +59,7 @@ dev = [
 # Opt-in: install EB packages to run @pytest.mark.ecosystem tests.
 ecosystem = [
   "eb-contracts==0.2.2",
-  "eb-evaluation==0.2.8",
+  "eb-evaluation==0.2.9",
   "eb-metrics==0.2.8",
   "electric-barometer==0.2.9",
 ]
