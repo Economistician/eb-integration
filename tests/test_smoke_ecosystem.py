@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 if TYPE_CHECKING:
-    from eb_evaluation.diagnostics import FPCSignals
+    from eb_evaluation.diagnostics import FPCSignals  # type: ignore[reportMissingImports]
 
 
 def local_cwsl(y: np.ndarray, yhat: np.ndarray, cu: float, co: float) -> float:
@@ -54,7 +54,9 @@ def _call_build_signals_from_series(
     Returns:
         FPCSignals (cast) for static typing; runtime value comes from eb-evaluation.
     """
-    from eb_evaluation.diagnostics.fpc import build_signals_from_series
+    from eb_evaluation.diagnostics.fpc import (  # type: ignore[reportMissingImports]
+        build_signals_from_series,
+    )
 
     params = inspect.signature(build_signals_from_series).parameters
 
@@ -122,7 +124,7 @@ def test_cwsl_array_and_df_match() -> None:
         (df["y"] - df["yhat"]) * 2.0,
         (df["yhat"] - df["y"]) * 1.0,
     )
-    cwsl_df = float(df["costs"].mean())
+    cwsl_df = float(np.mean(np.asarray(df["costs"], dtype=np.float64)))
 
     assert isinstance(cwsl_arr, float)
     assert cwsl_arr == pytest.approx(cwsl_df, rel=1e-12)
@@ -180,19 +182,19 @@ def test_evaluation_output_df_contract_smoke() -> None:
 @pytest.mark.ecosystem
 @pytest.mark.skipif(not _has_module("eb_contracts"), reason="eb-contracts not installed")
 def test_ecosystem_imports_contracts() -> None:
-    import eb_contracts
+    import eb_contracts  # type: ignore[reportMissingImports]
 
 
 @pytest.mark.ecosystem
 @pytest.mark.skipif(not _has_module("eb_metrics"), reason="eb-metrics not installed")
 def test_ecosystem_imports_metrics() -> None:
-    import eb_metrics
+    import eb_metrics  # type: ignore[reportMissingImports]
 
 
 @pytest.mark.ecosystem
 @pytest.mark.skipif(not _has_module("eb_evaluation"), reason="eb-evaluation not installed")
 def test_ecosystem_imports_evaluation() -> None:
-    import eb_evaluation
+    import eb_evaluation  # type: ignore[reportMissingImports]
 
 
 @pytest.mark.ecosystem
@@ -201,7 +203,7 @@ def test_ecosystem_imports_evaluation() -> None:
     reason="electric-barometer not installed",
 )
 def test_ecosystem_imports_electric_barometer() -> None:
-    import electric_barometer
+    import electric_barometer  # type: ignore[reportMissingImports]
 
     assert isinstance(electric_barometer.__version__, str)
     assert len(electric_barometer.__version__) > 0
@@ -221,7 +223,7 @@ def test_ecosystem_metrics_runs_against_real_library() -> None:
     y_pred = np.array([10.0, 11.5, 11.5], dtype=float)
 
     # If the name changes, the test should fail: that is the drift tripwire.
-    from eb_metrics import mae
+    from eb_metrics import mae  # type: ignore[reportMissingImports]
 
     value = mae(y_true=y_true, y_pred=y_pred)
     assert float(value) >= 0.0
@@ -238,8 +240,10 @@ def test_ecosystem_panel_demand_v1_validates_minimal_timestamp_panel() -> None:
     - validation entrypoint drift (validate.panel_demand_v1)
     - core gating semantics drift (structural-zero behavior)
     """
-    from eb_contracts.api import validate as v
-    from eb_contracts.contracts.demand_panel.v1.panel_demand import PanelDemandV1
+    from eb_contracts.api import validate as v  # type: ignore[reportMissingImports]
+    from eb_contracts.contracts.demand_panel.v1.panel_demand import (  # type: ignore[reportMissingImports]
+        PanelDemandV1,
+    )
 
     df = pd.DataFrame(
         [
@@ -299,7 +303,10 @@ def test_ecosystem_governance_runs_from_minimal_signals() -> None:
     - DQC + FPC composition contract
     - GovernanceDecision structure
     """
-    from eb_evaluation.diagnostics import FPCSignals, validate_governance
+    from eb_evaluation.diagnostics import (  # type: ignore[reportMissingImports]
+        FPCSignals,
+        validate_governance,
+    )
 
     # Tiny, deterministic realized demand series (raw units).
     y = [10.0, 12.0, 11.0, 9.0]
@@ -348,7 +355,7 @@ def test_ecosystem_governance_computes_signals_and_decides() -> None:
     - validate_governance entrypoint signature
     - GovernanceDecision structure and key fields
     """
-    from eb_evaluation.diagnostics import validate_governance
+    from eb_evaluation.diagnostics import validate_governance  # type: ignore[reportMissingImports]
 
     # Tiny, deterministic series (raw units).
     y = [10.0, 12.0, 11.0, 9.0]
@@ -388,7 +395,11 @@ def test_ecosystem_evaluation_entrypoints_exist() -> None:
     Smoke-check that the diagnostics module is importable and exposes the
     stable validation entrypoints you already treat as public API.
     """
-    from eb_evaluation.diagnostics import validate_dqc, validate_fpc, validate_governance
+    from eb_evaluation.diagnostics import (  # type: ignore[reportMissingImports]
+        validate_dqc,
+        validate_fpc,
+        validate_governance,
+    )
 
     assert callable(validate_dqc)
     assert callable(validate_fpc)

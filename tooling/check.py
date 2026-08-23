@@ -380,7 +380,7 @@ def main() -> int:
         print(f"\nERROR: {e}", file=sys.stderr)
         return 1
 
-    print("\n✅ All checks passed.")
+    print("\nAll checks passed.")
     return 0
 
 

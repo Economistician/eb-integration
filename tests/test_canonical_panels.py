@@ -134,7 +134,7 @@ def make_canonical_panel_point_forecast_v1() -> Any:
 @pytest.mark.ecosystem
 @pytest.mark.skipif(not _has_module("eb_contracts"), reason="eb-contracts not installed")
 def test_canonical_panel_demand_v1_validates() -> None:
-    from eb_contracts.api import validate as v
+    from eb_contracts.api import validate as v  # type: ignore[reportMissingImports]
 
     panel = make_canonical_panel_demand_v1()
 
@@ -146,7 +146,7 @@ def test_canonical_panel_demand_v1_validates() -> None:
 @pytest.mark.skipif(not _has_module("eb_contracts"), reason="eb-contracts not installed")
 def test_canonical_panel_point_forecast_v1_validates() -> None:
     """Construct and validate a canonical point-forecast panel via ``panel_point_v1``."""
-    from eb_contracts.api import validate as v
+    from eb_contracts.api import validate as v  # type: ignore[reportMissingImports]
 
     panel = make_canonical_panel_point_forecast_v1()
 

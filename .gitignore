@@ -96,6 +96,7 @@ dmypy.json
 # Linters / formatters
 # =========================================
 .ruff_cache/
+.pre-commit-home/
 
 # =========================================
 # IDE / editor files
