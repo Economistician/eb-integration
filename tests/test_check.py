@@ -57,9 +57,16 @@ def _mk_fake_run(
     return _fake_run
 
 
-def _run_main(mod: ModuleType, monkeypatch: pytest.MonkeyPatch, argv: list[str]) -> int:
+def _run_main(
+    mod: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    argv: list[str],
+    *,
+    siblings_present: bool = False,
+) -> int:
     # check.py uses argparse on sys.argv, so patch it.
     monkeypatch.setattr(sys, "argv", argv)
+    monkeypatch.setattr(mod, "_sibling_checkouts_present", lambda _tooling: siblings_present)
     return int(mod.main())
 
 
@@ -217,3 +224,80 @@ def test_skip_flags_skip_precommit_and_tests(monkeypatch: pytest.MonkeyPatch) ->
     joined = [" ".join(c) for c in seen]
     assert not any(" -m pre_commit run --all-files " in j for j in joined)
     assert not any(j.strip() == "pytest" for j in joined)
+    assert not any("check_ecosystem.py" in j for j in joined)
+
+
+def test_ecosystem_flag_invokes_check_ecosystem(monkeypatch: pytest.MonkeyPatch) -> None:
+    mod = _load_check_module()
+    repo_root = Path(__file__).resolve().parents[1]
+    monkeypatch.setattr(mod, "_find_repo_root", lambda _start: repo_root)
+
+    seen: list[list[str]] = []
+
+    def responses(cmd: list[str]) -> FakeProc:
+        return FakeProc(args=cmd, returncode=0)
+
+    monkeypatch.setattr(mod, "_run", _mk_fake_run(responses, seen))
+
+    rc = _run_main(
+        mod,
+        monkeypatch,
+        ["check.py", "--ecosystem", "--skip-precommit", "--skip-tests"],
+        siblings_present=False,
+    )
+    assert rc == 0
+
+    joined = [" ".join(c) for c in seen]
+    assert any("check_ecosystem.py" in j and "--require-siblings" in j for j in joined)
+
+
+def test_ecosystem_auto_runs_when_siblings_present(monkeypatch: pytest.MonkeyPatch) -> None:
+    mod = _load_check_module()
+    repo_root = Path(__file__).resolve().parents[1]
+    monkeypatch.setattr(mod, "_find_repo_root", lambda _start: repo_root)
+
+    seen: list[list[str]] = []
+
+    def responses(cmd: list[str]) -> FakeProc:
+        return FakeProc(args=cmd, returncode=0)
+
+    monkeypatch.setattr(mod, "_run", _mk_fake_run(responses, seen))
+
+    rc = _run_main(
+        mod,
+        monkeypatch,
+        ["check.py", "--skip-precommit", "--skip-tests"],
+        siblings_present=True,
+    )
+    assert rc == 0
+
+    joined = [" ".join(c) for c in seen]
+    ecosystem_cmds = [j for j in joined if "check_ecosystem.py" in j]
+    assert ecosystem_cmds, "Expected check_ecosystem.py to run when siblings are present"
+    assert all("--require-siblings" not in j for j in ecosystem_cmds)
+
+
+def test_skip_ecosystem_flag_skips_even_when_siblings_present(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    mod = _load_check_module()
+    repo_root = Path(__file__).resolve().parents[1]
+    monkeypatch.setattr(mod, "_find_repo_root", lambda _start: repo_root)
+
+    seen: list[list[str]] = []
+
+    def responses(cmd: list[str]) -> FakeProc:
+        return FakeProc(args=cmd, returncode=0)
+
+    monkeypatch.setattr(mod, "_run", _mk_fake_run(responses, seen))
+
+    rc = _run_main(
+        mod,
+        monkeypatch,
+        ["check.py", "--skip-ecosystem", "--skip-precommit", "--skip-tests"],
+        siblings_present=True,
+    )
+    assert rc == 0
+
+    joined = [" ".join(c) for c in seen]
+    assert not any("check_ecosystem.py" in j for j in joined)

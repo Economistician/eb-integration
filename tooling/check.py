@@ -11,12 +11,16 @@ Default behavior:
 - Run Pyright type checking (restricted to src/ and tests/; auto-skip if none exist).
 - Run pre-commit over all files (re-run once if hooks made changes).
 - Run pytest.
+- When sibling Electric Barometer checkouts are present (or --ecosystem is passed),
+  run tooling/check_ecosystem.py for cross-repo dependency and metadata validation.
 
 Run from repo root:
     python tooling/check.py
 
 Options:
     python tooling/check.py --no-fix
+    python tooling/check.py --ecosystem
+    python tooling/check.py --skip-ecosystem
 """
 
 from __future__ import annotations
@@ -28,6 +32,16 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+
+_ECOSYSTEM_SIBLING_NAMES: tuple[str, ...] = (
+    "eb-contracts",
+    "eb-metrics",
+    "eb-evaluation",
+    "eb-features",
+    "eb-optimization",
+    "eb-adapters",
+    "electric-barometer",
+)
 
 
 def _find_repo_root(start: Path) -> Path:
@@ -175,6 +189,12 @@ def _has_python_files(repo_root: Path, *, excluded_roots: Sequence[Path]) -> boo
     return False
 
 
+def _sibling_checkouts_present(tooling_dir: Path) -> bool:
+    """Return True if a named sibling checkout exists next to eb-integration."""
+    ecosystem_root = tooling_dir.resolve().parent.parent
+    return any((ecosystem_root / name).is_dir() for name in _ECOSYSTEM_SIBLING_NAMES)
+
+
 def _pyright_targets(repo_root: Path) -> list[str]:
     """
     Return the Pyright scan targets.
@@ -205,6 +225,20 @@ def main() -> int:
         "--skip-tests",
         action="store_true",
         help="Skip pytest.",
+    )
+    ecosystem = parser.add_mutually_exclusive_group()
+    ecosystem.add_argument(
+        "--ecosystem",
+        action="store_true",
+        help=(
+            "Run tooling/check_ecosystem.py and fail if sibling checkouts are missing. "
+            "Without this flag the ecosystem audit still runs when siblings are present."
+        ),
+    )
+    ecosystem.add_argument(
+        "--skip-ecosystem",
+        action="store_true",
+        help="Skip the cross-repo ecosystem audit even if sibling checkouts are present.",
     )
     args = parser.parse_args()
 
@@ -377,6 +411,24 @@ def main() -> int:
         # -------------------------
         if not args.skip_tests:
             _require_ok(_run(["pytest", *pytest_ignores], cwd=repo_root), step="pytest")
+
+        # -------------------------
+        # Ecosystem meta-validation (sibling checkouts)
+        # -------------------------
+        if args.skip_ecosystem:
+            print("\nSkipping ecosystem meta-validation (--skip-ecosystem).")
+        else:
+            ecosystem_script = tooling_dir / "check_ecosystem.py"
+            siblings_present = _sibling_checkouts_present(tooling_dir)
+            if args.ecosystem or siblings_present:
+                if not ecosystem_script.is_file():
+                    raise RuntimeError(f"ecosystem checker not found at: {ecosystem_script}")
+                cmd = [sys.executable, str(ecosystem_script)]
+                if args.ecosystem:
+                    cmd.append("--require-siblings")
+                _require_ok(_run(cmd, cwd=repo_root), step="check_ecosystem")
+            else:
+                print("\nSkipping ecosystem meta-validation (no sibling checkouts found).")
 
     except RuntimeError as e:
         print(f"\nERROR: {e}", file=sys.stderr)

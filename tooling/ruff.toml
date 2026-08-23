@@ -15,6 +15,7 @@ include = [
   "src/**/*.py",
   "tests/**/*.py",
   "scripts/**/*.py",
+  "tooling/**/*.py",
   "*.py",
 ]
 
