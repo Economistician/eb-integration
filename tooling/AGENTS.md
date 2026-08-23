@@ -3,6 +3,37 @@
 Canonical AI / agent development rules for the Electric Barometer ecosystem.
 Leaf repositories reach this file via the shared `tooling/` symlink (or CI tooling sync).
 
+## Quality Control & Commit Requirements
+
+### Mandatory Check Execution
+
+Before completing any task, staging changes, or creating a git commit in any
+repository across the ecosystem, run:
+
+```text
+python tooling/check.py
+```
+
+This script executes the mandatory verification chain:
+
+1. `ruff format`
+2. `ruff lint`
+3. `pyright` (static type checking)
+4. `pre-commit` checks
+5. `pytest` test suite
+
+### Resolution Obligation
+
+Zero-tolerance: do not stage, commit, or push code if `python tooling/check.py`
+fails. If the script reports any failures (formatting, linting, type errors, or
+failing tests), fix them and rerun `python tooling/check.py` until it returns a
+clean 100% pass.
+
+### Symlink Awareness
+
+`AGENTS.md` in leaf repositories is a symlink that points back to this file in
+`eb-integration`. Preserve the symlink. Do not replace it with a concrete file.
+
 ## Changelog Mandate
 
 Any modification to source code, APIs, or package metadata **MUST** include a
