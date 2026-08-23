@@ -1,6 +1,7 @@
 # Electric Barometer — LLM Style Contract (Python)
 # Authoritative, ecosystem-wide styling and linting rules.
 # Source of truth: tooling/ruff.toml, tooling/pyrightconfig.json, tooling/.pre-commit-config.yaml
+# Development rules / agent protocols: see tooling/AGENTS.md
 
 LANGUAGE:
 - Python 3.11 target
