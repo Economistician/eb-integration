@@ -210,6 +210,8 @@ def main() -> int:
 
     repo_root = _find_repo_root(Path.cwd())
     tooling_dir = Path(__file__).resolve().parent
+    # Prefer a repo-local hook cache so a locked/unreadable user cache cannot fail the run.
+    os.environ.setdefault("PRE_COMMIT_HOME", str(repo_root / ".pre-commit-home"))
 
     ruff_config = tooling_dir / "ruff.toml"
     pyright_config = tooling_dir / "pyrightconfig.json"
@@ -319,12 +321,12 @@ def main() -> int:
         targets = _pyright_targets(repo_root)
         if not targets:
             # If a repo doesn't have src/ or tests/ yet, don't waste time scanning the world.
-            print("\n⏭️  Skipping pyright (no src/ or tests/ directories found).")
+            print("\nSkipping pyright (no src/ or tests/ directories found).")
         else:
             # Avoid invoking pyright in docs-only repos that still have empty src/tests,
             # and avoid counting any Python files that only live in submodules.
             if not _has_python_files(repo_root, excluded_roots=submodule_roots):
-                print("\n⏭️  Skipping pyright (no .py files found in repo outside submodules).")
+                print("\nSkipping pyright (no .py files found in repo outside submodules).")
             else:
                 _require_ok(
                     _run(["pyright", "-p", str(pyright_config), *targets], cwd=repo_root),
