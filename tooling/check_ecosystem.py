@@ -1,8 +1,10 @@
 """
 Audit Electric Barometer sibling checkouts for dependency, metadata, and tooling consistency.
 
-Validates declared runtime dependencies against src/ imports, identical requires-python
-floors, tooling/ symlinks into eb-integration, and pytest -m ecosystem smoke on local trees.
+Validates declared runtime dependencies against src/ and scripts/ imports, identical
+requires-python floors, tooling/ symlinks into eb-integration, pytest -m ecosystem
+smoke on local trees, and each sibling's ``tooling/check.py`` on explicit ecosystem
+passes (``--require-siblings``).
 """
 
 from __future__ import annotations
@@ -26,6 +28,7 @@ SIBLING_REPO_NAMES: tuple[str, ...] = (
     "eb-features",
     "eb-optimization",
     "eb-adapters",
+    "eb-examples",
     "electric-barometer",
 )
 
@@ -184,6 +187,19 @@ def iter_src_python_files(repo: Path) -> list[Path]:
     return sorted(p for p in src.rglob("*.py") if p.is_file())
 
 
+def iter_scripts_python_files(repo: Path) -> list[Path]:
+    """Return Python files under scripts/, if that directory exists."""
+    scripts = repo / "scripts"
+    if not scripts.is_dir():
+        return []
+    return sorted(p for p in scripts.rglob("*.py") if p.is_file())
+
+
+def iter_audit_python_files(repo: Path) -> list[Path]:
+    """Return Python files whose ecosystem imports must be declared as dependencies."""
+    return sorted({*iter_src_python_files(repo), *iter_scripts_python_files(repo)})
+
+
 def normalize_link_target(raw: str) -> str:
     """Normalize a symlink target to POSIX form without a trailing slash."""
     return raw.replace("\\", "/").rstrip("/")
@@ -276,6 +292,65 @@ def invoke_ecosystem_pytest(*, cwd: Path, pythonpath: str) -> int:
     return int(proc.returncode)
 
 
+def leaf_check_script(repo: Path) -> Path:
+    """Return the expected ``tooling/check.py`` path for a sibling checkout."""
+    return repo / "tooling" / "check.py"
+
+
+def invoke_leaf_check(*, cwd: Path) -> int:
+    """Run a sibling's ``tooling/check.py --skip-ecosystem``."""
+    script = leaf_check_script(cwd)
+    cmd = [sys.executable, str(script), "--skip-ecosystem"]
+    print(f"\n$ {' '.join(cmd)}  (cwd={cwd.name})")
+    proc = subprocess.run(
+        cmd,
+        cwd=str(cwd),
+        text=True,
+        capture_output=True,
+        env=os.environ.copy(),
+        check=False,
+    )
+    _print_proc(proc)
+    return int(proc.returncode)
+
+
+def _missing_named_siblings(ecosystem_root: Path) -> list[str]:
+    """Return sibling names that are absent or lack pyproject.toml."""
+    present = {repo.name for repo in discover_sibling_repos(ecosystem_root)}
+    return [name for name in SIBLING_REPO_NAMES if name not in present]
+
+
+def _audit_leaf_checks(
+    siblings: Sequence[Path],
+    *,
+    runner: Callable[..., int],
+) -> list[Issue]:
+    """Invoke or fail closed on each sibling's local ``tooling/check.py``."""
+    issues: list[Issue] = []
+    for repo in siblings:
+        script = leaf_check_script(repo)
+        if not script.is_file():
+            issues.append(
+                Issue(
+                    repo.name,
+                    "leaf-check",
+                    "missing tooling/check.py; cannot verify local check coverage",
+                )
+            )
+            continue
+        print(f"\nLeaf check: {repo.name}")
+        rc = runner(cwd=repo)
+        if rc != 0:
+            issues.append(
+                Issue(
+                    repo.name,
+                    "leaf-check",
+                    f"tooling/check.py --skip-ecosystem failed with exit code {rc}",
+                )
+            )
+    return issues
+
+
 def _audit_dependencies(repo: Path, data: dict[str, Any]) -> list[Issue]:
     name = repo.name
     proj = project_name(data)
@@ -288,7 +363,7 @@ def _audit_dependencies(repo: Path, data: dict[str, Any]) -> list[Issue]:
         return [Issue(name, "metadata", str(exc))]
 
     issues: list[Issue] = []
-    for path in iter_src_python_files(repo):
+    for path in iter_audit_python_files(repo):
         try:
             imported = ecosystem_imports_in_source(path)
         except SyntaxError as exc:
@@ -340,7 +415,9 @@ def run_audit(
     integration_root: Path,
     require_siblings: bool = False,
     run_pytest: bool = True,
+    run_leaf_checks: bool = False,
     pytest_runner: Callable[..., int] | None = None,
+    leaf_check_runner: Callable[..., int] | None = None,
 ) -> int:
     """
     Run the ecosystem consistency audit.
@@ -355,6 +432,10 @@ def run_audit(
     else:
         print("Siblings:       (none)")
 
+    missing_named = _missing_named_siblings(ecosystem_root)
+    if missing_named:
+        print(f"Missing:        {', '.join(missing_named)}")
+
     if not siblings:
         message = f"No sibling repositories found under {ecosystem_root}."
         if require_siblings:
@@ -364,6 +445,16 @@ def run_audit(
         return 0
 
     issues: list[Issue] = []
+    if require_siblings and missing_named:
+        issues.append(
+            Issue(
+                "*",
+                "siblings",
+                "missing sibling checkouts required for a full ecosystem pass: "
+                + ", ".join(missing_named),
+            )
+        )
+
     loaded: list[tuple[Path, dict[str, Any]]] = []
     for repo in siblings:
         try:
@@ -429,7 +520,12 @@ def run_audit(
                 Issue(target.name, "pytest", f"pytest -m ecosystem failed with exit code {rc}")
             )
 
-    all_issues = [*issues, *pytest_issues]
+    leaf_issues: list[Issue] = []
+    if run_leaf_checks:
+        runner = leaf_check_runner if leaf_check_runner is not None else invoke_leaf_check
+        leaf_issues = _audit_leaf_checks(siblings, runner=runner)
+
+    all_issues = [*issues, *pytest_issues, *leaf_issues]
     if all_issues:
         print("\nEcosystem audit failed:")
         for issue in all_issues:
@@ -447,12 +543,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--require-siblings",
         action="store_true",
-        help="Fail if no sibling checkouts are present next to eb-integration.",
+        help="Fail if any named sibling checkout is missing next to eb-integration.",
     )
     parser.add_argument(
         "--skip-pytest",
         action="store_true",
         help="Skip pytest -m ecosystem smoke (metadata and symlink checks still run).",
+    )
+    parser.add_argument(
+        "--skip-leaf-checks",
+        action="store_true",
+        help="Skip sibling tooling/check.py coverage (metadata and symlink checks still run).",
     )
     args = parser.parse_args(list(argv) if argv is not None else None)
 
@@ -462,6 +563,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         integration_root=integration_root_from_tooling(tooling_dir),
         require_siblings=args.require_siblings,
         run_pytest=not args.skip_pytest,
+        run_leaf_checks=args.require_siblings and not args.skip_leaf_checks,
     )
 
 

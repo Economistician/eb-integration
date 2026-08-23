@@ -301,3 +301,19 @@ def test_skip_ecosystem_flag_skips_even_when_siblings_present(
 
     joined = [" ".join(c) for c in seen]
     assert not any("check_ecosystem.py" in j for j in joined)
+
+
+def test_ecosystem_sibling_names_include_examples_and_match_auditor() -> None:
+    check = _load_check_module()
+    repo_root = Path(__file__).resolve().parents[1]
+    eco_path = repo_root / "tooling" / "check_ecosystem.py"
+    spec = importlib.util.spec_from_file_location(
+        "eb_integration_tooling_check_ecosystem_names", eco_path
+    )
+    assert spec is not None and spec.loader is not None
+    eco = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = eco
+    spec.loader.exec_module(eco)
+    assert "eb-examples" in check._ECOSYSTEM_SIBLING_NAMES
+    assert check._ECOSYSTEM_SIBLING_NAMES == eco.SIBLING_REPO_NAMES
+    assert len(check._ECOSYSTEM_SIBLING_NAMES) == 8

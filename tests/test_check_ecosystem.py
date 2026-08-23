@@ -338,3 +338,147 @@ def test_sibling_checkouts_present_detects_named_dirs(tmp_path: Path) -> None:
     assert mod.sibling_checkouts_present(tooling) is False
     (eco / "eb-metrics").mkdir()
     assert mod.sibling_checkouts_present(tooling) is True
+
+
+def test_sibling_repo_names_include_eb_examples() -> None:
+    mod = _load_ecosystem_module()
+    assert "eb-examples" in mod.SIBLING_REPO_NAMES
+    assert len(mod.SIBLING_REPO_NAMES) == 8
+
+
+def test_scripts_imports_are_audited(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    mod = _load_ecosystem_module()
+    monkeypatch.setattr(mod, "tooling_symlink_issues", lambda *_a, **_k: [])
+    eco, integration = _make_workspace(tmp_path)
+    examples = eco / "eb-examples"
+    _write_pyproject(examples, name="eb-examples", dependencies=["numpy>=1.24"])
+    scripts = examples / "scripts"
+    scripts.mkdir(parents=True)
+    (scripts / "demo.py").write_text(
+        "from __future__ import annotations\nfrom eb_metrics import cwsl\n",
+        encoding="utf-8",
+    )
+
+    rc = mod.run_audit(
+        ecosystem_root=eco,
+        integration_root=integration,
+        run_pytest=False,
+        run_leaf_checks=False,
+    )
+    assert rc == 1
+
+
+def test_require_siblings_fails_when_named_sibling_is_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    mod = _load_ecosystem_module()
+    monkeypatch.setattr(mod, "tooling_symlink_issues", lambda *_a, **_k: [])
+    eco, integration = _make_workspace(tmp_path)
+    metrics = eco / "eb-metrics"
+    _write_pyproject(metrics, name="eb-metrics")
+    _write_src_module(metrics, "eb_metrics", "from __future__ import annotations\n")
+
+    rc = mod.run_audit(
+        ecosystem_root=eco,
+        integration_root=integration,
+        require_siblings=True,
+        run_pytest=False,
+        run_leaf_checks=False,
+    )
+    assert rc == 1
+
+
+def test_missing_leaf_check_py_is_an_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    mod = _load_ecosystem_module()
+    monkeypatch.setattr(mod, "tooling_symlink_issues", lambda *_a, **_k: [])
+    eco, integration = _make_workspace(tmp_path)
+    metrics = eco / "eb-metrics"
+    _write_pyproject(metrics, name="eb-metrics")
+    _write_src_module(metrics, "eb_metrics", "from __future__ import annotations\n")
+
+    rc = mod.run_audit(
+        ecosystem_root=eco,
+        integration_root=integration,
+        run_pytest=False,
+        run_leaf_checks=True,
+    )
+    assert rc == 1
+
+
+def test_leaf_check_is_invoked_for_each_sibling(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    mod = _load_ecosystem_module()
+    monkeypatch.setattr(mod, "tooling_symlink_issues", lambda *_a, **_k: [])
+    eco, integration = _make_workspace(tmp_path)
+    metrics = eco / "eb-metrics"
+    _write_pyproject(metrics, name="eb-metrics")
+    _write_src_module(metrics, "eb_metrics", "from __future__ import annotations\n")
+    tooling = metrics / "tooling"
+    tooling.mkdir(parents=True)
+    (tooling / "check.py").write_text("print('ok')\n", encoding="utf-8")
+
+    seen: list[str] = []
+
+    def fake_leaf(*, cwd: Path) -> int:
+        seen.append(cwd.name)
+        return 0
+
+    rc = mod.run_audit(
+        ecosystem_root=eco,
+        integration_root=integration,
+        run_pytest=False,
+        run_leaf_checks=True,
+        leaf_check_runner=fake_leaf,
+    )
+    assert rc == 0
+    assert seen == ["eb-metrics"]
+
+
+def test_leaf_check_failure_fails_the_audit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    mod = _load_ecosystem_module()
+    monkeypatch.setattr(mod, "tooling_symlink_issues", lambda *_a, **_k: [])
+    eco, integration = _make_workspace(tmp_path)
+    metrics = eco / "eb-metrics"
+    _write_pyproject(metrics, name="eb-metrics")
+    _write_src_module(metrics, "eb_metrics", "from __future__ import annotations\n")
+    tooling = metrics / "tooling"
+    tooling.mkdir(parents=True)
+    (tooling / "check.py").write_text("raise SystemExit(1)\n", encoding="utf-8")
+
+    rc = mod.run_audit(
+        ecosystem_root=eco,
+        integration_root=integration,
+        run_pytest=False,
+        run_leaf_checks=True,
+        leaf_check_runner=lambda **_k: 1,
+    )
+    assert rc == 1
+
+
+def test_invoke_leaf_check_passes_skip_ecosystem(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    mod = _load_ecosystem_module()
+    captured: dict[str, object] = {}
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> object:
+        captured["cmd"] = cmd
+
+        class _Proc:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        return _Proc()
+
+    monkeypatch.setattr(mod.subprocess, "run", fake_run)
+    monkeypatch.setattr(mod, "_print_proc", lambda *_a, **_k: None)
+    rc = mod.invoke_leaf_check(cwd=tmp_path)
+    assert rc == 0
+    cmd = captured["cmd"]
+    assert isinstance(cmd, list)
+    assert "--skip-ecosystem" in cmd
+    assert "--no-fix" not in cmd

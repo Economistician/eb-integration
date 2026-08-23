@@ -40,6 +40,7 @@ _ECOSYSTEM_SIBLING_NAMES: tuple[str, ...] = (
     "eb-features",
     "eb-optimization",
     "eb-adapters",
+    "eb-examples",
     "electric-barometer",
 )
 
