@@ -24,3 +24,21 @@ public symbols in root `__init__.py` files.
 
 Leaf changes must only touch local package files. System-wide master changelogs
 are compiled at the integration hub level in CI.
+
+## Documentation & Voice Protocol
+
+Published docs, module docstrings, READMEs, and script headers must read as
+native library documentation—not chat transcripts or prompt specifications.
+
+1. **No conversational leftovers.** Do not use meta-announcements, chat outros
+   (e.g. "If you want, next we can…"), or second-person tutorial phrasing in
+   committed documentation.
+2. **Concise module docstrings.** Module headers are 1–2 imperative sentences
+   focused on technical mechanics. Do not write multi-paragraph essays with
+   "Motivation", "Design goals", or "If you only have a single…" asides.
+3. **No redundant default notes.** Do not restate "Required; there is no
+   default" when the function signature already omits a default. Docstrings
+   describe meaning and expected types only.
+4. **Imperative voice.** Prefer objective statements ("Computes…", "Groups by…",
+   "Avoids hard dependency…") over first-person narrative ("We compute…",
+   "We intentionally avoid…").
