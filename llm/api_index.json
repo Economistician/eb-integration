@@ -118,7 +118,7 @@
       "name": "QSRIntervalPanelDemandSpecV1",
       "package": "eb_adapters",
       "public_import": "from eb_adapters import QSRIntervalPanelDemandSpecV1",
-      "signature": "(site_col: 'str' = 'STORE_ID', forecast_entity_col: 'str' = 'FORECAST_ENTITY_KEY', time_mode: 'str' = 'day_interval', business_day_col: 'str | None' = 'BUSINESS_DATE', interval_index_col: 'str | None' = 'INTERVAL_INDEX', interval_start_ts_col: 'str | None' = 'INTERVAL_INDEX_START_TIME', interval_minutes: 'int' = 30, periods_per_day: 'int' = 48, business_day_start_local_minutes: 'int | None' = 240, y_source_col: 'str' = 'FORECAST_ENTITY_DEMAND_QUANTITY', is_interval_observable_col: 'str | None' = 'IS_INTERVAL_OBSERVABLE', is_day_observable_col: 'str | None' = 'IS_DATE_OBSERVABLE', is_structural_zero_col: 'str' = 'IS_STRUCTURAL_ZERO', is_possible_col: 'str | None' = None, impute_zero_when_observable: 'bool' = False) -> None",
+      "signature": "(site_col: 'str' = 'STORE_ID', forecast_entity_col: 'str' = 'FORECAST_ENTITY_KEY', time_mode: 'str' = 'day_interval', business_day_col: 'str | None' = 'BUSINESS_DATE', interval_index_col: 'str | None' = 'INTERVAL_INDEX', interval_start_ts_col: 'str | None' = 'INTERVAL_INDEX_START_TIME', interval_minutes: 'int' = 30, periods_per_day: 'int' = 48, business_day_start_local_minutes: 'int | None' = 240, y_source_col: 'str' = 'FORECAST_ENTITY_DEMAND_QUANTITY', is_trainable_col: 'str | None' = 'IS_TRAINABLE', is_interval_observable_col: 'str | None' = 'IS_INTERVAL_OBSERVABLE', is_day_observable_col: 'str | None' = 'IS_DATE_OBSERVABLE', is_structural_zero_col: 'str' = 'IS_STRUCTURAL_ZERO', is_possible_col: 'str | None' = None, impute_zero_when_observable: 'bool' = False) -> None",
       "tags": [
         "adapter",
         "eb_adapters",
@@ -211,7 +211,7 @@
       "name": "QSRIntervalPanelDemandSpecV1",
       "package": "eb_adapters",
       "public_import": "from eb_adapters.contracts.demand_panel.v1.qsr import QSRIntervalPanelDemandSpecV1",
-      "signature": "(site_col: 'str' = 'STORE_ID', forecast_entity_col: 'str' = 'FORECAST_ENTITY_KEY', time_mode: 'str' = 'day_interval', business_day_col: 'str | None' = 'BUSINESS_DATE', interval_index_col: 'str | None' = 'INTERVAL_INDEX', interval_start_ts_col: 'str | None' = 'INTERVAL_INDEX_START_TIME', interval_minutes: 'int' = 30, periods_per_day: 'int' = 48, business_day_start_local_minutes: 'int | None' = 240, y_source_col: 'str' = 'FORECAST_ENTITY_DEMAND_QUANTITY', is_interval_observable_col: 'str | None' = 'IS_INTERVAL_OBSERVABLE', is_day_observable_col: 'str | None' = 'IS_DATE_OBSERVABLE', is_structural_zero_col: 'str' = 'IS_STRUCTURAL_ZERO', is_possible_col: 'str | None' = None, impute_zero_when_observable: 'bool' = False) -> None",
+      "signature": "(site_col: 'str' = 'STORE_ID', forecast_entity_col: 'str' = 'FORECAST_ENTITY_KEY', time_mode: 'str' = 'day_interval', business_day_col: 'str | None' = 'BUSINESS_DATE', interval_index_col: 'str | None' = 'INTERVAL_INDEX', interval_start_ts_col: 'str | None' = 'INTERVAL_INDEX_START_TIME', interval_minutes: 'int' = 30, periods_per_day: 'int' = 48, business_day_start_local_minutes: 'int | None' = 240, y_source_col: 'str' = 'FORECAST_ENTITY_DEMAND_QUANTITY', is_trainable_col: 'str | None' = 'IS_TRAINABLE', is_interval_observable_col: 'str | None' = 'IS_INTERVAL_OBSERVABLE', is_day_observable_col: 'str | None' = 'IS_DATE_OBSERVABLE', is_structural_zero_col: 'str' = 'IS_STRUCTURAL_ZERO', is_possible_col: 'str | None' = None, impute_zero_when_observable: 'bool' = False) -> None",
       "tags": [
         "adapter",
         "contract",
@@ -5899,7 +5899,7 @@
       ]
     }
   ],
-  "generated_at_utc": "2026-08-24T01:33:16+00:00",
+  "generated_at_utc": "2026-08-24T01:42:48+00:00",
   "generator": {
     "repo": "eb-integration",
     "script": "tooling/build_api_index.py",
