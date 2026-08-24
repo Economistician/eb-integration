@@ -733,7 +733,7 @@ notes:
       "eb_optimization",
       "electric_barometer"
     ],
-    "python_version": "3.13.3"
+    "python_version": "3.14.3"
   },
   "entries": [
     {
@@ -828,6 +828,25 @@ notes:
       ]
     },
     {
+      "doc_summary": "Column and semantic mapping for a QSR-style interval demand panel.",
+      "id": "eb_adapters:eb_adapters:QSRIntervalPanelDemandSpecV1",
+      "import_path": "eb_adapters:QSRIntervalPanelDemandSpecV1",
+      "io": {
+        "defined_in": "eb_adapters.contracts.demand_panel.v1.qsr.entity_usage_interval_panel"
+      },
+      "kind": "class",
+      "module": "eb_adapters",
+      "name": "QSRIntervalPanelDemandSpecV1",
+      "package": "eb_adapters",
+      "public_import": "from eb_adapters import QSRIntervalPanelDemandSpecV1",
+      "signature": "(site_col: 'str' = 'STORE_ID', forecast_entity_col: 'str' = 'FORECAST_ENTITY_ID', time_mode: 'str' = 'day_interval', business_day_col: 'str | None' = 'BUSINESS_DAY', interval_index_col: 'str | None' = 'INTERVAL_30_INDEX', interval_start_ts_col: 'str | None' = 'INTERVAL_START_TS', interval_minutes: 'int' = 30, periods_per_day: 'int' = 48, business_day_start_local_minutes: 'int | None' = 240, y_source_col: 'str' = 'LABEL_COMMODITY_USAGE_QTY', is_interval_observable_col: 'str | None' = 'IS_INTERVAL_OBSERVABLE', is_day_observable_col: 'str | None' = 'IS_DAY_OBSERVABLE', is_structural_zero_col: 'str' = 'IS_STRUCTURAL_ZERO', is_possible_col: 'str | None' = None, impute_zero_when_observable: 'bool' = False) -> None",
+      "tags": [
+        "adapter",
+        "eb_adapters",
+        "panel"
+      ]
+    },
+    {
       "doc_summary": "Adapter for `statsmodels` SARIMAX.",
       "id": "eb_adapters:eb_adapters:SarimaxAdapter",
       "import_path": "eb_adapters:SarimaxAdapter",
@@ -865,24 +884,6 @@ notes:
     },
     {
       "doc_summary": "Lightweight cloning utility for estimator-like or adapter-like objects.",
-      "id": "eb_adapters:eb_adapters:_clone_model",
-      "import_path": "eb_adapters:_clone_model",
-      "io": {
-        "defined_in": "eb_adapters.models.base"
-      },
-      "kind": "function",
-      "module": "eb_adapters",
-      "name": "_clone_model",
-      "package": "eb_adapters",
-      "public_import": "from eb_adapters import _clone_model",
-      "signature": "(model: 'Any') -> 'Any'",
-      "tags": [
-        "adapter",
-        "eb_adapters"
-      ]
-    },
-    {
-      "doc_summary": "Lightweight cloning utility for estimator-like or adapter-like objects.",
       "id": "eb_adapters:eb_adapters:clone_model",
       "import_path": "eb_adapters:clone_model",
       "io": {
@@ -897,6 +898,26 @@ notes:
       "tags": [
         "adapter",
         "eb_adapters"
+      ]
+    },
+    {
+      "doc_summary": "Adapt a QSR-style interval dataframe to PanelDemandV1.",
+      "id": "eb_adapters:eb_adapters:to_panel_demand_v1",
+      "import_path": "eb_adapters:to_panel_demand_v1",
+      "io": {
+        "defined_in": "eb_adapters.contracts.demand_panel.v1.qsr.entity_usage_interval_panel"
+      },
+      "kind": "function",
+      "module": "eb_adapters",
+      "name": "to_panel_demand_v1",
+      "package": "eb_adapters",
+      "public_import": "from eb_adapters import to_panel_demand_v1",
+      "signature": "(frame: 'pd.DataFrame', *, spec: 'QSRIntervalPanelDemandSpecV1 | None' = None, validate: 'bool' = True) -> 'PanelDemandV1'",
+      "tags": [
+        "adapter",
+        "dataframe",
+        "eb_adapters",
+        "panel"
       ]
     },
     {
@@ -1086,6 +1107,86 @@ notes:
       ]
     },
     {
+      "doc_summary": "Validate and construct a V1 cost-asymmetry specification artifact.",
+      "id": "eb_contracts:eb_contracts:cost_asymmetry_v1",
+      "import_path": "eb_contracts:cost_asymmetry_v1",
+      "io": {
+        "defined_in": "eb_contracts.api.validate"
+      },
+      "kind": "function",
+      "module": "eb_contracts",
+      "name": "cost_asymmetry_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts import cost_asymmetry_v1",
+      "signature": "(frame: 'pd.DataFrame') -> 'CostAsymmetrySpecV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validate a V1 demand panel artifact.",
+      "id": "eb_contracts:eb_contracts:panel_demand_v1",
+      "import_path": "eb_contracts:panel_demand_v1",
+      "io": {
+        "defined_in": "eb_contracts.api.validate"
+      },
+      "kind": "function",
+      "module": "eb_contracts",
+      "name": "panel_demand_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts import panel_demand_v1",
+      "signature": "(panel: 'PanelDemandV1') -> 'None'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validate and construct a V1 panel point forecast artifact.",
+      "id": "eb_contracts:eb_contracts:panel_point_forecast_v1",
+      "import_path": "eb_contracts:panel_point_forecast_v1",
+      "io": {
+        "defined_in": "eb_contracts.api.validate"
+      },
+      "kind": "function",
+      "module": "eb_contracts",
+      "name": "panel_point_forecast_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts import panel_point_forecast_v1",
+      "signature": "(frame: 'pd.DataFrame') -> 'PanelPointForecastV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Validate and construct a V1 panel point result artifact.",
+      "id": "eb_contracts:eb_contracts:panel_point_result_v1",
+      "import_path": "eb_contracts:panel_point_result_v1",
+      "io": {
+        "defined_in": "eb_contracts.api.validate"
+      },
+      "kind": "function",
+      "module": "eb_contracts",
+      "name": "panel_point_result_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts import panel_point_result_v1",
+      "signature": "(frame: 'pd.DataFrame') -> 'PanelPointResultV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "panel",
+        "validation"
+      ]
+    },
+    {
       "doc_summary": "Alias for `panel_point_forecast_v1` (kept for backwards compatibility).",
       "id": "eb_contracts:eb_contracts:panel_point_v1",
       "import_path": "eb_contracts:panel_point_v1",
@@ -1103,6 +1204,27 @@ notes:
         "eb_contracts",
         "forecast",
         "panel"
+      ]
+    },
+    {
+      "doc_summary": "Validate and construct a V1 panel quantile forecast artifact.",
+      "id": "eb_contracts:eb_contracts:panel_quantile_forecast_v1",
+      "import_path": "eb_contracts:panel_quantile_forecast_v1",
+      "io": {
+        "defined_in": "eb_contracts.api.validate"
+      },
+      "kind": "function",
+      "module": "eb_contracts",
+      "name": "panel_quantile_forecast_v1",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts import panel_quantile_forecast_v1",
+      "signature": "(frame: 'pd.DataFrame') -> 'PanelQuantileForecastV1'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "forecast",
+        "panel",
+        "validation"
       ]
     },
     {
@@ -1606,7 +1728,512 @@ notes:
       ]
     },
     {
-      "doc_summary": "Compute CWSL from a DataFrame.",
+      "doc_summary": "A single contract violation discovered during validation.",
+      "id": "eb_contracts:eb_contracts.validation:ContractViolation",
+      "import_path": "eb_contracts.validation:ContractViolation",
+      "io": {
+        "defined_in": "eb_contracts.validation.errors"
+      },
+      "kind": "class",
+      "module": "eb_contracts.validation",
+      "name": "ContractViolation",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.validation import ContractViolation",
+      "signature": "(code: 'str', message: 'str') -> None",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Raised when one or more contract violations occur in strict mode.",
+      "id": "eb_contracts:eb_contracts.validation:ContractViolationError",
+      "import_path": "eb_contracts.validation:ContractViolationError",
+      "io": {
+        "defined_in": "eb_contracts.validation.errors"
+      },
+      "kind": "class",
+      "module": "eb_contracts.validation",
+      "name": "ContractViolationError",
+      "package": "eb_contracts",
+      "public_import": "from eb_contracts.validation import ContractViolationError",
+      "signature": "(*, contract: 'str', violations: 'Sequence[ContractViolation]') -> 'None'",
+      "tags": [
+        "contract",
+        "eb_contracts",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Compatibility taxonomy for demand resolution / quantization.",
+      "id": "eb_evaluation:eb_evaluation:DQCClass",
+      "import_path": "eb_evaluation:DQCClass",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.dqc"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "DQCClass",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import DQCClass",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Result container for DQC classification + rationale.",
+      "id": "eb_evaluation:eb_evaluation:DQCResult",
+      "import_path": "eb_evaluation:DQCResult",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.dqc"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "DQCResult",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import DQCResult",
+      "signature": "(dqc_class: 'DQCClass', signals: 'DQCSignals', reasons: 'tuple[str, ...]') -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Observable signals describing demand quantization.",
+      "id": "eb_evaluation:eb_evaluation:DQCSignals",
+      "import_path": "eb_evaluation:DQCSignals",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.dqc"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "DQCSignals",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import DQCSignals",
+      "signature": "(n_obs: 'int', nonzero_obs: 'int', granularity: 'float | None', multiple_rate: 'float', support_size: 'int', zero_mass: 'float', small_value_mass: 'float', offgrid_mad: 'float', candidate_units: 'tuple[float, ...]', unit_scores: 'tuple[tuple[float, float], ...]', pack_signature: 'tuple[float, ...]' = ()) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Thresholds for DQC classification.",
+      "id": "eb_evaluation:eb_evaluation:DQCThresholds",
+      "import_path": "eb_evaluation:DQCThresholds",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.dqc"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "DQCThresholds",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import DQCThresholds",
+      "signature": "(multiple_rate_quantized: 'float' = 0.9, multiple_rate_packed: 'float' = 0.95, offgrid_mad_ratio_max: 'float' = 0.1, min_nonzero_obs: 'int' = 50, round_decimals: 'int' = 6, small_value_max: 'float' = 20.0, candidate_units: 'tuple[float, ...]' = (1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 16.0), pack_units_min_count: 'int' = 2, pack_unit_mass_min: 'float' = 0.1) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Admissibility class for a Forecast Admissibility Surface slice.",
+      "id": "eb_evaluation:eb_evaluation:FASClass",
+      "import_path": "eb_evaluation:FASClass",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fas"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "FASClass",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import FASClass",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Thresholds that define ALLOWED / CONDITIONAL / BLOCKED.",
+      "id": "eb_evaluation:eb_evaluation:FASThresholds",
+      "import_path": "eb_evaluation:FASThresholds",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fas"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "FASThresholds",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import FASThresholds",
+      "signature": "(blocked_spike_rate_ge: 'float' = 0.3, blocked_p95_ae_ge: 'float' = 25.0, conditional_spike_rate_ge: 'float' = 0.05, conditional_p95_ae_ge: 'float' = 10.0, blocked_shortfall_spike_rate_ge: 'float | None' = None, blocked_p95_shortfall_ge: 'float | None' = None, conditional_shortfall_spike_rate_ge: 'float | None' = None, conditional_p95_shortfall_ge: 'float | None' = None, min_valid_rows: 'int' = 200, min_nonzero_rows: 'int | None' = None) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Compatibility taxonomy for forecast primitives.",
+      "id": "eb_evaluation:eb_evaluation:FPCClass",
+      "import_path": "eb_evaluation:FPCClass",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "FPCClass",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import FPCClass",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Result container for classification + rationale.",
+      "id": "eb_evaluation:eb_evaluation:FPCResult",
+      "import_path": "eb_evaluation:FPCResult",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "FPCResult",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import FPCResult",
+      "signature": "(fpc_class: 'FPCClass', signals: 'FPCSignals', reasons: 'tuple[str, ...]') -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Observable signals used to classify forecast primitive compatibility.",
+      "id": "eb_evaluation:eb_evaluation:FPCSignals",
+      "import_path": "eb_evaluation:FPCSignals",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "FPCSignals",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import FPCSignals",
+      "signature": "(nsl_base: 'float', nsl_ral: 'float', delta_nsl: 'float', hr_base_tau: 'float', hr_ral_tau: 'float', delta_hr_tau: 'float', ud: 'float', cwsl_base: 'float | None' = None, cwsl_ral: 'float | None' = None, delta_cwsl: 'float | None' = None, intervals: 'int | None' = None, shortfall_intervals: 'int | None' = None) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Thresholds for FPC classification.",
+      "id": "eb_evaluation:eb_evaluation:FPCThresholds",
+      "import_path": "eb_evaluation:FPCThresholds",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "FPCThresholds",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import FPCThresholds",
+      "signature": "(nsl_very_low: 'float' = 0.03, delta_nsl_tiny: 'float' = 0.02, hr_very_low: 'float' = 0.05, delta_hr_large_drop: 'float' = -0.1, ud_high: 'float' = 10.0, delta_cwsl_high: 'float' = 0.75) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Result of running the governance gate from common raw inputs.",
+      "id": "eb_evaluation:eb_evaluation:GateResult",
+      "import_path": "eb_evaluation:GateResult",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.validate"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "GateResult",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import GateResult",
+      "signature": "(dqc: 'DQCResult', fpc_raw: 'FPCResult', fpc_snapped: 'FPCResult', decision: 'GovernanceDecision', recommended_mode: 'RecommendedEvaluationMode', recommendations: 'tuple[str, ...]' = ()) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Authoritative governance decision.",
+      "id": "eb_evaluation:eb_evaluation:GovernanceDecision",
+      "import_path": "eb_evaluation:GovernanceDecision",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "GovernanceDecision",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import GovernanceDecision",
+      "signature": "(dqc: 'DQCResult', fpc_raw: 'FPCResult', fpc_snapped: 'FPCResult', snap_required: 'bool', snap_unit: 'float | None', tau_policy: 'TauPolicy', ral_policy: 'RALPolicy', status: 'GovernanceStatus', max_delta_nsl_raw: 'float | None' = None, max_delta_nsl_snap: 'float | None' = None, fas_class: 'FASClass | None' = None, reasons: 'tuple[str, ...]' = ()) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Named bundle of governance thresholds.",
+      "id": "eb_evaluation:eb_evaluation:GovernancePreset",
+      "import_path": "eb_evaluation:GovernancePreset",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.presets"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "GovernancePreset",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import GovernancePreset",
+      "signature": "(name: 'str', description: 'str', dqc: 'DQCThresholds', fpc: 'FPCThresholds', nonnegativity_mode: 'NonnegativityMode' = 'clip_zero') -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Whether readiness adjustment is allowed downstream.",
+      "id": "eb_evaluation:eb_evaluation:GovernanceRALPolicy",
+      "import_path": "eb_evaluation:GovernanceRALPolicy",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "GovernanceRALPolicy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import GovernanceRALPolicy",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Portable governance result for a single demand stream.",
+      "id": "eb_evaluation:eb_evaluation:GovernanceResult",
+      "import_path": "eb_evaluation:GovernanceResult",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.results"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "GovernanceResult",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import GovernanceResult",
+      "signature": "(recommended_mode: 'str', snap_required: 'bool', snap_unit: 'float | None', tau_policy: 'TauPolicy', ral_policy: 'RALPolicy', status: 'GovernanceStatus', dqc_class: 'DQCClass', fpc_raw_class: 'FPCClass', fpc_snapped_class: 'FPCClass', dqc_reasons: 'tuple[str, ...]' = (), fpc_raw_reasons: 'tuple[str, ...]' = (), fpc_snapped_reasons: 'tuple[str, ...]' = (), recommendations: 'tuple[str, ...]' = ()) -> None",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Traffic-light status for downstream gating.",
+      "id": "eb_evaluation:eb_evaluation:GovernanceStatus",
+      "import_path": "eb_evaluation:GovernanceStatus",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "GovernanceStatus",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import GovernanceStatus",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "How to interpret tolerance \u03c4 downstream.",
+      "id": "eb_evaluation:eb_evaluation:GovernanceTauPolicy",
+      "import_path": "eb_evaluation:GovernanceTauPolicy",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "GovernanceTauPolicy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import GovernanceTauPolicy",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Whether readiness adjustment is allowed downstream.",
+      "id": "eb_evaluation:eb_evaluation:RALPolicy",
+      "import_path": "eb_evaluation:RALPolicy",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "RALPolicy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import RALPolicy",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "How to interpret tolerance \u03c4 downstream.",
+      "id": "eb_evaluation:eb_evaluation:TauPolicy",
+      "import_path": "eb_evaluation:TauPolicy",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "class",
+      "module": "eb_evaluation",
+      "name": "TauPolicy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import TauPolicy",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Canonical RAL application utility: - joins a required governance decisions table onto a panel, - produces a raw RAL prediction column (from yhat_ral_col or uplift_col), - applies governed nonnegativity + snap-to-grid policies, - emits governed prediction columns + audit columns.",
+      "id": "eb_evaluation:eb_evaluation:apply_ral",
+      "import_path": "eb_evaluation:apply_ral",
+      "io": {
+        "defined_in": "eb_evaluation.adjustment.ral"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "apply_ral",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import apply_ral",
+      "signature": "(df: 'pd.DataFrame', *, join_keys: 'Sequence[str] | None' = None, pred_col: 'str | None' = None, output_col: 'str | None' = None, nonneg_mode: 'str | None' = None, decisions: 'pd.DataFrame | None' = None, key_cols: 'Sequence[str]' = ('forecast_entity_id',), yhat_base_col: 'str' = 'yhat_base', yhat_ral_col: 'str | None' = 'yhat_ral', uplift_col: 'str | None' = None, snap_required_col: 'str' = 'snap_required', snap_unit_col: 'str' = 'snap_unit', recommendations_col: 'str' = 'recommendations', snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = False, out_base_col: 'str' = 'yhat_base_governed', out_ral_col: 'str' = 'yhat_ral_governed', out_audit_prefix: 'str' = 'ral_apply_') -> 'pd.DataFrame'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "panel",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Build the FAS surface from an error anatomy table.",
+      "id": "eb_evaluation:eb_evaluation:build_fas_surface",
+      "import_path": "eb_evaluation:build_fas_surface",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fas"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "build_fas_surface",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import build_fas_surface",
+      "signature": "(*, anatomy: 'pd.DataFrame', keys: 'list[str]', thr: 'FASThresholds' = FASThresholds(blocked_spike_rate_ge=0.3, blocked_p95_ae_ge=25.0, conditional_spike_rate_ge=0.05, conditional_p95_ae_ge=10.0, blocked_shortfall_spike_rate_ge=None, blocked_p95_shortfall_ge=None, conditional_shortfall_spike_rate_ge=None, conditional_p95_shortfall_ge=None, min_valid_rows=200, min_nonzero_rows=None)) -> 'pd.DataFrame'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Compute FPCSignals from deterministic series.",
+      "id": "eb_evaluation:eb_evaluation:build_signals_from_series",
+      "import_path": "eb_evaluation:build_signals_from_series",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "build_signals_from_series",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import build_signals_from_series",
+      "signature": "(*, y: 'Sequence[float]', yhat_base: 'Sequence[float]', yhat_ral: 'Sequence[float]', tau: 'float', ud: 'float | None' = None, cwsl_r: 'float | None' = None, cost_ratio: 'float | None' = None) -> 'FPCSignals'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Classify demand quantization compatibility from realized demand values.",
+      "id": "eb_evaluation:eb_evaluation:classify_dqc",
+      "import_path": "eb_evaluation:classify_dqc",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.dqc"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "classify_dqc",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import classify_dqc",
+      "signature": "(y: 'Sequence[object]', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Classify forecast primitive compatibility from observable signals.",
+      "id": "eb_evaluation:eb_evaluation:classify_fpc",
+      "import_path": "eb_evaluation:classify_fpc",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "classify_fpc",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import classify_fpc",
+      "signature": "(signals: 'FPCSignals', thresholds: 'FPCThresholds | None' = None) -> 'FPCResult'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Compare multiple forecast models on the same target series.",
+      "id": "eb_evaluation:eb_evaluation:compare_forecasts",
+      "import_path": "eb_evaluation:compare_forecasts",
+      "io": {
+        "defined_in": "eb_evaluation.model_selection.compare"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "compare_forecasts",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import compare_forecasts",
+      "signature": "(y_true: 'ArrayLike', forecasts: 'Mapping[str, ArrayLike]', cu: 'float | ArrayLike', co: 'float | ArrayLike', sample_weight: 'ArrayLike | None' = None, tau: 'float | ArrayLike' = 2.0, *, cwsl_max: 'float') -> 'pd.DataFrame'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Compute CWSL for one DataFrame slice.",
       "id": "eb_evaluation:eb_evaluation:compute_cwsl_df",
       "import_path": "eb_evaluation:compute_cwsl_df",
       "io": {
@@ -1625,6 +2252,61 @@ notes:
       ]
     },
     {
+      "doc_summary": "Compute baseline-derived error anatomy by slice keys.",
+      "id": "eb_evaluation:eb_evaluation:compute_error_anatomy",
+      "import_path": "eb_evaluation:compute_error_anatomy",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fas"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "compute_error_anatomy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import compute_error_anatomy",
+      "signature": "(df: 'pd.DataFrame', *, y_col: 'str' = 'y', yhat_col: 'str', keys: 'list[str]', spike_ge: 'float' = 10.0) -> 'pd.DataFrame'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Produce an authoritative governance decision for a single realized series.",
+      "id": "eb_evaluation:eb_evaluation:decide_governance",
+      "import_path": "eb_evaluation:decide_governance",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "decide_governance",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import decide_governance",
+      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset' = 'balanced', fas_class: 'FASClass | str | None' = None) -> 'GovernanceDecision'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Serialize a DQCResult to a JSON-friendly dictionary.",
+      "id": "eb_evaluation:eb_evaluation:dqc_to_dict",
+      "import_path": "eb_evaluation:dqc_to_dict",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.dqc"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "dqc_to_dict",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import dqc_to_dict",
+      "signature": "(result: 'DQCResult') -> 'dict[str, object]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
       "doc_summary": "Evaluate governance across a panel of streams and return a per-stream summary table.",
       "id": "eb_evaluation:eb_evaluation:evaluate_governance_panel_df",
       "import_path": "eb_evaluation:evaluate_governance_panel_df",
@@ -1636,7 +2318,7 @@ notes:
       "name": "evaluate_governance_panel_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import evaluate_governance_panel_df",
-      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True) -> 'pd.DataFrame'",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, fas_class: 'FASClass | str | pd.Series | None' = None, fas_class_col: 'str | None' = None) -> 'pd.DataFrame'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -1657,7 +2339,7 @@ notes:
       "name": "evaluate_groups_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import evaluate_groups_df",
-      "signature": "(df: 'pd.DataFrame', group_cols: 'list[str]', *, actual_col: 'str' = 'actual_qty', forecast_col: 'str' = 'forecast_qty', cu: 'float | str' = 2.0, co: 'float | str' = 1.0, tau: 'float' = 2.0, sample_weight_col: 'str | None' = None) -> 'pd.DataFrame'",
+      "signature": "(df: 'pd.DataFrame', group_cols: 'list[str]', *, actual_col: 'str' = 'actual_qty', forecast_col: 'str' = 'forecast_qty', cu: 'float | str', co: 'float | str', tau: 'float' = 2.0, sample_weight_col: 'str | None' = None, cwsl_max: 'float') -> 'pd.DataFrame'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -1677,7 +2359,7 @@ notes:
       "name": "evaluate_hierarchy_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import evaluate_hierarchy_df",
-      "signature": "(df: 'pd.DataFrame', levels: 'dict[str, Sequence[str]]', actual_col: 'str', forecast_col: 'str', cu, co, tau: 'float | None' = None) -> 'dict[str, pd.DataFrame]'",
+      "signature": "(df: 'pd.DataFrame', levels: 'dict[str, Sequence[str]]', actual_col: 'str', forecast_col: 'str', cu: 'float | str', co: 'float | str', tau: 'float | None' = None, *, cwsl_max: 'float', sample_weight_col: 'str | None' = None) -> 'dict[str, pd.DataFrame]'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -1698,7 +2380,7 @@ notes:
       "name": "evaluate_panel_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import evaluate_panel_df",
-      "signature": "(df: 'pd.DataFrame', levels: 'dict[str, Sequence[str]]', actual_col: 'str', forecast_col: 'str', cu, co, tau: 'float | None' = None) -> 'pd.DataFrame'",
+      "signature": "(df: 'pd.DataFrame', levels: 'dict[str, Sequence[str]]', actual_col: 'str', forecast_col: 'str', cu, co, tau: 'float | None' = None, *, cwsl_max: 'float', sample_weight_col: 'str | None' = None) -> 'pd.DataFrame'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -1719,11 +2401,104 @@ notes:
       "name": "evaluate_panel_with_entity_R",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import evaluate_panel_with_entity_R",
-      "signature": "(df: 'pd.DataFrame', entity_R: 'pd.DataFrame', *, entity_col: 'str' = 'entity', y_true_col: 'str' = 'actual_qty', y_pred_col: 'str' = 'forecast_qty', R_col: 'str' = 'R', co_col: 'str' = 'co', tau: 'float' = 2.0, sample_weight_col: 'str | None' = None) -> 'pd.DataFrame'",
+      "signature": "(df: 'pd.DataFrame', entity_R: 'pd.DataFrame', *, entity_col: 'str' = 'entity', y_true_col: 'str' = 'actual_qty', y_pred_col: 'str' = 'forecast_qty', R_col: 'str' = 'R', co_col: 'str' = 'co', tau: 'float' = 2.0, sample_weight_col: 'str | None' = None, cwsl_max: 'float') -> 'pd.DataFrame'",
       "tags": [
         "eb_evaluation",
         "evaluation",
         "panel"
+      ]
+    },
+    {
+      "doc_summary": "Retrieve a governance preset by name.",
+      "id": "eb_evaluation:eb_evaluation:get_governance_preset",
+      "import_path": "eb_evaluation:get_governance_preset",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.presets"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "get_governance_preset",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import get_governance_preset",
+      "signature": "(name: 'str') -> 'GovernancePreset'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Resolve a preset into its governance policy knobs (non-threshold behavior).",
+      "id": "eb_evaluation:eb_evaluation:preset_policy",
+      "import_path": "eb_evaluation:preset_policy",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.presets"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "preset_policy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import preset_policy",
+      "signature": "(preset: 'str | GovernancePreset') -> 'NonnegativityMode'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Resolve a preset into (DQCThresholds, FPCThresholds).",
+      "id": "eb_evaluation:eb_evaluation:preset_thresholds",
+      "import_path": "eb_evaluation:preset_thresholds",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.presets"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "preset_thresholds",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import preset_thresholds",
+      "signature": "(preset: 'str | GovernancePreset') -> 'tuple[DQCThresholds, FPCThresholds]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": null,
+      "id": "eb_evaluation:eb_evaluation:results_to_dict",
+      "import_path": "eb_evaluation:results_to_dict",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "results_to_dict",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import results_to_dict",
+      "signature": "(result: 'FPCResult') -> 'dict[str, object]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Orchestrate governance from common raw inputs.",
+      "id": "eb_evaluation:eb_evaluation:run_governance_gate",
+      "import_path": "eb_evaluation:run_governance_gate",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.validate"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "run_governance_gate",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import run_governance_gate",
+      "signature": "(*, y: 'Sequence[float]', yhat_base: 'Sequence[float]', yhat_ral: 'Sequence[float]', tau: 'float', cwsl_r: 'float | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset | None' = None, nonneg_mode: 'NonnegMode' = 'none', fas_class: 'FASClass | str | None' = None) -> 'GateResult'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
       ]
     },
     {
@@ -1738,7 +2513,7 @@ notes:
       "name": "run_governance_workflow_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import run_governance_workflow_df",
-      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = True, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'tuple[pd.DataFrame, pd.DataFrame]'",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, fas_class: 'FASClass | str | pd.Series | None' = None, fas_class_col: 'str | None' = None, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = False, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'tuple[pd.DataFrame, pd.DataFrame]'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -1760,13 +2535,127 @@ notes:
       "name": "run_governance_workflow_df_dict",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import run_governance_workflow_df_dict",
-      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = True, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'dict[str, Any]'",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, fas_class: 'FASClass | str | pd.Series | None' = None, fas_class_col: 'str | None' = None, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = False, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'dict[str, Any]'",
       "tags": [
         "dataframe",
         "eb_evaluation",
         "evaluation",
         "governance",
         "workflow"
+      ]
+    },
+    {
+      "doc_summary": null,
+      "id": "eb_evaluation:eb_evaluation:slice_keys",
+      "import_path": "eb_evaluation:slice_keys",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fas"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "slice_keys",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import slice_keys",
+      "signature": "(mode: 'FASSliceMode', *, site_col: 'str' = 'site_id', entity_col: 'str' = 'forecast_entity_id', interval_col: 'str' = 'INTERVAL_30_INDEX') -> 'list[str]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Snap values to the detected demand grid.",
+      "id": "eb_evaluation:eb_evaluation:snap_to_grid",
+      "import_path": "eb_evaluation:snap_to_grid",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "snap_to_grid",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import snap_to_grid",
+      "signature": "(values: 'Sequence[float]', unit: 'float', *, mode: 'str' = 'ceil') -> 'list[float]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Return the supported slice mode strings.",
+      "id": "eb_evaluation:eb_evaluation:valid_slice_modes",
+      "import_path": "eb_evaluation:valid_slice_modes",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fas"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "valid_slice_modes",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import valid_slice_modes",
+      "signature": "() -> 'tuple[str, ...]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Run Demand Quantization Compatibility (DQC) classification.",
+      "id": "eb_evaluation:eb_evaluation:validate_dqc",
+      "import_path": "eb_evaluation:validate_dqc",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.validate"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "validate_dqc",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import validate_dqc",
+      "signature": "(*, y: 'Sequence[float]', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Run Forecast Primitive Compatibility (FPC) classification.",
+      "id": "eb_evaluation:eb_evaluation:validate_fpc",
+      "import_path": "eb_evaluation:validate_fpc",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.validate"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "validate_fpc",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import validate_fpc",
+      "signature": "(*, signals: 'FPCSignals', thresholds: 'FPCThresholds | None' = None) -> 'FPCResult'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast",
+        "validation"
+      ]
+    },
+    {
+      "doc_summary": "Run the governance decision contract (DQC x FPC) for a single entity.",
+      "id": "eb_evaluation:eb_evaluation:validate_governance",
+      "import_path": "eb_evaluation:validate_governance",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.validate"
+      },
+      "kind": "function",
+      "module": "eb_evaluation",
+      "name": "validate_governance",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation import validate_governance",
+      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset | None' = None, fas_class: 'FASClass | str | None' = None) -> 'GovernanceDecision'",
+      "tags": [
+        "contract",
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "validation"
       ]
     },
     {
@@ -1790,7 +2679,7 @@ notes:
       ]
     },
     {
-      "doc_summary": "Canonical RAL application utility: - optionally joins governance decisions onto a panel, - produces a raw RAL prediction column (from yhat_ral_col or uplift_col), - applies governed nonnegativity + snap-to-grid policies, - emits governed prediction columns + audit columns.",
+      "doc_summary": "Canonical RAL application utility: - joins a required governance decisions table onto a panel, - produces a raw RAL prediction column (from yhat_ral_col or uplift_col), - applies governed nonnegativity + snap-to-grid policies, - emits governed prediction columns + audit columns.",
       "id": "eb_evaluation:eb_evaluation.adjustment:apply_ral",
       "import_path": "eb_evaluation.adjustment:apply_ral",
       "io": {
@@ -1801,7 +2690,7 @@ notes:
       "name": "apply_ral",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.adjustment import apply_ral",
-      "signature": "(df: 'pd.DataFrame', *, join_keys: 'Sequence[str] | None' = None, pred_col: 'str | None' = None, output_col: 'str | None' = None, nonneg_mode: 'str | None' = None, decisions: 'pd.DataFrame | None' = None, key_cols: 'Sequence[str]' = ('forecast_entity_id',), yhat_base_col: 'str' = 'yhat_base', yhat_ral_col: 'str | None' = 'yhat_ral', uplift_col: 'str | None' = None, snap_required_col: 'str' = 'snap_required', snap_unit_col: 'str' = 'snap_unit', recommendations_col: 'str' = 'recommendations', snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = True, out_base_col: 'str' = 'yhat_base_governed', out_ral_col: 'str' = 'yhat_ral_governed', out_audit_prefix: 'str' = 'ral_apply_') -> 'pd.DataFrame'",
+      "signature": "(df: 'pd.DataFrame', *, join_keys: 'Sequence[str] | None' = None, pred_col: 'str | None' = None, output_col: 'str | None' = None, nonneg_mode: 'str | None' = None, decisions: 'pd.DataFrame | None' = None, key_cols: 'Sequence[str]' = ('forecast_entity_id',), yhat_base_col: 'str' = 'yhat_base', yhat_ral_col: 'str | None' = 'yhat_ral', uplift_col: 'str | None' = None, snap_required_col: 'str' = 'snap_required', snap_unit_col: 'str' = 'snap_unit', recommendations_col: 'str' = 'recommendations', snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = False, out_base_col: 'str' = 'yhat_base_governed', out_ral_col: 'str' = 'yhat_ral_governed', out_audit_prefix: 'str' = 'ral_apply_') -> 'pd.DataFrame'",
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -1811,7 +2700,7 @@ notes:
       ]
     },
     {
-      "doc_summary": "Compute CWSL from a DataFrame.",
+      "doc_summary": "Compute CWSL for one DataFrame slice.",
       "id": "eb_evaluation:eb_evaluation.dataframe:compute_cwsl_df",
       "import_path": "eb_evaluation.dataframe:compute_cwsl_df",
       "io": {
@@ -1841,7 +2730,7 @@ notes:
       "name": "evaluate_governance_panel_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.dataframe import evaluate_governance_panel_df",
-      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True) -> 'pd.DataFrame'",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, fas_class: 'FASClass | str | pd.Series | None' = None, fas_class_col: 'str | None' = None) -> 'pd.DataFrame'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -1862,7 +2751,7 @@ notes:
       "name": "evaluate_groups_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.dataframe import evaluate_groups_df",
-      "signature": "(df: 'pd.DataFrame', group_cols: 'list[str]', *, actual_col: 'str' = 'actual_qty', forecast_col: 'str' = 'forecast_qty', cu: 'float | str' = 2.0, co: 'float | str' = 1.0, tau: 'float' = 2.0, sample_weight_col: 'str | None' = None) -> 'pd.DataFrame'",
+      "signature": "(df: 'pd.DataFrame', group_cols: 'list[str]', *, actual_col: 'str' = 'actual_qty', forecast_col: 'str' = 'forecast_qty', cu: 'float | str', co: 'float | str', tau: 'float' = 2.0, sample_weight_col: 'str | None' = None, cwsl_max: 'float') -> 'pd.DataFrame'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -1882,7 +2771,7 @@ notes:
       "name": "evaluate_hierarchy_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.dataframe import evaluate_hierarchy_df",
-      "signature": "(df: 'pd.DataFrame', levels: 'dict[str, Sequence[str]]', actual_col: 'str', forecast_col: 'str', cu, co, tau: 'float | None' = None) -> 'dict[str, pd.DataFrame]'",
+      "signature": "(df: 'pd.DataFrame', levels: 'dict[str, Sequence[str]]', actual_col: 'str', forecast_col: 'str', cu: 'float | str', co: 'float | str', tau: 'float | None' = None, *, cwsl_max: 'float', sample_weight_col: 'str | None' = None) -> 'dict[str, pd.DataFrame]'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -1903,7 +2792,7 @@ notes:
       "name": "evaluate_panel_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.dataframe import evaluate_panel_df",
-      "signature": "(df: 'pd.DataFrame', levels: 'dict[str, Sequence[str]]', actual_col: 'str', forecast_col: 'str', cu, co, tau: 'float | None' = None) -> 'pd.DataFrame'",
+      "signature": "(df: 'pd.DataFrame', levels: 'dict[str, Sequence[str]]', actual_col: 'str', forecast_col: 'str', cu, co, tau: 'float | None' = None, *, cwsl_max: 'float', sample_weight_col: 'str | None' = None) -> 'pd.DataFrame'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -1924,7 +2813,7 @@ notes:
       "name": "evaluate_panel_with_entity_R",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.dataframe import evaluate_panel_with_entity_R",
-      "signature": "(df: 'pd.DataFrame', entity_R: 'pd.DataFrame', *, entity_col: 'str' = 'entity', y_true_col: 'str' = 'actual_qty', y_pred_col: 'str' = 'forecast_qty', R_col: 'str' = 'R', co_col: 'str' = 'co', tau: 'float' = 2.0, sample_weight_col: 'str | None' = None) -> 'pd.DataFrame'",
+      "signature": "(df: 'pd.DataFrame', entity_R: 'pd.DataFrame', *, entity_col: 'str' = 'entity', y_true_col: 'str' = 'actual_qty', y_pred_col: 'str' = 'forecast_qty', R_col: 'str' = 'R', co_col: 'str' = 'co', tau: 'float' = 2.0, sample_weight_col: 'str | None' = None, cwsl_max: 'float') -> 'pd.DataFrame'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -2044,7 +2933,7 @@ notes:
       "name": "run_governance_workflow_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.dataframe import run_governance_workflow_df",
-      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = True, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'tuple[pd.DataFrame, pd.DataFrame]'",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, fas_class: 'FASClass | str | pd.Series | None' = None, fas_class_col: 'str | None' = None, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = False, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'tuple[pd.DataFrame, pd.DataFrame]'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -2066,7 +2955,7 @@ notes:
       "name": "run_governance_workflow_df_dict",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.dataframe import run_governance_workflow_df_dict",
-      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = True, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'dict[str, Any]'",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, fas_class: 'FASClass | str | pd.Series | None' = None, fas_class_col: 'str | None' = None, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = False, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'dict[str, Any]'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -2085,7 +2974,7 @@ notes:
       "name": "evaluate_panel_with_entity_R",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.dataframe.entity import evaluate_panel_with_entity_R",
-      "signature": "(df: 'pd.DataFrame', entity_R: 'pd.DataFrame', *, entity_col: 'str' = 'entity', y_true_col: 'str' = 'actual_qty', y_pred_col: 'str' = 'forecast_qty', R_col: 'str' = 'R', co_col: 'str' = 'co', tau: 'float' = 2.0, sample_weight_col: 'str | None' = None) -> 'pd.DataFrame'",
+      "signature": "(df: 'pd.DataFrame', entity_R: 'pd.DataFrame', *, entity_col: 'str' = 'entity', y_true_col: 'str' = 'actual_qty', y_pred_col: 'str' = 'forecast_qty', R_col: 'str' = 'R', co_col: 'str' = 'co', tau: 'float' = 2.0, sample_weight_col: 'str | None' = None, cwsl_max: 'float') -> 'pd.DataFrame'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -2103,7 +2992,26 @@ notes:
       "name": "evaluate_governance_panel_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.dataframe.governance_panel import evaluate_governance_panel_df",
-      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True) -> 'pd.DataFrame'",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, fas_class: 'FASClass | str | pd.Series | None' = None, fas_class_col: 'str | None' = None) -> 'pd.DataFrame'",
+      "tags": [
+        "dataframe",
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Return True when a stream must not be governed on its finite subset.",
+      "id": "eb_evaluation:eb_evaluation.dataframe.governance_panel:finite_coverage_is_insufficient",
+      "import_path": "eb_evaluation.dataframe.governance_panel:finite_coverage_is_insufficient",
+      "io": null,
+      "kind": "function",
+      "module": "eb_evaluation.dataframe.governance_panel",
+      "name": "finite_coverage_is_insufficient",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.dataframe.governance_panel import finite_coverage_is_insufficient",
+      "signature": "(n_total: 'int', n_finite: 'int') -> 'bool'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -2122,7 +3030,7 @@ notes:
       "name": "run_governance_workflow_df",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.dataframe.governance_workflow import run_governance_workflow_df",
-      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = True, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'tuple[pd.DataFrame, pd.DataFrame]'",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, fas_class: 'FASClass | str | pd.Series | None' = None, fas_class_col: 'str | None' = None, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = False, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'tuple[pd.DataFrame, pd.DataFrame]'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -2142,7 +3050,7 @@ notes:
       "name": "run_governance_workflow_df_dict",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.dataframe.governance_workflow import run_governance_workflow_df_dict",
-      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = True, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'dict[str, Any]'",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, fas_class: 'FASClass | str | pd.Series | None' = None, fas_class_col: 'str | None' = None, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = False, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'dict[str, Any]'",
       "tags": [
         "dataframe",
         "eb_evaluation",
@@ -2221,6 +3129,25 @@ notes:
       "tags": [
         "eb_evaluation",
         "evaluation"
+      ]
+    },
+    {
+      "doc_summary": "Admissibility class for a Forecast Admissibility Surface slice.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics:FASClass",
+      "import_path": "eb_evaluation.diagnostics:FASClass",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fas"
+      },
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics",
+      "name": "FASClass",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics import FASClass",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "forecast"
       ]
     },
     {
@@ -2346,7 +3273,7 @@ notes:
       "name": "GovernanceDecision",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import GovernanceDecision",
-      "signature": "(dqc: 'DQCResult', fpc_raw: 'FPCResult', fpc_snapped: 'FPCResult', snap_required: 'bool', snap_unit: 'float | None', tau_policy: 'TauPolicy', ral_policy: 'RALPolicy', status: 'GovernanceStatus', max_delta_nsl_raw: 'float | None' = None, max_delta_nsl_snap: 'float | None' = None, reasons: 'tuple[str, ...]' = ()) -> None",
+      "signature": "(dqc: 'DQCResult', fpc_raw: 'FPCResult', fpc_snapped: 'FPCResult', snap_required: 'bool', snap_unit: 'float | None', tau_policy: 'TauPolicy', ral_policy: 'RALPolicy', status: 'GovernanceStatus', max_delta_nsl_raw: 'float | None' = None, max_delta_nsl_snap: 'float | None' = None, fas_class: 'FASClass | None' = None, reasons: 'tuple[str, ...]' = ()) -> None",
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -2370,6 +3297,26 @@ notes:
         "eb_evaluation",
         "evaluation",
         "governance"
+      ]
+    },
+    {
+      "doc_summary": "Whether readiness adjustment is allowed downstream.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics:GovernanceRALPolicy",
+      "import_path": "eb_evaluation.diagnostics:GovernanceRALPolicy",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics",
+      "name": "GovernanceRALPolicy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics import GovernanceRALPolicy",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance",
+        "ral"
       ]
     },
     {
@@ -2403,6 +3350,25 @@ notes:
       "name": "GovernanceStatus",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import GovernanceStatus",
+      "signature": "(*values)",
+      "tags": [
+        "eb_evaluation",
+        "evaluation",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "How to interpret tolerance \u03c4 downstream.",
+      "id": "eb_evaluation:eb_evaluation.diagnostics:GovernanceTauPolicy",
+      "import_path": "eb_evaluation.diagnostics:GovernanceTauPolicy",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "class",
+      "module": "eb_evaluation.diagnostics",
+      "name": "GovernanceTauPolicy",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics import GovernanceTauPolicy",
       "signature": "(*values)",
       "tags": [
         "eb_evaluation",
@@ -2495,7 +3461,7 @@ notes:
       "name": "classify_dqc",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import classify_dqc",
-      "signature": "(y: 'Sequence[float]', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
+      "signature": "(y: 'Sequence[object]', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
       "tags": [
         "eb_evaluation",
         "evaluation"
@@ -2550,7 +3516,7 @@ notes:
       "name": "decide_governance",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import decide_governance",
-      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset' = 'balanced') -> 'GovernanceDecision'",
+      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset' = 'balanced', fas_class: 'FASClass | str | None' = None) -> 'GovernanceDecision'",
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -2632,6 +3598,24 @@ notes:
       ]
     },
     {
+      "doc_summary": null,
+      "id": "eb_evaluation:eb_evaluation.diagnostics:results_to_dict",
+      "import_path": "eb_evaluation.diagnostics:results_to_dict",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "function",
+      "module": "eb_evaluation.diagnostics",
+      "name": "results_to_dict",
+      "package": "eb_evaluation",
+      "public_import": "from eb_evaluation.diagnostics import results_to_dict",
+      "signature": "(result: 'FPCResult') -> 'dict[str, object]'",
+      "tags": [
+        "eb_evaluation",
+        "evaluation"
+      ]
+    },
+    {
       "doc_summary": "Orchestrate governance from common raw inputs.",
       "id": "eb_evaluation:eb_evaluation.diagnostics:run_governance_gate",
       "import_path": "eb_evaluation.diagnostics:run_governance_gate",
@@ -2643,7 +3627,7 @@ notes:
       "name": "run_governance_gate",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import run_governance_gate",
-      "signature": "(*, y: 'Sequence[float]', yhat_base: 'Sequence[float]', yhat_ral: 'Sequence[float]', tau: 'float', cwsl_r: 'float | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset | None' = None) -> 'GateResult'",
+      "signature": "(*, y: 'Sequence[float]', yhat_base: 'Sequence[float]', yhat_ral: 'Sequence[float]', tau: 'float', cwsl_r: 'float | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset | None' = None, nonneg_mode: 'NonnegMode' = 'none', fas_class: 'FASClass | str | None' = None) -> 'GateResult'",
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -2755,7 +3739,7 @@ notes:
       "name": "validate_governance",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import validate_governance",
-      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset | None' = None) -> 'GovernanceDecision'",
+      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset | None' = None, fas_class: 'FASClass | str | None' = None) -> 'GovernanceDecision'",
       "tags": [
         "contract",
         "eb_evaluation",
@@ -2830,7 +3814,7 @@ notes:
       "name": "compare_forecasts",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.model_selection import compare_forecasts",
-      "signature": "(y_true: 'ArrayLike', forecasts: 'Mapping[str, ArrayLike]', cu: 'float | ArrayLike', co: 'float | ArrayLike', sample_weight: 'ArrayLike | None' = None, tau: 'float | ArrayLike' = 2.0) -> 'pd.DataFrame'",
+      "signature": "(y_true: 'ArrayLike', forecasts: 'Mapping[str, ArrayLike]', cu: 'float | ArrayLike', co: 'float | ArrayLike', sample_weight: 'ArrayLike | None' = None, tau: 'float | ArrayLike' = 2.0, *, cwsl_max: 'float') -> 'pd.DataFrame'",
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -2968,6 +3952,24 @@ notes:
       ]
     },
     {
+      "doc_summary": "Load the EB golden demo dataset (v1) as a pandas DataFrame.",
+      "id": "eb_examples:eb_examples:load_demo_golden_v1",
+      "import_path": "eb_examples:load_demo_golden_v1",
+      "io": {
+        "defined_in": "eb_examples.datasets.demo_golden_v1"
+      },
+      "kind": "function",
+      "module": "eb_examples",
+      "name": "load_demo_golden_v1",
+      "package": "eb_examples",
+      "public_import": "from eb_examples import load_demo_golden_v1",
+      "signature": "(*, as_dataframe: 'bool' = True) -> 'pd.DataFrame'",
+      "tags": [
+        "dataframe",
+        "eb_examples"
+      ]
+    },
+    {
       "doc_summary": null,
       "id": "eb_examples:eb_examples:resolve_base_dir",
       "import_path": "eb_examples:resolve_base_dir",
@@ -3021,6 +4023,98 @@ notes:
     },
     {
       "doc_summary": "Configuration for panel time-series feature engineering.",
+      "id": "eb_features:eb_features:FeatureConfig",
+      "import_path": "eb_features:FeatureConfig",
+      "io": {
+        "defined_in": "eb_features.panel.engineering"
+      },
+      "kind": "class",
+      "module": "eb_features",
+      "name": "FeatureConfig",
+      "package": "eb_features",
+      "public_import": "from eb_features import FeatureConfig",
+      "signature": "(lag_steps: 'Sequence[int] | None' = <factory>, rolling_windows: 'Sequence[int] | None' = <factory>, rolling_stats: 'Sequence[str]' = <factory>, calendar_features: 'Sequence[str]' = <factory>, use_cyclical_time: 'bool' = True, regressor_cols: 'Sequence[str] | None' = None, static_cols: 'Sequence[str] | None' = None, dropna: 'bool' = True, leakage_safe_rolling: 'bool' = True) -> None",
+      "tags": [
+        "eb_features",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Transform panel time-series data into a model-ready ``(X, y, feature_names)`` triple.",
+      "id": "eb_features:eb_features:FeatureEngineer",
+      "import_path": "eb_features:FeatureEngineer",
+      "io": {
+        "defined_in": "eb_features.panel.engineering"
+      },
+      "kind": "class",
+      "module": "eb_features",
+      "name": "FeatureEngineer",
+      "package": "eb_features",
+      "public_import": "from eb_features import FeatureEngineer",
+      "signature": "(entity_col: 'str' = 'entity_id', timestamp_col: 'str' = 'timestamp', target_col: 'str' = 'target') -> 'None'",
+      "tags": [
+        "eb_features",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Add calendar/time-derived features to a DataFrame.",
+      "id": "eb_features:eb_features:add_calendar_features",
+      "import_path": "eb_features:add_calendar_features",
+      "io": {
+        "defined_in": "eb_features.panel.calendar"
+      },
+      "kind": "function",
+      "module": "eb_features",
+      "name": "add_calendar_features",
+      "package": "eb_features",
+      "public_import": "from eb_features import add_calendar_features",
+      "signature": "(df: 'pd.DataFrame', *, timestamp_col: 'str', calendar_features: 'Sequence[str]', use_cyclical_time: 'bool' = True) -> 'tuple[pd.DataFrame, list[str], list[str]]'",
+      "tags": [
+        "dataframe",
+        "eb_features"
+      ]
+    },
+    {
+      "doc_summary": "Add target lag features to a panel DataFrame.",
+      "id": "eb_features:eb_features:add_lag_features",
+      "import_path": "eb_features:add_lag_features",
+      "io": {
+        "defined_in": "eb_features.panel.lags"
+      },
+      "kind": "function",
+      "module": "eb_features",
+      "name": "add_lag_features",
+      "package": "eb_features",
+      "public_import": "from eb_features import add_lag_features",
+      "signature": "(df: 'pd.DataFrame', *, entity_col: 'str', target_col: 'str', lag_steps: 'Sequence[int] | None') -> 'tuple[pd.DataFrame, list[str]]'",
+      "tags": [
+        "dataframe",
+        "eb_features",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Add rolling window statistics features to a panel DataFrame.",
+      "id": "eb_features:eb_features:add_rolling_features",
+      "import_path": "eb_features:add_rolling_features",
+      "io": {
+        "defined_in": "eb_features.panel.rolling"
+      },
+      "kind": "function",
+      "module": "eb_features",
+      "name": "add_rolling_features",
+      "package": "eb_features",
+      "public_import": "from eb_features import add_rolling_features",
+      "signature": "(df: 'pd.DataFrame', *, entity_col: 'str', target_col: 'str', rolling_windows: 'Sequence[int] | None', rolling_stats: 'Sequence[str]', min_periods: 'int | None' = None, leakage_safe: 'bool' = True) -> 'tuple[pd.DataFrame, list[str]]'",
+      "tags": [
+        "dataframe",
+        "eb_features",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Configuration for panel time-series feature engineering.",
       "id": "eb_features:eb_features.panel:FeatureConfig",
       "import_path": "eb_features.panel:FeatureConfig",
       "io": {
@@ -3031,7 +4125,7 @@ notes:
       "name": "FeatureConfig",
       "package": "eb_features",
       "public_import": "from eb_features.panel import FeatureConfig",
-      "signature": "(lag_steps: 'Optional[Sequence[int]]' = <factory>, rolling_windows: 'Optional[Sequence[int]]' = <factory>, rolling_stats: 'Sequence[str]' = <factory>, calendar_features: 'Sequence[str]' = <factory>, use_cyclical_time: 'bool' = True, regressor_cols: 'Optional[Sequence[str]]' = None, static_cols: 'Optional[Sequence[str]]' = None, dropna: 'bool' = True, leakage_safe_rolling: 'bool' = True) -> None",
+      "signature": "(lag_steps: 'Sequence[int] | None' = <factory>, rolling_windows: 'Sequence[int] | None' = <factory>, rolling_stats: 'Sequence[str]' = <factory>, calendar_features: 'Sequence[str]' = <factory>, use_cyclical_time: 'bool' = True, regressor_cols: 'Sequence[str] | None' = None, static_cols: 'Sequence[str] | None' = None, dropna: 'bool' = True, leakage_safe_rolling: 'bool' = True) -> None",
       "tags": [
         "eb_features",
         "panel"
@@ -3050,6 +4144,81 @@ notes:
       "package": "eb_features",
       "public_import": "from eb_features.panel import FeatureEngineer",
       "signature": "(entity_col: 'str' = 'entity_id', timestamp_col: 'str' = 'timestamp', target_col: 'str' = 'target') -> 'None'",
+      "tags": [
+        "eb_features",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Add calendar/time-derived features to a DataFrame.",
+      "id": "eb_features:eb_features.panel:add_calendar_features",
+      "import_path": "eb_features.panel:add_calendar_features",
+      "io": {
+        "defined_in": "eb_features.panel.calendar"
+      },
+      "kind": "function",
+      "module": "eb_features.panel",
+      "name": "add_calendar_features",
+      "package": "eb_features",
+      "public_import": "from eb_features.panel import add_calendar_features",
+      "signature": "(df: 'pd.DataFrame', *, timestamp_col: 'str', calendar_features: 'Sequence[str]', use_cyclical_time: 'bool' = True) -> 'tuple[pd.DataFrame, list[str], list[str]]'",
+      "tags": [
+        "dataframe",
+        "eb_features",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Add target lag features to a panel DataFrame.",
+      "id": "eb_features:eb_features.panel:add_lag_features",
+      "import_path": "eb_features.panel:add_lag_features",
+      "io": {
+        "defined_in": "eb_features.panel.lags"
+      },
+      "kind": "function",
+      "module": "eb_features.panel",
+      "name": "add_lag_features",
+      "package": "eb_features",
+      "public_import": "from eb_features.panel import add_lag_features",
+      "signature": "(df: 'pd.DataFrame', *, entity_col: 'str', target_col: 'str', lag_steps: 'Sequence[int] | None') -> 'tuple[pd.DataFrame, list[str]]'",
+      "tags": [
+        "dataframe",
+        "eb_features",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Add rolling window statistics features to a panel DataFrame.",
+      "id": "eb_features:eb_features.panel:add_rolling_features",
+      "import_path": "eb_features.panel:add_rolling_features",
+      "io": {
+        "defined_in": "eb_features.panel.rolling"
+      },
+      "kind": "function",
+      "module": "eb_features.panel",
+      "name": "add_rolling_features",
+      "package": "eb_features",
+      "public_import": "from eb_features.panel import add_rolling_features",
+      "signature": "(df: 'pd.DataFrame', *, entity_col: 'str', target_col: 'str', rolling_windows: 'Sequence[int] | None', rolling_stats: 'Sequence[str]', min_periods: 'int | None' = None, leakage_safe: 'bool' = True) -> 'tuple[pd.DataFrame, list[str]]'",
+      "tags": [
+        "dataframe",
+        "eb_features",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "Encode non-numeric feature columns as categorical codes.",
+      "id": "eb_features:eb_features.panel:encode_non_numeric_as_category_codes",
+      "import_path": "eb_features.panel:encode_non_numeric_as_category_codes",
+      "io": {
+        "defined_in": "eb_features.panel.encoders"
+      },
+      "kind": "function",
+      "module": "eb_features.panel",
+      "name": "encode_non_numeric_as_category_codes",
+      "package": "eb_features",
+      "public_import": "from eb_features.panel import encode_non_numeric_as_category_codes",
+      "signature": "(feature_frame: 'pd.DataFrame', *, columns: 'Iterable[str] | None' = None, dtype: 'str' = 'int32') -> 'pd.DataFrame'",
       "tags": [
         "eb_features",
         "panel"
@@ -3103,7 +4272,7 @@ notes:
       "name": "frs",
       "package": "eb_metrics",
       "public_import": "from eb_metrics import frs",
-      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', cu: 'float | ArrayLike', co: 'float | ArrayLike', sample_weight: 'ArrayLike | None' = None) -> 'float'",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', cu: 'float | ArrayLike', co: 'float | ArrayLike', *, cwsl_max: 'float', sample_weight: 'ArrayLike | None' = None) -> 'float'",
       "tags": [
         "eb_metrics",
         "forecast",
@@ -3512,7 +4681,7 @@ notes:
       "name": "frs",
       "package": "eb_metrics",
       "public_import": "from eb_metrics.metrics import frs",
-      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', cu: 'float | ArrayLike', co: 'float | ArrayLike', sample_weight: 'ArrayLike | None' = None) -> 'float'",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', cu: 'float | ArrayLike', co: 'float | ArrayLike', *, cwsl_max: 'float', sample_weight: 'ArrayLike | None' = None) -> 'float'",
       "tags": [
         "eb_metrics",
         "forecast",
@@ -4005,7 +5174,7 @@ notes:
       "name": "frs",
       "package": "eb_metrics",
       "public_import": "from eb_metrics.metrics.service import frs",
-      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', cu: 'float | ArrayLike', co: 'float | ArrayLike', sample_weight: 'ArrayLike | None' = None) -> 'float'",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', cu: 'float | ArrayLike', co: 'float | ArrayLike', *, cwsl_max: 'float', sample_weight: 'ArrayLike | None' = None) -> 'float'",
       "tags": [
         "eb_metrics",
         "forecast",
@@ -4061,6 +5230,60 @@ notes:
       ]
     },
     {
+      "doc_summary": "Frozen cost-ratio (R) policy configuration.",
+      "id": "eb_optimization:eb_optimization:CostRatioPolicy",
+      "import_path": "eb_optimization:CostRatioPolicy",
+      "io": {
+        "defined_in": "eb_optimization.policies.cost_ratio_policy"
+      },
+      "kind": "class",
+      "module": "eb_optimization",
+      "name": "CostRatioPolicy",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import CostRatioPolicy",
+      "signature": "(R_grid: 'Sequence[float]' = (0.5, 1.0, 2.0, 3.0), co: 'float' = 1.0, min_n: 'int' = 30) -> None",
+      "tags": [
+        "eb_optimization",
+        "optimization"
+      ]
+    },
+    {
+      "doc_summary": "Legacy DQCPolicy container.",
+      "id": "eb_optimization:eb_optimization:DQCPolicy",
+      "import_path": "eb_optimization:DQCPolicy",
+      "io": {
+        "defined_in": "eb_optimization.policies.dqc_policy"
+      },
+      "kind": "class",
+      "module": "eb_optimization",
+      "name": "DQCPolicy",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import DQCPolicy",
+      "signature": "(min_n_pos: 'int' = 50) -> None",
+      "tags": [
+        "eb_optimization",
+        "optimization"
+      ]
+    },
+    {
+      "doc_summary": "Output of DQC computation (policy-facing summary).",
+      "id": "eb_optimization:eb_optimization:DQCResultSummary",
+      "import_path": "eb_optimization:DQCResultSummary",
+      "io": {
+        "defined_in": "eb_optimization.policies.dqc_policy"
+      },
+      "kind": "class",
+      "module": "eb_optimization",
+      "name": "DQCResultSummary",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import DQCResultSummary",
+      "signature": "(dqc_class: 'DQCClass', delta_star: 'float | None', rho_star: 'float | None', n_pos: 'int', support_size: 'int', offgrid_mad_over_delta: 'float | None') -> None",
+      "tags": [
+        "eb_optimization",
+        "optimization"
+      ]
+    },
+    {
       "doc_summary": "Entity-level cost ratio calibration artifact.",
       "id": "eb_optimization:eb_optimization:EntityCostRatioEstimate",
       "import_path": "eb_optimization:EntityCostRatioEstimate",
@@ -4079,6 +5302,44 @@ notes:
       ]
     },
     {
+      "doc_summary": "Canonical two-band thresholds artifact.",
+      "id": "eb_optimization:eb_optimization:RALBandThresholds",
+      "import_path": "eb_optimization:RALBandThresholds",
+      "io": {
+        "defined_in": "eb_optimization.policies.ral_policy"
+      },
+      "kind": "class",
+      "module": "eb_optimization",
+      "name": "RALBandThresholds",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import RALBandThresholds",
+      "signature": "(mid: 'float' = 0.75, high: 'float' = 0.85) -> None",
+      "tags": [
+        "eb_optimization",
+        "optimization",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Risk-region thresholds for a two-band additive RAL policy.",
+      "id": "eb_optimization:eb_optimization:RALBands",
+      "import_path": "eb_optimization:RALBands",
+      "io": {
+        "defined_in": "eb_optimization.policies.ral_policy"
+      },
+      "kind": "class",
+      "module": "eb_optimization",
+      "name": "RALBands",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import RALBands",
+      "signature": "(mid: 'float' = 0.75, high: 'float' = 0.85) -> None",
+      "tags": [
+        "eb_optimization",
+        "optimization",
+        "ral"
+      ]
+    },
+    {
       "doc_summary": "Two-band additive deltas for a two-band RAL policy.",
       "id": "eb_optimization:eb_optimization:RALDeltas",
       "import_path": "eb_optimization:RALDeltas",
@@ -4091,6 +5352,44 @@ notes:
       "package": "eb_optimization",
       "public_import": "from eb_optimization import RALDeltas",
       "signature": "(d_mid: 'float' = 0.0, d_high: 'float' = 0.0) -> None",
+      "tags": [
+        "eb_optimization",
+        "optimization",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Portable policy artifact for the Readiness Adjustment Layer (RAL).",
+      "id": "eb_optimization:eb_optimization:RALPolicyArtifact",
+      "import_path": "eb_optimization:RALPolicyArtifact",
+      "io": {
+        "defined_in": "eb_optimization.policies.ral_policy"
+      },
+      "kind": "class",
+      "module": "eb_optimization",
+      "name": "RALPolicyArtifact",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import RALPolicyArtifact",
+      "signature": "(global_uplift: 'float' = 1.0, segment_cols: 'list[str]' = <factory>, uplift_table: 'pd.DataFrame | None' = None) -> None",
+      "tags": [
+        "eb_optimization",
+        "optimization",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Canonical RAL policy artifact: learnable thresholds + additive deltas (Option E).",
+      "id": "eb_optimization:eb_optimization:RALThresholdTwoBandPolicy",
+      "import_path": "eb_optimization:RALThresholdTwoBandPolicy",
+      "io": {
+        "defined_in": "eb_optimization.policies.ral_policy"
+      },
+      "kind": "class",
+      "module": "eb_optimization",
+      "name": "RALThresholdTwoBandPolicy",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import RALThresholdTwoBandPolicy",
+      "signature": "(global_thresholds: 'RALBandThresholds' = <factory>, global_deltas: 'RALDeltas' = <factory>, per_key_thresholds: 'dict[str, RALBandThresholds] | None' = None, per_key_deltas: 'dict[str, RALDeltas] | None' = None) -> None",
       "tags": [
         "eb_optimization",
         "optimization",
@@ -4117,7 +5416,44 @@ notes:
       ]
     },
     {
-      "doc_summary": "Convenience functional wrapper to apply a RALPolicy.",
+      "doc_summary": "Immutable \u03c4 configuration for HR@\u03c4 estimation and application.",
+      "id": "eb_optimization:eb_optimization:TauPolicyArtifact",
+      "import_path": "eb_optimization:TauPolicyArtifact",
+      "io": {
+        "defined_in": "eb_optimization.policies.tau_policy"
+      },
+      "kind": "class",
+      "module": "eb_optimization",
+      "name": "TauPolicyArtifact",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import TauPolicyArtifact",
+      "signature": "(method: 'TauMethod' = 'target_hit_rate', min_n: 'int' = 30, estimate_kwargs: 'Mapping[str, Any]' = <factory>, cap_with_global: 'bool' = False, global_cap_quantile: 'float' = 0.99) -> None",
+      "tags": [
+        "eb_optimization",
+        "optimization"
+      ]
+    },
+    {
+      "doc_summary": "Apply a frozen cost-ratio policy to estimate a global R.",
+      "id": "eb_optimization:eb_optimization:apply_cost_ratio_policy",
+      "import_path": "eb_optimization:apply_cost_ratio_policy",
+      "io": {
+        "defined_in": "eb_optimization.policies.cost_ratio_policy"
+      },
+      "kind": "function",
+      "module": "eb_optimization",
+      "name": "apply_cost_ratio_policy",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import apply_cost_ratio_policy",
+      "signature": "(y_true: 'ArrayLike', y_pred: 'ArrayLike', *, policy: 'CostRatioPolicy' = CostRatioPolicy(R_grid=(0.5, 1.0, 2.0, 3.0), co=1.0, min_n=30), co: 'float | ArrayLike | None' = None, sample_weight: 'ArrayLike | None' = None, gate: 'GateMode' = 'warn', identifiability_override_reason: 'str | None' = None) -> 'tuple[float, dict[str, Any]]'",
+      "tags": [
+        "eb_optimization",
+        "optimization"
+      ]
+    },
+    {
+      "deprecated": true,
+      "doc_summary": "Hard-deprecated. Always raises ValueError. Requires a governance decisions table via electric_barometer.apply_ral (or eb_evaluation.apply_ral).",
       "id": "eb_optimization:eb_optimization:apply_ral_policy",
       "import_path": "eb_optimization:apply_ral_policy",
       "io": {
@@ -4131,8 +5467,66 @@ notes:
       "signature": "(df: 'pd.DataFrame', forecast_col: 'str', policy: 'RALPolicy' = RALPolicy(global_uplift=1.0, segment_cols=[], uplift_table=None)) -> 'pd.DataFrame'",
       "tags": [
         "eb_optimization",
+        "evaluation",
+        "governance",
         "optimization",
         "ral"
+      ]
+    },
+    {
+      "doc_summary": "Apply a frozen \u03c4 policy to produce \u03c4 (global).",
+      "id": "eb_optimization:eb_optimization:apply_tau_policy",
+      "import_path": "eb_optimization:apply_tau_policy",
+      "io": {
+        "defined_in": "eb_optimization.policies.tau_policy"
+      },
+      "kind": "function",
+      "module": "eb_optimization",
+      "name": "apply_tau_policy",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import apply_tau_policy",
+      "signature": "(y: 'pd.Series | np.ndarray | Iterable[float]', yhat: 'pd.Series | np.ndarray | Iterable[float]', policy: 'TauPolicy' = TauPolicy(method='target_hit_rate', min_n=30, estimate_kwargs={'target_hit_rate': 0.9, 'tau_floor': 0.0, 'tau_cap': None}, cap_with_global=False, global_cap_quantile=0.99)) -> 'tuple[float, dict[str, Any]]'",
+      "tags": [
+        "eb_optimization",
+        "optimization"
+      ]
+    },
+    {
+      "doc_summary": "Compute DQC by delegating the full series to ``eb_evaluation.classify_dqc``.",
+      "id": "eb_optimization:eb_optimization:compute_dqc",
+      "import_path": "eb_optimization:compute_dqc",
+      "io": {
+        "defined_in": "eb_optimization.policies.dqc_policy"
+      },
+      "kind": "function",
+      "module": "eb_optimization",
+      "name": "compute_dqc",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import compute_dqc",
+      "signature": "(y: 'Any', *, policy: 'DQCPolicy' = DQCPolicy(min_n_pos=50), use_positive_only: 'bool' = True) -> 'DQCResult'",
+      "tags": [
+        "eb_optimization",
+        "evaluation",
+        "optimization"
+      ]
+    },
+    {
+      "doc_summary": "Apply DQC snapping enforcement to forecasts.",
+      "id": "eb_optimization:eb_optimization:enforce_snapping",
+      "import_path": "eb_optimization:enforce_snapping",
+      "io": {
+        "defined_in": "eb_optimization.policies.dqc_policy"
+      },
+      "kind": "function",
+      "module": "eb_optimization",
+      "name": "enforce_snapping",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization import enforce_snapping",
+      "signature": "(y_hat: 'Sequence[float] | np.ndarray', *, dqc: 'Any', enforce: 'EnforcementMode' = 'snap', mode: 'SnapMode' = 'ceil', tol: 'float' = 1e-06) -> 'np.ndarray'",
+      "tags": [
+        "eb_optimization",
+        "forecast",
+        "optimization"
       ]
     },
     {
@@ -4241,16 +5635,16 @@ notes:
     },
     {
       "doc_summary": "Output of DQC computation (policy-facing summary).",
-      "id": "eb_optimization:eb_optimization.policies:DQCResult",
-      "import_path": "eb_optimization.policies:DQCResult",
+      "id": "eb_optimization:eb_optimization.policies:DQCResultSummary",
+      "import_path": "eb_optimization.policies:DQCResultSummary",
       "io": {
         "defined_in": "eb_optimization.policies.dqc_policy"
       },
       "kind": "class",
       "module": "eb_optimization.policies",
-      "name": "DQCResult",
+      "name": "DQCResultSummary",
       "package": "eb_optimization",
-      "public_import": "from eb_optimization.policies import DQCResult",
+      "public_import": "from eb_optimization.policies import DQCResultSummary",
       "signature": "(dqc_class: 'DQCClass', delta_star: 'float | None', rho_star: 'float | None', n_pos: 'int', support_size: 'int', offgrid_mad_over_delta: 'float | None') -> None",
       "tags": [
         "eb_optimization",
@@ -4296,17 +5690,36 @@ notes:
       ]
     },
     {
-      "doc_summary": "Portable policy artifact for the Readiness Adjustment Layer (RAL).",
-      "id": "eb_optimization:eb_optimization.policies:RALPolicy",
-      "import_path": "eb_optimization.policies:RALPolicy",
+      "doc_summary": "Two-band additive deltas for a two-band RAL policy.",
+      "id": "eb_optimization:eb_optimization.policies:RALDeltas",
+      "import_path": "eb_optimization.policies:RALDeltas",
       "io": {
         "defined_in": "eb_optimization.policies.ral_policy"
       },
       "kind": "class",
       "module": "eb_optimization.policies",
-      "name": "RALPolicy",
+      "name": "RALDeltas",
       "package": "eb_optimization",
-      "public_import": "from eb_optimization.policies import RALPolicy",
+      "public_import": "from eb_optimization.policies import RALDeltas",
+      "signature": "(d_mid: 'float' = 0.0, d_high: 'float' = 0.0) -> None",
+      "tags": [
+        "eb_optimization",
+        "optimization",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Portable policy artifact for the Readiness Adjustment Layer (RAL).",
+      "id": "eb_optimization:eb_optimization.policies:RALPolicyArtifact",
+      "import_path": "eb_optimization.policies:RALPolicyArtifact",
+      "io": {
+        "defined_in": "eb_optimization.policies.ral_policy"
+      },
+      "kind": "class",
+      "module": "eb_optimization.policies",
+      "name": "RALPolicyArtifact",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization.policies import RALPolicyArtifact",
       "signature": "(global_uplift: 'float' = 1.0, segment_cols: 'list[str]' = <factory>, uplift_table: 'pd.DataFrame | None' = None) -> None",
       "tags": [
         "eb_optimization",
@@ -4334,17 +5747,36 @@ notes:
       ]
     },
     {
-      "doc_summary": "Frozen \u03c4 policy configuration.",
-      "id": "eb_optimization:eb_optimization.policies:TauPolicy",
-      "import_path": "eb_optimization.policies:TauPolicy",
+      "doc_summary": "Portable policy artifact for two-band *additive* RAL.",
+      "id": "eb_optimization:eb_optimization.policies:RALTwoBandPolicy",
+      "import_path": "eb_optimization.policies:RALTwoBandPolicy",
+      "io": {
+        "defined_in": "eb_optimization.policies.ral_policy"
+      },
+      "kind": "class",
+      "module": "eb_optimization.policies",
+      "name": "RALTwoBandPolicy",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization.policies import RALTwoBandPolicy",
+      "signature": "(bands: 'RALBands' = <factory>, global_deltas: 'RALDeltas' = <factory>, per_key_deltas: 'dict[str, RALDeltas] | None' = None) -> None",
+      "tags": [
+        "eb_optimization",
+        "optimization",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Immutable \u03c4 configuration for HR@\u03c4 estimation and application.",
+      "id": "eb_optimization:eb_optimization.policies:TauPolicyArtifact",
+      "import_path": "eb_optimization.policies:TauPolicyArtifact",
       "io": {
         "defined_in": "eb_optimization.policies.tau_policy"
       },
       "kind": "class",
       "module": "eb_optimization.policies",
-      "name": "TauPolicy",
+      "name": "TauPolicyArtifact",
       "package": "eb_optimization",
-      "public_import": "from eb_optimization.policies import TauPolicy",
+      "public_import": "from eb_optimization.policies import TauPolicyArtifact",
       "signature": "(method: 'TauMethod' = 'target_hit_rate', min_n: 'int' = 30, estimate_kwargs: 'Mapping[str, Any]' = <factory>, cap_with_global: 'bool' = False, global_cap_quantile: 'float' = 0.99) -> None",
       "tags": [
         "eb_optimization",
@@ -4407,7 +5839,8 @@ notes:
       ]
     },
     {
-      "doc_summary": "Convenience functional wrapper to apply a RALPolicy.",
+      "deprecated": true,
+      "doc_summary": "Hard-deprecated. Always raises ValueError. Requires a governance decisions table via electric_barometer.apply_ral (or eb_evaluation.apply_ral).",
       "id": "eb_optimization:eb_optimization.policies:apply_ral_policy",
       "import_path": "eb_optimization.policies:apply_ral_policy",
       "io": {
@@ -4421,6 +5854,8 @@ notes:
       "signature": "(df: 'pd.DataFrame', forecast_col: 'str', policy: 'RALPolicy' = RALPolicy(global_uplift=1.0, segment_cols=[], uplift_table=None)) -> 'pd.DataFrame'",
       "tags": [
         "eb_optimization",
+        "evaluation",
+        "governance",
         "optimization",
         "ral"
       ]
@@ -4462,7 +5897,7 @@ notes:
       ]
     },
     {
-      "doc_summary": "Compute DQC over a realized demand series.",
+      "doc_summary": "Compute DQC by delegating the full series to ``eb_evaluation.classify_dqc``.",
       "id": "eb_optimization:eb_optimization.policies:compute_dqc",
       "import_path": "eb_optimization.policies:compute_dqc",
       "io": {
@@ -4476,6 +5911,7 @@ notes:
       "signature": "(y: 'Any', *, policy: 'DQCPolicy' = DQCPolicy(min_n_pos=50), use_positive_only: 'bool' = True) -> 'DQCResult'",
       "tags": [
         "eb_optimization",
+        "evaluation",
         "optimization"
       ]
     },
@@ -4491,7 +5927,7 @@ notes:
       "name": "enforce_snapping",
       "package": "eb_optimization",
       "public_import": "from eb_optimization.policies import enforce_snapping",
-      "signature": "(y_hat: 'Sequence[float] | np.ndarray', *, dqc: 'Any', enforce: 'EnforcementMode' = 'snap', mode: 'SnapMode' = 'nearest', tol: 'float' = 1e-06) -> 'np.ndarray'",
+      "signature": "(y_hat: 'Sequence[float] | np.ndarray', *, dqc: 'Any', enforce: 'EnforcementMode' = 'snap', mode: 'SnapMode' = 'ceil', tol: 'float' = 1e-06) -> 'np.ndarray'",
       "tags": [
         "eb_optimization",
         "forecast",
@@ -4510,7 +5946,7 @@ notes:
       "name": "evaluate_with_dqc_hr",
       "package": "eb_optimization",
       "public_import": "from eb_optimization.policies import evaluate_with_dqc_hr",
-      "signature": "(y_true: 'Sequence[float] | np.ndarray', y_hat: 'Sequence[float] | np.ndarray', *, tau_units: 'float', dqc: 'Any | None' = None, y_for_dqc: 'Sequence[float] | np.ndarray | None' = None, policy: 'DQCPolicy' = DQCPolicy(min_n_pos=50), enforce: 'EnforcementMode' = 'snap', snap_mode: 'SnapMode' = 'nearest', use_positive_only_for_dqc: 'bool' = True) -> 'DQCEvaluation'",
+      "signature": "(y_true: 'Sequence[float] | np.ndarray', y_hat: 'Sequence[float] | np.ndarray', *, tau_units: 'float', dqc: 'Any | None' = None, y_for_dqc: 'Sequence[float] | np.ndarray | None' = None, policy: 'DQCPolicy' = DQCPolicy(min_n_pos=50), enforce: 'EnforcementMode' = 'snap', snap_mode: 'SnapMode' = 'ceil', use_positive_only_for_dqc: 'bool' = True) -> 'DQCEvaluation'",
       "tags": [
         "eb_optimization",
         "governance",
@@ -4529,7 +5965,7 @@ notes:
       "name": "hr_at_tau_grid_units",
       "package": "eb_optimization",
       "public_import": "from eb_optimization.policies import hr_at_tau_grid_units",
-      "signature": "(y_true: 'Sequence[float] | np.ndarray', y_hat: 'Sequence[float] | np.ndarray', *, dqc: 'Any', tau_units: 'float', enforce: 'EnforcementMode' = 'snap', snap_mode: 'SnapMode' = 'nearest') -> 'float'",
+      "signature": "(y_true: 'Sequence[float] | np.ndarray', y_hat: 'Sequence[float] | np.ndarray', *, dqc: 'Any', tau_units: 'float', enforce: 'EnforcementMode' = 'snap', snap_mode: 'SnapMode' = 'ceil') -> 'float'",
       "tags": [
         "eb_optimization",
         "optimization"
@@ -4547,7 +5983,7 @@ notes:
       "name": "snap_to_grid",
       "package": "eb_optimization",
       "public_import": "from eb_optimization.policies import snap_to_grid",
-      "signature": "(x: 'np.ndarray', delta: 'float', *, mode: 'SnapMode' = 'nearest', nonneg: 'bool' = True) -> 'np.ndarray'",
+      "signature": "(x: 'np.ndarray', delta: 'float', *, mode: 'SnapMode' = 'ceil', nonneg: 'bool' = True) -> 'np.ndarray'",
       "tags": [
         "eb_optimization",
         "optimization"
@@ -4602,7 +6038,7 @@ notes:
       ]
     },
     {
-      "doc_summary": "Frozen \u03c4 policy configuration.",
+      "doc_summary": "Immutable \u03c4 configuration for HR@\u03c4 estimation and application.",
       "id": "eb_optimization:eb_optimization.policies.tau_policy:TauPolicy",
       "import_path": "eb_optimization.policies.tau_policy:TauPolicy",
       "io": null,
@@ -4611,6 +6047,22 @@ notes:
       "name": "TauPolicy",
       "package": "eb_optimization",
       "public_import": "from eb_optimization.policies.tau_policy import TauPolicy",
+      "signature": "(method: 'TauMethod' = 'target_hit_rate', min_n: 'int' = 30, estimate_kwargs: 'Mapping[str, Any]' = <factory>, cap_with_global: 'bool' = False, global_cap_quantile: 'float' = 0.99) -> None",
+      "tags": [
+        "eb_optimization",
+        "optimization"
+      ]
+    },
+    {
+      "doc_summary": "Immutable \u03c4 configuration for HR@\u03c4 estimation and application.",
+      "id": "eb_optimization:eb_optimization.policies.tau_policy:TauPolicyArtifact",
+      "import_path": "eb_optimization.policies.tau_policy:TauPolicyArtifact",
+      "io": null,
+      "kind": "class",
+      "module": "eb_optimization.policies.tau_policy",
+      "name": "TauPolicyArtifact",
+      "package": "eb_optimization",
+      "public_import": "from eb_optimization.policies.tau_policy import TauPolicyArtifact",
       "signature": "(method: 'TauMethod' = 'target_hit_rate', min_n: 'int' = 30, estimate_kwargs: 'Mapping[str, Any]' = <factory>, cap_with_global: 'bool' = False, global_cap_quantile: 'float' = 0.99) -> None",
       "tags": [
         "eb_optimization",
@@ -4794,9 +6246,383 @@ notes:
         "eb_optimization",
         "optimization"
       ]
+    },
+    {
+      "doc_summary": "Compatibility taxonomy for demand resolution / quantization.",
+      "id": "electric_barometer:electric_barometer:DQC",
+      "import_path": "electric_barometer:DQC",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.dqc"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "DQC",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import DQC",
+      "signature": "(*values)",
+      "tags": [
+        "electric_barometer"
+      ]
+    },
+    {
+      "doc_summary": "Compatibility taxonomy for demand resolution / quantization.",
+      "id": "electric_barometer:electric_barometer:DQCClass",
+      "import_path": "electric_barometer:DQCClass",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.dqc"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "DQCClass",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import DQCClass",
+      "signature": "(*values)",
+      "tags": [
+        "electric_barometer"
+      ]
+    },
+    {
+      "doc_summary": "Result container for DQC classification + rationale.",
+      "id": "electric_barometer:electric_barometer:DQCResult",
+      "import_path": "electric_barometer:DQCResult",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.dqc"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "DQCResult",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import DQCResult",
+      "signature": "(dqc_class: 'DQCClass', signals: 'DQCSignals', reasons: 'tuple[str, ...]') -> None",
+      "tags": [
+        "electric_barometer"
+      ]
+    },
+    {
+      "doc_summary": "Thresholds for DQC classification.",
+      "id": "electric_barometer:electric_barometer:DQCThresholds",
+      "import_path": "electric_barometer:DQCThresholds",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.dqc"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "DQCThresholds",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import DQCThresholds",
+      "signature": "(multiple_rate_quantized: 'float' = 0.9, multiple_rate_packed: 'float' = 0.95, offgrid_mad_ratio_max: 'float' = 0.1, min_nonzero_obs: 'int' = 50, round_decimals: 'int' = 6, small_value_max: 'float' = 20.0, candidate_units: 'tuple[float, ...]' = (1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 16.0), pack_units_min_count: 'int' = 2, pack_unit_mass_min: 'float' = 0.1) -> None",
+      "tags": [
+        "electric_barometer"
+      ]
+    },
+    {
+      "doc_summary": "Admissibility class for a Forecast Admissibility Surface slice.",
+      "id": "electric_barometer:electric_barometer:FAS",
+      "import_path": "electric_barometer:FAS",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fas"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "FAS",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import FAS",
+      "signature": "(*values)",
+      "tags": [
+        "electric_barometer",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Admissibility class for a Forecast Admissibility Surface slice.",
+      "id": "electric_barometer:electric_barometer:FASClass",
+      "import_path": "electric_barometer:FASClass",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fas"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "FASClass",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import FASClass",
+      "signature": "(*values)",
+      "tags": [
+        "electric_barometer",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Thresholds that define ALLOWED / CONDITIONAL / BLOCKED.",
+      "id": "electric_barometer:electric_barometer:FASThresholds",
+      "import_path": "electric_barometer:FASThresholds",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fas"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "FASThresholds",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import FASThresholds",
+      "signature": "(blocked_spike_rate_ge: 'float' = 0.3, blocked_p95_ae_ge: 'float' = 25.0, conditional_spike_rate_ge: 'float' = 0.05, conditional_p95_ae_ge: 'float' = 10.0, blocked_shortfall_spike_rate_ge: 'float | None' = None, blocked_p95_shortfall_ge: 'float | None' = None, conditional_shortfall_spike_rate_ge: 'float | None' = None, conditional_p95_shortfall_ge: 'float | None' = None, min_valid_rows: 'int' = 200, min_nonzero_rows: 'int | None' = None) -> None",
+      "tags": [
+        "electric_barometer"
+      ]
+    },
+    {
+      "doc_summary": "Compatibility taxonomy for forecast primitives.",
+      "id": "electric_barometer:electric_barometer:FPC",
+      "import_path": "electric_barometer:FPC",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "FPC",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import FPC",
+      "signature": "(*values)",
+      "tags": [
+        "electric_barometer",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Compatibility taxonomy for forecast primitives.",
+      "id": "electric_barometer:electric_barometer:FPCClass",
+      "import_path": "electric_barometer:FPCClass",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "FPCClass",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import FPCClass",
+      "signature": "(*values)",
+      "tags": [
+        "electric_barometer",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Result container for classification + rationale.",
+      "id": "electric_barometer:electric_barometer:FPCResult",
+      "import_path": "electric_barometer:FPCResult",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "FPCResult",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import FPCResult",
+      "signature": "(fpc_class: 'FPCClass', signals: 'FPCSignals', reasons: 'tuple[str, ...]') -> None",
+      "tags": [
+        "electric_barometer"
+      ]
+    },
+    {
+      "doc_summary": "Thresholds for FPC classification.",
+      "id": "electric_barometer:electric_barometer:FPCThresholds",
+      "import_path": "electric_barometer:FPCThresholds",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "FPCThresholds",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import FPCThresholds",
+      "signature": "(nsl_very_low: 'float' = 0.03, delta_nsl_tiny: 'float' = 0.02, hr_very_low: 'float' = 0.05, delta_hr_large_drop: 'float' = -0.1, ud_high: 'float' = 10.0, delta_cwsl_high: 'float' = 0.75) -> None",
+      "tags": [
+        "electric_barometer"
+      ]
+    },
+    {
+      "doc_summary": "Whether readiness adjustment is allowed downstream.",
+      "id": "electric_barometer:electric_barometer:RAL",
+      "import_path": "electric_barometer:RAL",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "RAL",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import RAL",
+      "signature": "(*values)",
+      "tags": [
+        "electric_barometer",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Whether readiness adjustment is allowed downstream.",
+      "id": "electric_barometer:electric_barometer:RALPolicy",
+      "import_path": "electric_barometer:RALPolicy",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "class",
+      "module": "electric_barometer",
+      "name": "RALPolicy",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import RALPolicy",
+      "signature": "(*values)",
+      "tags": [
+        "electric_barometer",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Canonical RAL application utility: - joins a required governance decisions table onto a panel, - produces a raw RAL prediction column (from yhat_ral_col or uplift_col), - applies governed nonnegativity + snap-to-grid policies, - emits governed prediction columns + audit columns.",
+      "id": "electric_barometer:electric_barometer:apply_ral",
+      "import_path": "electric_barometer:apply_ral",
+      "io": {
+        "defined_in": "eb_evaluation.adjustment.ral"
+      },
+      "kind": "function",
+      "module": "electric_barometer",
+      "name": "apply_ral",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import apply_ral",
+      "signature": "(df: 'pd.DataFrame', *, join_keys: 'Sequence[str] | None' = None, pred_col: 'str | None' = None, output_col: 'str | None' = None, nonneg_mode: 'str | None' = None, decisions: 'pd.DataFrame | None' = None, key_cols: 'Sequence[str]' = ('forecast_entity_id',), yhat_base_col: 'str' = 'yhat_base', yhat_ral_col: 'str | None' = 'yhat_ral', uplift_col: 'str | None' = None, snap_required_col: 'str' = 'snap_required', snap_unit_col: 'str' = 'snap_unit', recommendations_col: 'str' = 'recommendations', snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = False, out_base_col: 'str' = 'yhat_base_governed', out_ral_col: 'str' = 'yhat_ral_governed', out_audit_prefix: 'str' = 'ral_apply_') -> 'pd.DataFrame'",
+      "tags": [
+        "electric_barometer",
+        "governance",
+        "panel",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Build the FAS surface from an error anatomy table.",
+      "id": "electric_barometer:electric_barometer:build_fas_surface",
+      "import_path": "electric_barometer:build_fas_surface",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fas"
+      },
+      "kind": "function",
+      "module": "electric_barometer",
+      "name": "build_fas_surface",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import build_fas_surface",
+      "signature": "(*, anatomy: 'pd.DataFrame', keys: 'list[str]', thr: 'FASThresholds' = FASThresholds(blocked_spike_rate_ge=0.3, blocked_p95_ae_ge=25.0, conditional_spike_rate_ge=0.05, conditional_p95_ae_ge=10.0, blocked_shortfall_spike_rate_ge=None, blocked_p95_shortfall_ge=None, conditional_shortfall_spike_rate_ge=None, conditional_p95_shortfall_ge=None, min_valid_rows=200, min_nonzero_rows=None)) -> 'pd.DataFrame'",
+      "tags": [
+        "electric_barometer"
+      ]
+    },
+    {
+      "doc_summary": "Classify demand quantization compatibility from realized demand values.",
+      "id": "electric_barometer:electric_barometer:classify_dqc",
+      "import_path": "electric_barometer:classify_dqc",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.dqc"
+      },
+      "kind": "function",
+      "module": "electric_barometer",
+      "name": "classify_dqc",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import classify_dqc",
+      "signature": "(y: 'Sequence[object]', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
+      "tags": [
+        "electric_barometer"
+      ]
+    },
+    {
+      "doc_summary": "Classify forecast primitive compatibility from observable signals.",
+      "id": "electric_barometer:electric_barometer:classify_fpc",
+      "import_path": "electric_barometer:classify_fpc",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.fpc"
+      },
+      "kind": "function",
+      "module": "electric_barometer",
+      "name": "classify_fpc",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import classify_fpc",
+      "signature": "(signals: 'FPCSignals', thresholds: 'FPCThresholds | None' = None) -> 'FPCResult'",
+      "tags": [
+        "electric_barometer",
+        "forecast"
+      ]
+    },
+    {
+      "doc_summary": "Produce an authoritative governance decision for a single realized series.",
+      "id": "electric_barometer:electric_barometer:decide_governance",
+      "import_path": "electric_barometer:decide_governance",
+      "io": {
+        "defined_in": "eb_evaluation.diagnostics.governance"
+      },
+      "kind": "function",
+      "module": "electric_barometer",
+      "name": "decide_governance",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import decide_governance",
+      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset' = 'balanced', fas_class: 'FASClass | str | None' = None) -> 'GovernanceDecision'",
+      "tags": [
+        "electric_barometer",
+        "governance"
+      ]
+    },
+    {
+      "doc_summary": "Production snap enforcement aligned with ``apply_ral`` (default ``ceil``).",
+      "id": "electric_barometer:electric_barometer:enforce_snapping",
+      "import_path": "electric_barometer:enforce_snapping",
+      "io": null,
+      "kind": "function",
+      "module": "electric_barometer",
+      "name": "enforce_snapping",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import enforce_snapping",
+      "signature": "(y_hat: 'Sequence[float] | np.ndarray', *, dqc: 'Any', enforce: 'str' = 'snap', mode: 'str' = 'ceil', tol: 'float' = 1e-06) -> 'np.ndarray'",
+      "tags": [
+        "electric_barometer",
+        "ral"
+      ]
+    },
+    {
+      "doc_summary": "Evaluate governance across a panel of streams and return a per-stream summary table.",
+      "id": "electric_barometer:electric_barometer:evaluate_governance_panel_df",
+      "import_path": "electric_barometer:evaluate_governance_panel_df",
+      "io": {
+        "defined_in": "eb_evaluation.dataframe.governance_panel"
+      },
+      "kind": "function",
+      "module": "electric_barometer",
+      "name": "evaluate_governance_panel_df",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import evaluate_governance_panel_df",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, fas_class: 'FASClass | str | pd.Series | None' = None, fas_class_col: 'str | None' = None) -> 'pd.DataFrame'",
+      "tags": [
+        "dataframe",
+        "electric_barometer",
+        "governance",
+        "panel"
+      ]
+    },
+    {
+      "doc_summary": "End-to-end governance workflow for a panel DataFrame.",
+      "id": "electric_barometer:electric_barometer:run_governance_workflow_df",
+      "import_path": "electric_barometer:run_governance_workflow_df",
+      "io": {
+        "defined_in": "eb_evaluation.dataframe.governance_workflow"
+      },
+      "kind": "function",
+      "module": "electric_barometer",
+      "name": "run_governance_workflow_df",
+      "package": "electric_barometer",
+      "public_import": "from electric_barometer import run_governance_workflow_df",
+      "signature": "(*, df: 'pd.DataFrame', keys: 'Sequence[str]', actual_col: 'str', base_forecast_col: 'str', ral_forecast_col: 'str', tau: 'float', cwsl_r: 'float | None' = None, preset: 'GovernancePreset | str | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, dropna_keys: 'bool' = True, fas_class: 'FASClass | str | pd.Series | None' = None, fas_class_col: 'str | None' = None, decisions_df: 'pd.DataFrame | None' = None, snap_mode: 'SnapMode' = 'ceil', nonneg_policy: 'NonnegPolicy | None' = None, infer_policy_from_recommendations: 'bool' = False, out_base_col: 'str | None' = None, out_ral_col: 'str | None' = None, out_audit_prefix: 'str' = 'ral_apply_', require_complete_decisions: 'bool' = True) -> 'tuple[pd.DataFrame, pd.DataFrame]'",
+      "tags": [
+        "dataframe",
+        "electric_barometer",
+        "governance",
+        "panel",
+        "workflow"
+      ]
     }
   ],
-  "generated_at_utc": "2026-01-27T01:38:59+00:00",
+  "generated_at_utc": "2026-08-23T23:31:59+00:00",
   "generator": {
     "repo": "eb-integration",
     "script": "tooling/build_api_index.py",
