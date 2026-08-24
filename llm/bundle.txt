@@ -839,7 +839,7 @@ notes:
       "name": "QSRIntervalPanelDemandSpecV1",
       "package": "eb_adapters",
       "public_import": "from eb_adapters import QSRIntervalPanelDemandSpecV1",
-      "signature": "(site_col: 'str' = 'STORE_ID', forecast_entity_col: 'str' = 'FORECAST_ENTITY_ID', time_mode: 'str' = 'day_interval', business_day_col: 'str | None' = 'BUSINESS_DAY', interval_index_col: 'str | None' = 'INTERVAL_30_INDEX', interval_start_ts_col: 'str | None' = 'INTERVAL_START_TS', interval_minutes: 'int' = 30, periods_per_day: 'int' = 48, business_day_start_local_minutes: 'int | None' = 240, y_source_col: 'str' = 'LABEL_COMMODITY_USAGE_QTY', is_interval_observable_col: 'str | None' = 'IS_INTERVAL_OBSERVABLE', is_day_observable_col: 'str | None' = 'IS_DAY_OBSERVABLE', is_structural_zero_col: 'str' = 'IS_STRUCTURAL_ZERO', is_possible_col: 'str | None' = None, impute_zero_when_observable: 'bool' = False) -> None",
+      "signature": "(site_col: 'str' = 'STORE_ID', forecast_entity_col: 'str' = 'FORECAST_ENTITY_KEY', time_mode: 'str' = 'day_interval', business_day_col: 'str | None' = 'BUSINESS_DATE', interval_index_col: 'str | None' = 'INTERVAL_INDEX', interval_start_ts_col: 'str | None' = 'INTERVAL_INDEX_START_TIME', interval_minutes: 'int' = 30, periods_per_day: 'int' = 48, business_day_start_local_minutes: 'int | None' = 240, y_source_col: 'str' = 'FORECAST_ENTITY_DEMAND_QUANTITY', is_interval_observable_col: 'str | None' = 'IS_INTERVAL_OBSERVABLE', is_day_observable_col: 'str | None' = 'IS_DATE_OBSERVABLE', is_structural_zero_col: 'str' = 'IS_STRUCTURAL_ZERO', is_possible_col: 'str | None' = None, impute_zero_when_observable: 'bool' = False) -> None",
       "tags": [
         "adapter",
         "eb_adapters",
@@ -932,7 +932,7 @@ notes:
       "name": "QSRIntervalPanelDemandSpecV1",
       "package": "eb_adapters",
       "public_import": "from eb_adapters.contracts.demand_panel.v1.qsr import QSRIntervalPanelDemandSpecV1",
-      "signature": "(site_col: 'str' = 'STORE_ID', forecast_entity_col: 'str' = 'FORECAST_ENTITY_ID', time_mode: 'str' = 'day_interval', business_day_col: 'str | None' = 'BUSINESS_DAY', interval_index_col: 'str | None' = 'INTERVAL_30_INDEX', interval_start_ts_col: 'str | None' = 'INTERVAL_START_TS', interval_minutes: 'int' = 30, periods_per_day: 'int' = 48, business_day_start_local_minutes: 'int | None' = 240, y_source_col: 'str' = 'LABEL_COMMODITY_USAGE_QTY', is_interval_observable_col: 'str | None' = 'IS_INTERVAL_OBSERVABLE', is_day_observable_col: 'str | None' = 'IS_DAY_OBSERVABLE', is_structural_zero_col: 'str' = 'IS_STRUCTURAL_ZERO', is_possible_col: 'str | None' = None, impute_zero_when_observable: 'bool' = False) -> None",
+      "signature": "(site_col: 'str' = 'STORE_ID', forecast_entity_col: 'str' = 'FORECAST_ENTITY_KEY', time_mode: 'str' = 'day_interval', business_day_col: 'str | None' = 'BUSINESS_DATE', interval_index_col: 'str | None' = 'INTERVAL_INDEX', interval_start_ts_col: 'str | None' = 'INTERVAL_INDEX_START_TIME', interval_minutes: 'int' = 30, periods_per_day: 'int' = 48, business_day_start_local_minutes: 'int | None' = 240, y_source_col: 'str' = 'FORECAST_ENTITY_DEMAND_QUANTITY', is_interval_observable_col: 'str | None' = 'IS_INTERVAL_OBSERVABLE', is_day_observable_col: 'str | None' = 'IS_DATE_OBSERVABLE', is_structural_zero_col: 'str' = 'IS_STRUCTURAL_ZERO', is_possible_col: 'str | None' = None, impute_zero_when_observable: 'bool' = False) -> None",
       "tags": [
         "adapter",
         "contract",
@@ -2556,7 +2556,7 @@ notes:
       "name": "slice_keys",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import slice_keys",
-      "signature": "(mode: 'FASSliceMode', *, site_col: 'str' = 'site_id', entity_col: 'str' = 'forecast_entity_id', interval_col: 'str' = 'INTERVAL_30_INDEX') -> 'list[str]'",
+      "signature": "(mode: 'FASSliceMode', *, site_col: 'str' = 'site_id', entity_col: 'str' = 'forecast_entity_id', interval_col: 'str' = 'INTERVAL_INDEX') -> 'list[str]'",
       "tags": [
         "eb_evaluation",
         "evaluation"
@@ -3646,7 +3646,7 @@ notes:
       "name": "slice_keys",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import slice_keys",
-      "signature": "(mode: 'FASSliceMode', *, site_col: 'str' = 'site_id', entity_col: 'str' = 'forecast_entity_id', interval_col: 'str' = 'INTERVAL_30_INDEX') -> 'list[str]'",
+      "signature": "(mode: 'FASSliceMode', *, site_col: 'str' = 'site_id', entity_col: 'str' = 'forecast_entity_id', interval_col: 'str' = 'INTERVAL_INDEX') -> 'list[str]'",
       "tags": [
         "eb_evaluation",
         "evaluation"
@@ -5452,7 +5452,6 @@ notes:
       ]
     },
     {
-      "deprecated": true,
       "doc_summary": "Hard-deprecated. Always raises ValueError. Requires a governance decisions table via electric_barometer.apply_ral (or eb_evaluation.apply_ral).",
       "id": "eb_optimization:eb_optimization:apply_ral_policy",
       "import_path": "eb_optimization:apply_ral_policy",
@@ -5839,7 +5838,6 @@ notes:
       ]
     },
     {
-      "deprecated": true,
       "doc_summary": "Hard-deprecated. Always raises ValueError. Requires a governance decisions table via electric_barometer.apply_ral (or eb_evaluation.apply_ral).",
       "id": "eb_optimization:eb_optimization.policies:apply_ral_policy",
       "import_path": "eb_optimization.policies:apply_ral_policy",
@@ -6574,7 +6572,7 @@ notes:
       "name": "enforce_snapping",
       "package": "electric_barometer",
       "public_import": "from electric_barometer import enforce_snapping",
-      "signature": "(y_hat: 'Sequence[float] | np.ndarray', *, dqc: 'Any', enforce: 'str' = 'snap', mode: 'str' = 'ceil', tol: 'float' = 1e-06) -> 'np.ndarray'",
+      "signature": "(y_hat: 'Sequence[float] | np.ndarray', *, dqc: 'Any', enforce: '_EnforceMode' = 'snap', mode: '_SnapMode' = 'ceil', tol: 'float' = 1e-06) -> 'np.ndarray'",
       "tags": [
         "electric_barometer",
         "ral"
@@ -6622,7 +6620,7 @@ notes:
       ]
     }
   ],
-  "generated_at_utc": "2026-08-23T23:31:59+00:00",
+  "generated_at_utc": "2026-08-24T01:33:16+00:00",
   "generator": {
     "repo": "eb-integration",
     "script": "tooling/build_api_index.py",
