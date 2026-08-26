@@ -4,7 +4,7 @@ Build a generated, canonical cross-package API index for the EB ecosystem.
 This script generates: llm/api_index.json
 
 Design goals:
-- Deterministic output (stable ordering, stable IDs)
+- Deterministic output (stable ordering, stable IDs, no wall-clock or interpreter fields)
 - Only indexes public surfaces declared via package/module __all__
 - Captures minimal, useful metadata for LLM-driven discovery
 """
@@ -14,13 +14,11 @@ from __future__ import annotations
 import argparse
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
-import datetime as dt
 import importlib
 import inspect
 import json
 from pathlib import Path
 import pkgutil
-import platform
 import re
 import sys
 from types import ModuleType
@@ -328,8 +326,6 @@ def build_api_index(
     ecosystem_source: str | None = None,
     extra_diagnostics: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    now = dt.datetime.now(dt.UTC).replace(microsecond=0)
-
     all_entries: list[ApiEntry] = []
     packages_indexed: list[str] = []
     import_errors: dict[str, str] = {}
@@ -356,14 +352,12 @@ def build_api_index(
 
     payload: dict[str, Any] = {
         "schema_version": "1.0",
-        "generated_at_utc": now.isoformat(),
         "generator": {
             "repo": "eb-integration",
             "script": "tooling/build_api_index.py",
             "script_version": None,
         },
         "ecosystem": {
-            "python_version": platform.python_version(),
             "install_mode": "editable",
             "packages_indexed": packages_indexed,
         },

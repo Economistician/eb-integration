@@ -732,8 +732,7 @@ notes:
       "eb_metrics",
       "eb_optimization",
       "electric_barometer"
-    ],
-    "python_version": "3.14.3"
+    ]
   },
   "entries": [
     {
@@ -2170,7 +2169,7 @@ notes:
       "name": "build_signals_from_series",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import build_signals_from_series",
-      "signature": "(*, y: 'Sequence[float]', yhat_base: 'Sequence[float]', yhat_ral: 'Sequence[float]', tau: 'float', ud: 'float | None' = None, cwsl_r: 'float | None' = None, cost_ratio: 'float | None' = None) -> 'FPCSignals'",
+      "signature": "(*, y: 'Sequence[float] | np.ndarray', yhat_base: 'Sequence[float] | np.ndarray', yhat_ral: 'Sequence[float] | np.ndarray', tau: 'float', ud: 'float | None' = None, cwsl_r: 'float | None' = None, cost_ratio: 'float | None' = None) -> 'FPCSignals'",
       "tags": [
         "eb_evaluation",
         "evaluation"
@@ -2188,7 +2187,7 @@ notes:
       "name": "classify_dqc",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import classify_dqc",
-      "signature": "(y: 'Sequence[object]', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
+      "signature": "(y: 'Sequence[object] | np.ndarray', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
       "tags": [
         "eb_evaluation",
         "evaluation"
@@ -2281,7 +2280,7 @@ notes:
       "name": "decide_governance",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import decide_governance",
-      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset' = 'balanced', fas_class: 'FASClass | str | None' = None) -> 'GovernanceDecision'",
+      "signature": "(*, y: 'Sequence[float] | np.ndarray', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset' = 'balanced', fas_class: 'FASClass | str | None' = None) -> 'GovernanceDecision'",
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -3443,7 +3442,7 @@ notes:
       "name": "build_signals_from_series",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import build_signals_from_series",
-      "signature": "(*, y: 'Sequence[float]', yhat_base: 'Sequence[float]', yhat_ral: 'Sequence[float]', tau: 'float', ud: 'float | None' = None, cwsl_r: 'float | None' = None, cost_ratio: 'float | None' = None) -> 'FPCSignals'",
+      "signature": "(*, y: 'Sequence[float] | np.ndarray', yhat_base: 'Sequence[float] | np.ndarray', yhat_ral: 'Sequence[float] | np.ndarray', tau: 'float', ud: 'float | None' = None, cwsl_r: 'float | None' = None, cost_ratio: 'float | None' = None) -> 'FPCSignals'",
       "tags": [
         "eb_evaluation",
         "evaluation"
@@ -3461,7 +3460,7 @@ notes:
       "name": "classify_dqc",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import classify_dqc",
-      "signature": "(y: 'Sequence[object]', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
+      "signature": "(y: 'Sequence[object] | np.ndarray', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
       "tags": [
         "eb_evaluation",
         "evaluation"
@@ -3516,7 +3515,7 @@ notes:
       "name": "decide_governance",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import decide_governance",
-      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset' = 'balanced', fas_class: 'FASClass | str | None' = None) -> 'GovernanceDecision'",
+      "signature": "(*, y: 'Sequence[float] | np.ndarray', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset' = 'balanced', fas_class: 'FASClass | str | None' = None) -> 'GovernanceDecision'",
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -6521,7 +6520,7 @@ notes:
       "name": "classify_dqc",
       "package": "electric_barometer",
       "public_import": "from electric_barometer import classify_dqc",
-      "signature": "(y: 'Sequence[object]', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
+      "signature": "(y: 'Sequence[object] | np.ndarray', thresholds: 'DQCThresholds | None' = None) -> 'DQCResult'",
       "tags": [
         "electric_barometer"
       ]
@@ -6556,7 +6555,7 @@ notes:
       "name": "decide_governance",
       "package": "electric_barometer",
       "public_import": "from electric_barometer import decide_governance",
-      "signature": "(*, y: 'Sequence[float]', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset' = 'balanced', fas_class: 'FASClass | str | None' = None) -> 'GovernanceDecision'",
+      "signature": "(*, y: 'Sequence[float] | np.ndarray', fpc_signals_raw: 'FPCSignals', fpc_signals_snapped: 'FPCSignals | None' = None, dqc_thresholds: 'DQCThresholds | None' = None, fpc_thresholds: 'FPCThresholds | None' = None, preset: 'str | GovernancePreset' = 'balanced', fas_class: 'FASClass | str | None' = None) -> 'GovernanceDecision'",
       "tags": [
         "electric_barometer",
         "governance"
@@ -6620,7 +6619,6 @@ notes:
       ]
     }
   ],
-  "generated_at_utc": "2026-08-24T01:51:10+00:00",
   "generator": {
     "repo": "eb-integration",
     "script": "tooling/build_api_index.py",
