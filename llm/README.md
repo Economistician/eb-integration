@@ -127,3 +127,18 @@ Planned extensions include:
 
 All additions should preserve the core principle:
 **LLM-driven work must be constrained, explicit, and reproducible.**
+
+### Regenerating generated artifacts
+
+`api_index.json` and `bundle.txt` are generated. After public API changes in
+published ecosystem packages, regenerate against the same install set CI uses:
+
+```text
+python -m pip install -e ".[ecosystem]"
+python tooling/build_api_index.py
+python tooling/llm_bundle.py --out llm/bundle.txt
+```
+
+Commit both files together. Unpublished packages (for example `eb_examples`)
+are excluded from the catalog via `index_in_api_catalog: false` in
+`repo_index.json`.

@@ -6,7 +6,6 @@
       "eb_adapters",
       "eb_contracts",
       "eb_evaluation",
-      "eb_examples",
       "eb_features",
       "eb_metrics",
       "eb_optimization",
@@ -894,7 +893,7 @@
       ]
     },
     {
-      "doc_summary": "Convert a string or number to a floating-point number, if possible.",
+      "doc_summary": null,
       "id": "eb_contracts:eb_contracts.definitions:Scale",
       "import_path": "eb_contracts.definitions:Scale",
       "io": {
@@ -905,7 +904,7 @@
       "name": "Scale",
       "package": "eb_contracts",
       "public_import": "from eb_contracts.definitions import Scale",
-      "signature": "(x=0, /)",
+      "signature": null,
       "tags": [
         "contract",
         "eb_contracts"
@@ -948,7 +947,7 @@
       ]
     },
     {
-      "doc_summary": "str(object='') -> str str(bytes_or_buffer[, encoding[, errors]]) -> str",
+      "doc_summary": null,
       "id": "eb_contracts:eb_contracts.definitions:UnitString",
       "import_path": "eb_contracts.definitions:UnitString",
       "io": {
@@ -1055,7 +1054,7 @@
       "name": "DQCClass",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import DQCClass",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation"
@@ -1127,7 +1126,7 @@
       "name": "FASClass",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import FASClass",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -1164,7 +1163,7 @@
       "name": "FPCClass",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import FPCClass",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -1295,7 +1294,7 @@
       "name": "GovernanceRALPolicy",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import GovernanceRALPolicy",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -1334,7 +1333,7 @@
       "name": "GovernanceStatus",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import GovernanceStatus",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -1353,7 +1352,7 @@
       "name": "GovernanceTauPolicy",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import GovernanceTauPolicy",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -1372,7 +1371,7 @@
       "name": "RALPolicy",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import RALPolicy",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -1391,7 +1390,7 @@
       "name": "TauPolicy",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation import TauPolicy",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation"
@@ -2349,7 +2348,7 @@
       "name": "DQCClass",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import DQCClass",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation"
@@ -2421,7 +2420,7 @@
       "name": "FASClass",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import FASClass",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -2458,7 +2457,7 @@
       "name": "FPCClass",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import FPCClass",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -2589,7 +2588,7 @@
       "name": "GovernanceRALPolicy",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import GovernanceRALPolicy",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -2628,7 +2627,7 @@
       "name": "GovernanceStatus",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import GovernanceStatus",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -2647,7 +2646,7 @@
       "name": "GovernanceTauPolicy",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import GovernanceTauPolicy",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -2666,7 +2665,7 @@
       "name": "RALPolicy",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import RALPolicy",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation",
@@ -2685,7 +2684,7 @@
       "name": "TauPolicy",
       "package": "eb_evaluation",
       "public_import": "from eb_evaluation.diagnostics import TauPolicy",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "eb_evaluation",
         "evaluation"
@@ -3196,110 +3195,6 @@
       ]
     },
     {
-      "doc_summary": "Canonical file layout for the eb_golden_v1 demo dataset.",
-      "id": "eb_examples:eb_examples:GoldenV1Artifacts",
-      "import_path": "eb_examples:GoldenV1Artifacts",
-      "io": {
-        "defined_in": "eb_examples.paths"
-      },
-      "kind": "class",
-      "module": "eb_examples",
-      "name": "GoldenV1Artifacts",
-      "package": "eb_examples",
-      "public_import": "from eb_examples import GoldenV1Artifacts",
-      "signature": "(base: 'Path') -> None",
-      "tags": [
-        "eb_examples"
-      ]
-    },
-    {
-      "doc_summary": null,
-      "id": "eb_examples:eb_examples:default_base_dir",
-      "import_path": "eb_examples:default_base_dir",
-      "io": {
-        "defined_in": "eb_examples.paths"
-      },
-      "kind": "function",
-      "module": "eb_examples",
-      "name": "default_base_dir",
-      "package": "eb_examples",
-      "public_import": "from eb_examples import default_base_dir",
-      "signature": "() -> 'Path'",
-      "tags": [
-        "eb_examples"
-      ]
-    },
-    {
-      "doc_summary": "Load the EB golden demo dataset (v1) as a pandas DataFrame.",
-      "id": "eb_examples:eb_examples:load_demo_golden_v1",
-      "import_path": "eb_examples:load_demo_golden_v1",
-      "io": {
-        "defined_in": "eb_examples.datasets.demo_golden_v1"
-      },
-      "kind": "function",
-      "module": "eb_examples",
-      "name": "load_demo_golden_v1",
-      "package": "eb_examples",
-      "public_import": "from eb_examples import load_demo_golden_v1",
-      "signature": "(*, as_dataframe: 'bool' = True) -> 'pd.DataFrame'",
-      "tags": [
-        "dataframe",
-        "eb_examples"
-      ]
-    },
-    {
-      "doc_summary": null,
-      "id": "eb_examples:eb_examples:resolve_base_dir",
-      "import_path": "eb_examples:resolve_base_dir",
-      "io": {
-        "defined_in": "eb_examples.paths"
-      },
-      "kind": "function",
-      "module": "eb_examples",
-      "name": "resolve_base_dir",
-      "package": "eb_examples",
-      "public_import": "from eb_examples import resolve_base_dir",
-      "signature": "(base_dir: 'str | None') -> 'Path'",
-      "tags": [
-        "eb_examples"
-      ]
-    },
-    {
-      "doc_summary": "Load the EB golden demo dataset (v1) as a pandas DataFrame.",
-      "id": "eb_examples:eb_examples.datasets:load_demo_golden_v1",
-      "import_path": "eb_examples.datasets:load_demo_golden_v1",
-      "io": {
-        "defined_in": "eb_examples.datasets.demo_golden_v1"
-      },
-      "kind": "function",
-      "module": "eb_examples.datasets",
-      "name": "load_demo_golden_v1",
-      "package": "eb_examples",
-      "public_import": "from eb_examples.datasets import load_demo_golden_v1",
-      "signature": "(*, as_dataframe: 'bool' = True) -> 'pd.DataFrame'",
-      "tags": [
-        "dataframe",
-        "eb_examples"
-      ]
-    },
-    {
-      "doc_summary": "Load the dataset manifest.json for the EB golden demo dataset (v1).",
-      "id": "eb_examples:eb_examples.datasets:load_demo_golden_v1_manifest",
-      "import_path": "eb_examples.datasets:load_demo_golden_v1_manifest",
-      "io": {
-        "defined_in": "eb_examples.datasets.demo_golden_v1"
-      },
-      "kind": "function",
-      "module": "eb_examples.datasets",
-      "name": "load_demo_golden_v1_manifest",
-      "package": "eb_examples",
-      "public_import": "from eb_examples.datasets import load_demo_golden_v1_manifest",
-      "signature": "() -> 'dict[str, Any]'",
-      "tags": [
-        "eb_examples"
-      ]
-    },
-    {
       "doc_summary": "Configuration for panel time-series feature engineering.",
       "id": "eb_features:eb_features:FeatureConfig",
       "import_path": "eb_features:FeatureConfig",
@@ -3514,7 +3409,7 @@
       "name": "cwsl",
       "package": "eb_metrics",
       "public_import": "from eb_metrics import cwsl",
-      "signature": "(y_true: ArrayLike, y_pred: ArrayLike, cu: float | ArrayLike, co: float | ArrayLike, sample_weight: ArrayLike | None = None) -> float",
+      "signature": "(y_true: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], y_pred: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], cu: Union[float, numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], co: Union[float, numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], sample_weight: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str], NoneType] = None) -> float",
       "tags": [
         "eb_metrics",
         "metric"
@@ -3923,7 +3818,7 @@
       "name": "cwsl",
       "package": "eb_metrics",
       "public_import": "from eb_metrics.metrics import cwsl",
-      "signature": "(y_true: ArrayLike, y_pred: ArrayLike, cu: float | ArrayLike, co: float | ArrayLike, sample_weight: ArrayLike | None = None) -> float",
+      "signature": "(y_true: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], y_pred: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], cu: Union[float, numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], co: Union[float, numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], sample_weight: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str], NoneType] = None) -> float",
       "tags": [
         "eb_metrics",
         "metric"
@@ -4122,7 +4017,7 @@
       "name": "piecewise_state_asymmetric_squared_error",
       "package": "eb_metrics",
       "public_import": "from eb_metrics.metrics import piecewise_state_asymmetric_squared_error",
-      "signature": "(y_true: ArrayLike, y_pred: ArrayLike, profile: eb_metrics.metrics.loss.PiecewiseStateAsymmetry) -> numpy.ndarray",
+      "signature": "(y_true: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], y_pred: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], profile: eb_metrics.metrics.loss.PiecewiseStateAsymmetry) -> numpy.ndarray",
       "tags": [
         "eb_metrics",
         "metric"
@@ -4244,7 +4139,7 @@
       "name": "cwsl",
       "package": "eb_metrics",
       "public_import": "from eb_metrics.metrics.loss import cwsl",
-      "signature": "(y_true: ArrayLike, y_pred: ArrayLike, cu: float | ArrayLike, co: float | ArrayLike, sample_weight: ArrayLike | None = None) -> float",
+      "signature": "(y_true: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], y_pred: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], cu: Union[float, numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], co: Union[float, numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], sample_weight: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str], NoneType] = None) -> float",
       "tags": [
         "eb_metrics",
         "metric"
@@ -4260,7 +4155,7 @@
       "name": "piecewise_state_asymmetric_squared_error",
       "package": "eb_metrics",
       "public_import": "from eb_metrics.metrics.loss import piecewise_state_asymmetric_squared_error",
-      "signature": "(y_true: ArrayLike, y_pred: ArrayLike, profile: eb_metrics.metrics.loss.PiecewiseStateAsymmetry) -> numpy.ndarray",
+      "signature": "(y_true: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], y_pred: Union[numpy._typing._array_like._Buffer, numpy._typing._array_like._SupportsArray[numpy.dtype[Any]], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype[Any]]], complex, bytes, str, numpy._typing._nested_sequence._NestedSequence[complex | bytes | str]], profile: eb_metrics.metrics.loss.PiecewiseStateAsymmetry) -> numpy.ndarray",
       "tags": [
         "eb_metrics",
         "metric"
@@ -5535,7 +5430,7 @@
       "name": "DQC",
       "package": "electric_barometer",
       "public_import": "from electric_barometer import DQC",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "electric_barometer"
       ]
@@ -5552,7 +5447,7 @@
       "name": "DQCClass",
       "package": "electric_barometer",
       "public_import": "from electric_barometer import DQCClass",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "electric_barometer"
       ]
@@ -5603,7 +5498,7 @@
       "name": "FAS",
       "package": "electric_barometer",
       "public_import": "from electric_barometer import FAS",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "electric_barometer",
         "forecast"
@@ -5621,7 +5516,7 @@
       "name": "FASClass",
       "package": "electric_barometer",
       "public_import": "from electric_barometer import FASClass",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "electric_barometer",
         "forecast"
@@ -5656,7 +5551,7 @@
       "name": "FPC",
       "package": "electric_barometer",
       "public_import": "from electric_barometer import FPC",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "electric_barometer",
         "forecast"
@@ -5674,7 +5569,7 @@
       "name": "FPCClass",
       "package": "electric_barometer",
       "public_import": "from electric_barometer import FPCClass",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "electric_barometer",
         "forecast"
@@ -5726,7 +5621,7 @@
       "name": "RAL",
       "package": "electric_barometer",
       "public_import": "from electric_barometer import RAL",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "electric_barometer",
         "ral"
@@ -5744,7 +5639,7 @@
       "name": "RALPolicy",
       "package": "electric_barometer",
       "public_import": "from electric_barometer import RALPolicy",
-      "signature": "(*values)",
+      "signature": null,
       "tags": [
         "electric_barometer",
         "ral"

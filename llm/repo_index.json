@@ -38,7 +38,8 @@
           "import_root": "eb_examples",
           "src_layout": null,
           "public_api_modules": [],
-          "notes": "Examples-focused; package entry only if importable."
+          "index_in_api_catalog": false,
+          "notes": "Examples-focused; unpublished. Omit from llm/api_index.json so CI and local regen match."
         }
       ],
       "docs": {

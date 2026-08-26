@@ -4,7 +4,8 @@ Build a generated, canonical cross-package API index for the EB ecosystem.
 This script generates: llm/api_index.json
 
 Design goals:
-- Deterministic output (stable ordering, stable IDs, no wall-clock or interpreter fields)
+- Deterministic output (stable ordering, stable IDs, no wall-clock, interpreter,
+  or install-environment fields)
 - Only indexes public surfaces declared via package/module __all__
 - Captures minimal, useful metadata for LLM-driven discovery
 """
@@ -14,6 +15,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
+from enum import Enum
 import importlib
 import inspect
 import json
@@ -113,6 +115,8 @@ def _packages_from_repo_index(root: Path) -> tuple[list[str], dict[str, str] | N
         for p in packages:
             if not isinstance(p, dict):
                 continue
+            if p.get("index_in_api_catalog", True) is False:
+                continue
             import_root = p.get("import_root")
             if isinstance(import_root, str) and import_root.strip():
                 pkgs.add(import_root.strip())
@@ -138,6 +142,28 @@ def _safe_signature(obj: Any) -> str | None:
         return str(inspect.signature(obj))
     except (TypeError, ValueError):
         return None
+
+
+def _is_enum_class(obj: Any) -> bool:
+    return inspect.isclass(obj) and issubclass(obj, Enum)
+
+
+def _is_builtin_origin(obj: Any) -> bool:
+    return getattr(obj, "__module__", None) == "builtins"
+
+
+def _entry_signature(obj: Any) -> str | None:
+    # Enum constructors and builtin types leak interpreter-specific inspect text
+    # (Python 3.11 vs 3.13+ Enum.__call__, float.__doc__, etc.).
+    if _is_enum_class(obj) or _is_builtin_origin(obj):
+        return None
+    return _safe_signature(obj)
+
+
+def _entry_doc_summary(obj: Any) -> str | None:
+    if _is_builtin_origin(obj):
+        return None
+    return _first_paragraph(getattr(obj, "__doc__", None))
 
 
 def _kind(obj: Any) -> str | None:
@@ -251,8 +277,8 @@ def _index_module_exports(package: str, mod: ModuleType, entries: list[ApiEntry]
         module = exporting_module
         import_path = f"{module}:{name}"
         public_import = f"from {module} import {name}"
-        sig = _safe_signature(obj)
-        doc_summary = _first_paragraph(getattr(obj, "__doc__", None))
+        sig = _entry_signature(obj)
+        doc_summary = _entry_doc_summary(obj)
         tags = _make_tags(package=package, module=module, name=name, doc_summary=doc_summary)
 
         entry_id = f"{package}:{module}:{name}"
@@ -324,7 +350,6 @@ def build_api_index(
     packages: Iterable[str],
     *,
     ecosystem_source: str | None = None,
-    extra_diagnostics: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     all_entries: list[ApiEntry] = []
     packages_indexed: list[str] = []
@@ -337,8 +362,9 @@ def build_api_index(
 
         entries, errs = _index_package(pkg)
         if errs:
-            # If the package itself failed to import, we may have no entries;
-            # still capture the error so CI/users see it.
+            # Root or submodule import failures are reported on stderr only.
+            # They must not land in the committed golden file: optional packages
+            # and extra extras would otherwise make CI vs local diffs.
             import_errors.update(errs)
 
         # Only count a package as "indexed" if its root imported successfully.
@@ -367,13 +393,9 @@ def build_api_index(
     if ecosystem_source is not None:
         payload["ecosystem"]["package_source"] = ecosystem_source
 
-    diagnostics: dict[str, Any] = {}
     if import_errors:
-        diagnostics["import_errors"] = import_errors
-    if extra_diagnostics:
-        diagnostics.update(extra_diagnostics)
-    if diagnostics:
-        payload["diagnostics"] = diagnostics
+        for mod_name, msg in sorted(import_errors.items()):
+            print(f"API index skipped {mod_name}: {msg}", file=sys.stderr)
 
     return payload
 
@@ -399,21 +421,21 @@ def main(argv: list[str] | None = None) -> int:
 
     packages: list[str]
     ecosystem_source: str | None = None
-    repo_index_diag: dict[str, str] | None = None
 
     if args.packages is not None and len(args.packages) > 0:
         packages = args.packages
         ecosystem_source = "cli"
     else:
         repo_pkgs, repo_diag = _packages_from_repo_index(root)
+        if repo_diag:
+            for key, msg in sorted(repo_diag.items()):
+                print(f"API index {key}: {msg}", file=sys.stderr)
         if repo_pkgs:
             packages = repo_pkgs
             ecosystem_source = str(REPO_INDEX_REL).replace("\\", "/")
-            repo_index_diag = repo_diag
         else:
             packages = DEFAULT_PACKAGES
             ecosystem_source = "DEFAULT_PACKAGES"
-            repo_index_diag = repo_diag
 
     out_path = Path(args.out) if args.out else (root / "llm" / "api_index.json")
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -421,7 +443,6 @@ def main(argv: list[str] | None = None) -> int:
     payload = build_api_index(
         packages,
         ecosystem_source=ecosystem_source,
-        extra_diagnostics=repo_index_diag,
     )
 
     # Deterministic JSON formatting
@@ -429,8 +450,6 @@ def main(argv: list[str] | None = None) -> int:
     print(
         f"Wrote api index: {out_path}  (entries={len(payload['entries'])}, packages={len(payload['ecosystem']['packages_indexed'])})"
     )
-    if "diagnostics" in payload:
-        print("Diagnostics present (import errors).")
     return 0
 
 
