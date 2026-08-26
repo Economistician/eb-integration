@@ -34,7 +34,23 @@ jobs:
             EXTRAS="${EXTRAS#.[}"
             EXTRAS="${EXTRAS#[}"
             EXTRAS="${EXTRAS%]}"
-            python -m pip install ".[${EXTRAS}]"
+            attempt=1
+            max_attempts=8
+            delay=5
+            until python -m pip install ".[${EXTRAS}]"; do
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "ERROR: pip install .[${EXTRAS}] failed after ${max_attempts} attempts."
+                echo "If this is a coordinated system release, wait until exact pins exist on PyPI and re-run CI."
+                exit 1
+              fi
+              echo "pip install failed (attempt ${attempt}/${max_attempts}); retrying in ${delay}s."
+              sleep "$delay"
+              attempt=$((attempt + 1))
+              delay=$((delay * 2))
+              if [ "$delay" -gt 40 ]; then
+                delay=40
+              fi
+            done
           fi
 
           python -m pip install -U pip-audit
